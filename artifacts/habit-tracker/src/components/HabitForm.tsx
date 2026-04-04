@@ -8,37 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { HabitCategory, HabitFrequency, Habit } from "@/types/habit";
-import { HABIT_COLORS, getCategoryColor } from "@/lib/colors";
+import { HabitFrequency, Habit } from "@/types/habit";
+import { HABIT_COLORS } from "@/lib/colors";
+import { useApp } from "@/context/AppContext";
 
 const habitSchema = z.object({
-  name: z.string().min(1, "Nama wajib diisi").max(60, "Nama terlalu panjang"),
-  category: z.enum(["Health", "Work", "Skill", "Finance", "Social", "Personal", "Other"] as const),
-  description: z.string().max(200, "Deskripsi terlalu panjang").optional().default(""),
+  name: z.string().min(1, "Name is required").max(60, "Name is too long"),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().max(200, "Description is too long").optional().default(""),
   frequency: z.enum(["Daily", "Weekly", "Monthly"] as const),
   color: z.string().optional().default("#7C9EBD"),
 });
 
 type HabitFormValues = z.infer<typeof habitSchema>;
 
-const CATEGORIES: HabitCategory[] = ["Health", "Work", "Skill", "Finance", "Social", "Personal", "Other"];
 const FREQUENCIES: HabitFrequency[] = ["Daily", "Weekly", "Monthly"];
-
-const CATEGORY_LABELS: Record<HabitCategory, string> = {
-  Health: "Kesehatan",
-  Work: "Pekerjaan",
-  Skill: "Keterampilan",
-  Finance: "Keuangan",
-  Social: "Sosial",
-  Personal: "Pribadi",
-  Other: "Lainnya",
-};
-
-const FREQUENCY_LABELS: Record<HabitFrequency, string> = {
-  Daily: "Harian",
-  Weekly: "Mingguan",
-  Monthly: "Bulanan",
-};
 
 interface HabitFormProps {
   open: boolean;
@@ -49,11 +33,13 @@ interface HabitFormProps {
 }
 
 export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add" }: HabitFormProps) {
+  const { settings } = useApp();
+
   const form = useForm<HabitFormValues>({
     resolver: zodResolver(habitSchema),
     defaultValues: {
       name: initialValues?.name || "",
-      category: initialValues?.category || "Health",
+      category: initialValues?.category || settings.habitCategories[0] || "Health",
       description: initialValues?.description || "",
       frequency: initialValues?.frequency || "Daily",
       color: initialValues?.color || "#7C9EBD",
@@ -61,32 +47,24 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
   });
 
   useEffect(() => {
-    if (open && initialValues) {
+    if (open) {
       form.reset({
-        name: initialValues.name || "",
-        category: initialValues.category || "Health",
-        description: initialValues.description || "",
-        frequency: initialValues.frequency || "Daily",
-        color: initialValues.color || "#7C9EBD",
-      });
-    } else if (open && !initialValues) {
-      form.reset({
-        name: "",
-        category: "Health",
-        description: "",
-        frequency: "Daily",
-        color: "#7C9EBD",
+        name: initialValues?.name || "",
+        category: initialValues?.category || settings.habitCategories[0] || "Health",
+        description: initialValues?.description || "",
+        frequency: initialValues?.frequency || "Daily",
+        color: initialValues?.color || "#7C9EBD",
       });
     }
-  }, [open, initialValues, form]);
+  }, [open, initialValues, form, settings.habitCategories]);
 
   function handleSubmit(values: HabitFormValues) {
     onSubmit({
       name: values.name,
-      category: values.category,
+      category: values.category as Habit["category"],
       description: values.description || "",
       frequency: values.frequency,
-      color: values.color || getCategoryColor(values.category),
+      color: values.color || "#7C9EBD",
     });
     onClose();
   }
@@ -96,7 +74,7 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
-            {mode === "add" ? "Tambah Kebiasaan Baru" : "Edit Kebiasaan"}
+            {mode === "add" ? "Add New Habit" : "Edit Habit"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -106,13 +84,9 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nama Kebiasaan</FormLabel>
+                  <FormLabel>Habit Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Contoh: Olahraga pagi"
-                      {...field}
-                      data-testid="input-habit-name"
-                    />
+                    <Input placeholder="e.g. Morning workout" {...field} data-testid="input-habit-name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,18 +99,16 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kategori</FormLabel>
+                    <FormLabel>Category</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-category">
-                          <SelectValue placeholder="Pilih kategori" />
+                          <SelectValue placeholder="Choose category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {CATEGORY_LABELS[cat]}
-                          </SelectItem>
+                        {settings.habitCategories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -150,18 +122,16 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                 name="frequency"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Frekuensi</FormLabel>
+                    <FormLabel>Frequency</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-frequency">
-                          <SelectValue placeholder="Pilih frekuensi" />
+                          <SelectValue placeholder="Choose frequency" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {FREQUENCIES.map((f) => (
-                          <SelectItem key={f} value={f}>
-                            {FREQUENCY_LABELS[f]}
-                          </SelectItem>
+                          <SelectItem key={f} value={f}>{f}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -176,10 +146,12 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Deskripsi / Cheat Sheet <span className="text-gray-400 font-normal">(opsional)</span></FormLabel>
+                  <FormLabel>
+                    Description / Cheat Sheet <span className="text-gray-400 font-normal">(optional)</span>
+                  </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Contoh: Push up 3x12 repetisi, istirahat 60 detik"
+                      placeholder="e.g. Push-up 3x12 reps, rest 60 seconds"
                       className="resize-none min-h-[80px]"
                       {...field}
                       data-testid="input-habit-description"
@@ -195,7 +167,7 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               name="color"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Warna</FormLabel>
+                  <FormLabel>Color</FormLabel>
                   <FormControl>
                     <div className="flex gap-2 flex-wrap">
                       {HABIT_COLORS.map((color) => (
@@ -220,10 +192,10 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
 
             <div className="flex gap-2 pt-2">
               <Button type="submit" className="flex-1" data-testid="btn-submit-habit">
-                {mode === "add" ? "Tambah" : "Simpan"}
+                {mode === "add" ? "Add Habit" : "Save Changes"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-                Batal
+                Cancel
               </Button>
             </div>
           </form>

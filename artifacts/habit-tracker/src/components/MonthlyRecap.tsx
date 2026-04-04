@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { HabitWithStats } from "@/types/habit";
-import { useHabits } from "@/hooks/useHabits";
+import { useApp } from "@/context/AppContext";
 import { getDayGrid, getMonthName } from "@/lib/dateUtils";
-import { getCategoryColor } from "@/lib/colors";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface MonthlyRecapProps {
   habit: HabitWithStats;
 }
 
 export function MonthlyRecap({ habit }: MonthlyRecapProps) {
-  const { getMonthCheckIns } = useHabits();
+  const { getMonthCheckIns } = useApp();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -21,16 +19,17 @@ export function MonthlyRecap({ habit }: MonthlyRecapProps) {
   const grid = getDayGrid(year, month);
   const checkIns = getMonthCheckIns(habit.id, year, month);
   const checkedDates = new Set(checkIns.map((c) => c.date));
-  const catColor = getCategoryColor(habit.category);
+  const catColor = habit.color || "#7C9EBD";
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const completedDays = checkIns.length;
-  const pct = Math.round((completedDays / daysInMonth) * 100);
+  const pct = daysInMonth > 0 ? Math.round((completedDays / daysInMonth) * 100) : 0;
 
   function prevMonth() {
     if (month === 0) { setMonth(11); setYear((y) => y - 1); }
     else setMonth((m) => m - 1);
   }
+
   function nextMonth() {
     const today = new Date();
     if (year < today.getFullYear() || (year === today.getFullYear() && month < today.getMonth())) {
@@ -56,10 +55,8 @@ export function MonthlyRecap({ habit }: MonthlyRecapProps) {
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center">
-        {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((day) => (
-          <div key={day} className="text-xs font-medium text-gray-400 py-1">
-            {day}
-          </div>
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div key={day} className="text-xs font-medium text-gray-400 py-1">{day}</div>
         ))}
         {grid.map((cell) => {
           const isChecked = checkedDates.has(cell.date);
@@ -72,7 +69,7 @@ export function MonthlyRecap({ habit }: MonthlyRecapProps) {
                 !cell.inMonth && "opacity-20",
                 isChecked && cell.inMonth && "text-white font-bold",
                 !isChecked && cell.inMonth && "text-gray-500 dark:text-gray-400",
-                isToday && !isChecked && "ring-2 ring-offset-1",
+                isToday && !isChecked && "ring-2 ring-offset-1 ring-offset-white dark:ring-offset-gray-900"
               )}
               style={{
                 backgroundColor: isChecked ? catColor : undefined,
@@ -87,9 +84,9 @@ export function MonthlyRecap({ habit }: MonthlyRecapProps) {
 
       <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-gray-500">Penyelesaian bulan ini</span>
+          <span className="text-xs text-gray-500">Completion this month</span>
           <span className="text-xs font-bold" style={{ color: catColor }}>
-            {completedDays}/{daysInMonth} hari ({pct}%)
+            {completedDays}/{daysInMonth} days ({pct}%)
           </span>
         </div>
         <Progress value={pct} className="h-2" />
