@@ -9,6 +9,8 @@ import { SettingsModal } from "@/components/SettingsModal";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import NotesPage from "@/pages/NotesPage";
+import InsightsPage from "@/pages/InsightsPage";
+import FinancePage from "@/pages/FinancePage";
 
 const queryClient = new QueryClient();
 
@@ -16,10 +18,12 @@ function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-300">
       <NavBar onOpenSettings={() => setSettingsOpen(true)} />
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/insights" component={InsightsPage} />
+        <Route path="/finance" component={FinancePage} />
         <Route path="/notes" component={NotesPage} />
         <Route component={NotFound} />
       </Switch>

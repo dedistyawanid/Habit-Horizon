@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { AppSettings, DEFAULT_SETTINGS } from "@/types/settings";
+import { AppSettings, DEFAULT_SETTINGS, THEME_PRESETS, AccentTheme } from "@/types/settings";
 
 const SETTINGS_KEY = "dedi_app_settings";
 
@@ -37,16 +37,34 @@ function applyTheme(theme: AppSettings["theme"]) {
   }
 }
 
+function applyAccentTheme(accentTheme: AccentTheme, isDark: boolean) {
+  const preset = THEME_PRESETS.find((t) => t.id === accentTheme);
+  if (!preset) return;
+  const vars = isDark ? preset.darkVars : preset.lightVars;
+  const root = document.documentElement;
+  Object.entries(vars).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
+}
+
 export function useSettings() {
   const [settings, setSettings] = useState<AppSettings>(loadSettings);
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     applyTheme(settings.theme);
+    const isDark =
+      settings.theme === "dark" ||
+      (settings.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    applyAccentTheme(settings.accentTheme, isDark);
   }, [settings]);
 
   useEffect(() => {
     applyTheme(settings.theme);
+    const isDark =
+      settings.theme === "dark" ||
+      (settings.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    applyAccentTheme(settings.accentTheme, isDark);
   }, []);
 
   const updateSettings = useCallback((updates: Partial<AppSettings>) => {

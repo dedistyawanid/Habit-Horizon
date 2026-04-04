@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, BookOpen, Settings } from "lucide-react";
+import { LayoutDashboard, BookOpen, Settings, BarChart2, Wallet } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,8 @@ export function NavBar({ onOpenSettings }: NavBarProps) {
 
   const navItems = [
     { href: "/", label: "Habits", icon: LayoutDashboard },
+    { href: "/insights", label: "Insights", icon: BarChart2 },
+    { href: "/finance", label: "Finance", icon: Wallet },
     { href: "/notes", label: "Notes", icon: BookOpen },
   ];
 
@@ -29,14 +31,14 @@ export function NavBar({ onOpenSettings }: NavBarProps) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-violet-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">H</span>
+          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground text-xs font-bold">H</span>
           </div>
           <span className="font-bold text-gray-800 dark:text-gray-100 hidden sm:block">HabitSpace</span>
         </div>
 
         {/* Nav links */}
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-0.5">
           {navItems.map(({ href, label, icon: Icon }) => {
             const isActive = location === href;
             return (
@@ -44,15 +46,15 @@ export function NavBar({ onOpenSettings }: NavBarProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all",
                   isActive
-                    ? "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400"
+                    ? "bg-primary/10 text-primary"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                 )}
                 data-testid={`nav-${label.toLowerCase()}`}
               >
                 <Icon className="w-4 h-4" />
-                <span className="hidden sm:block">{label}</span>
+                <span className="hidden md:block">{label}</span>
               </Link>
             );
           })}
@@ -81,7 +83,7 @@ export function NavBar({ onOpenSettings }: NavBarProps) {
                 className="w-8 h-8 rounded-xl object-cover"
               />
             ) : (
-              <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-xs font-bold text-violet-600 dark:text-violet-400">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                 {initials}
               </div>
             )}

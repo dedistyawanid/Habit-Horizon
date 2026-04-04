@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 import { QuickNote } from "@/types/notes";
+import { Link } from "lucide-react";
 
 const noteSchema = z.object({
   title: z.string().min(1, "Title is required").max(100),
   category: z.string().min(1, "Category is required"),
   content: z.string().min(1, "Content is required"),
+  url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
 type NoteFormValues = z.infer<typeof noteSchema>;
@@ -35,6 +37,7 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
       title: "",
       category: settings.noteCategories[0] || "Ideas",
       content: "",
+      url: "",
     },
   });
 
@@ -44,15 +47,22 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
         title: editNote?.title || "",
         category: editNote?.category || settings.noteCategories[0] || "Ideas",
         content: editNote?.content || "",
+        url: editNote?.url || "",
       });
     }
   }, [open, editNote, form, settings.noteCategories]);
 
   function handleSubmit(values: NoteFormValues) {
+    const payload = {
+      title: values.title,
+      category: values.category,
+      content: values.content,
+      url: values.url || undefined,
+    };
     if (isEdit && editNote) {
-      updateNote(editNote.id, values);
+      updateNote(editNote.id, payload);
     } else {
-      addNote(values);
+      addNote(payload);
     }
     onClose();
   }
@@ -106,6 +116,28 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
 
             <FormField
               control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-1.5">
+                    <Link className="w-3.5 h-3.5 text-primary" />
+                    Media / Reference URL <span className="text-gray-400 font-normal">(optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://youtube.com/watch?v=..."
+                      type="url"
+                      {...field}
+                      data-testid="input-note-url"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="content"
               render={({ field }) => (
                 <FormItem>
@@ -113,7 +145,7 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
                   <FormControl>
                     <Textarea
                       placeholder="Write your note here..."
-                      className="min-h-[140px] resize-none"
+                      className="min-h-[120px] resize-none"
                       {...field}
                       data-testid="input-note-content"
                     />

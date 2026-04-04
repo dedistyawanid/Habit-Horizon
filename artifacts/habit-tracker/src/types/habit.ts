@@ -9,6 +9,7 @@ export interface Habit {
   frequency: HabitFrequency;
   createdAt: string;
   color: string;
+  monthlyTarget?: number;
 }
 
 export interface CheckIn {

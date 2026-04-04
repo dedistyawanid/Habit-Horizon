@@ -5,6 +5,7 @@ export interface QuickNote {
   title: string;
   category: NoteCategory;
   content: string;
+  url?: string;
   createdAt: string;
   updatedAt: string;
 }

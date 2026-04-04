@@ -18,6 +18,7 @@ const habitSchema = z.object({
   description: z.string().max(200, "Description is too long").optional().default(""),
   frequency: z.enum(["Daily", "Weekly", "Monthly"] as const),
   color: z.string().optional().default("#7C9EBD"),
+  monthlyTarget: z.string().optional(),
 });
 
 type HabitFormValues = z.infer<typeof habitSchema>;
@@ -43,6 +44,7 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
       description: initialValues?.description || "",
       frequency: initialValues?.frequency || "Daily",
       color: initialValues?.color || "#7C9EBD",
+      monthlyTarget: initialValues?.monthlyTarget?.toString() || "",
     },
   });
 
@@ -54,17 +56,20 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
         description: initialValues?.description || "",
         frequency: initialValues?.frequency || "Daily",
         color: initialValues?.color || "#7C9EBD",
+        monthlyTarget: initialValues?.monthlyTarget?.toString() || "",
       });
     }
   }, [open, initialValues, form, settings.habitCategories]);
 
   function handleSubmit(values: HabitFormValues) {
+    const target = values.monthlyTarget ? parseInt(values.monthlyTarget) : undefined;
     onSubmit({
       name: values.name,
       category: values.category as Habit["category"],
       description: values.description || "",
       frequency: values.frequency,
       color: values.color || "#7C9EBD",
+      monthlyTarget: target && !isNaN(target) && target > 0 ? target : undefined,
     });
     onClose();
   }
@@ -143,6 +148,29 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
 
             <FormField
               control={form.control}
+              name="monthlyTarget"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Monthly Goal <span className="text-gray-400 font-normal">(optional — e.g. "20 times this month")</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="31"
+                      placeholder="e.g. 20"
+                      {...field}
+                      data-testid="input-habit-target"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -152,7 +180,7 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                   <FormControl>
                     <Textarea
                       placeholder="e.g. Push-up 3x12 reps, rest 60 seconds"
-                      className="resize-none min-h-[80px]"
+                      className="resize-none min-h-[70px]"
                       {...field}
                       data-testid="input-habit-description"
                     />
