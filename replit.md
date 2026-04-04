@@ -25,3 +25,38 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Artifacts
+
+### Dedi's Habit Tracker (`artifacts/habit-tracker`)
+- **Type**: React + Vite web app
+- **Preview path**: `/`
+- **Purpose**: A personal minimalist habit tracker for Dedi Styawan
+- **Data storage**: Browser LocalStorage (no backend required)
+- **Features**:
+  - Personalized dashboard with greeting ("Halo, Dedi Styawan!") and daily motivation quote in Bahasa Indonesia
+  - Performance Insight: Top Performing and Needs Attention habits
+  - Add/Edit/Delete habits with Name, Category, Description, Frequency
+  - Categories: Health, Work, Skill, Finance, Social, Personal, Other
+  - Frequencies: Daily, Weekly, Monthly
+  - Daily check-in toggle per habit
+  - Per-habit notes for each check-in date
+  - Monthly calendar recap (visual heatmap per habit)
+  - Progress bars (monthly completion %)
+  - Streak tracking
+  - Grid / List view toggle
+  - Filter by category, sort by name/performance/created date
+  - Search bar
+  - Export to CSV and JSON
+  - Responsive design (mobile + desktop)
+  - Soft violet/indigo color palette
+
+### API Server (`artifacts/api-server`)
+- **Type**: Express API
+- **Preview path**: `/api`
+- **Purpose**: Shared backend (currently only /healthz endpoint)
+
+### Canvas / Mockup Sandbox (`artifacts/mockup-sandbox`)
+- **Type**: Design sandbox
+- **Preview path**: `/__mockup`
+- **Purpose**: UI prototyping canvas
