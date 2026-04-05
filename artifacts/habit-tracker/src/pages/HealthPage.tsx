@@ -143,11 +143,28 @@ export default function HealthPage() {
   }, [filteredAct]);
 
   const actChartData = useMemo(() => {
-    const map: Record<string, number> = {};
-    filteredAct.filter((e) => e.type === "Running" && e.distanceKm).forEach((e) => {
-      map[e.date] = (map[e.date] ?? 0) + e.distanceKm!;
+    /* Running distance chart — falls back to duration when distanceKm is unavailable */
+    const runEntries = filteredAct.filter((e) => e.type === "Running");
+    const hasDistance = runEntries.some((e) => (e.distanceKm ?? 0) > 0);
+    const map: Record<string, { km: number; min: number }> = {};
+    runEntries.forEach((e) => {
+      if (!map[e.date]) map[e.date] = { km: 0, min: 0 };
+      map[e.date].km  += e.distanceKm  ?? 0;
+      map[e.date].min += e.durationMin ?? 0;
     });
-    return Object.entries(map).sort().map(([date, km]) => ({ date, km: +km.toFixed(2) }));
+    return Object.entries(map).sort().map(([date, v]) => ({
+      date,
+      km:  +v.km.toFixed(2),
+      min: v.min,
+      hasDistance,
+    }));
+  }, [filteredAct]);
+
+  /* Any-activity chart (sessions per day — shown when no running data) */
+  const sessionChartData = useMemo(() => {
+    const map: Record<string, number> = {};
+    filteredAct.forEach((e) => { map[e.date] = (map[e.date] ?? 0) + 1; });
+    return Object.entries(map).sort().map(([date, count]) => ({ date, count }));
   }, [filteredAct]);
 
   /* ── Derived: Nutrition ── */
@@ -380,29 +397,58 @@ export default function HealthPage() {
         {subTab === "activity" && (
           <div className="space-y-4">
 
-            {/* Running KM trend chart */}
+            {/* Activity trend chart */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">Running KM Trend</p>
-              {actChartData.length >= 2 ? (
-                <ResponsiveContainer width="100%" height={130}>
-                  <AreaChart data={actChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#556B2F" stopOpacity={0.20} />
-                        <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
-                    <YAxis tick={axisTick} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} km`, "Distance"]} labelFormatter={fmtDate} />
-                    <Area type="monotone" dataKey="km" stroke="#556B2F" strokeWidth={2} fill="url(#actGrad)" dot={false} activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
+              {actChartData.length > 0 ? (
+                <>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
+                    {actChartData[0]?.hasDistance ? "Running Distance (km)" : "Running Duration (min)"}
+                  </p>
+                  <ResponsiveContainer width="100%" height={130}>
+                    <AreaChart data={actChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor="#556B2F" stopOpacity={0.20} />
+                          <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
+                      <YAxis tick={axisTick} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={tooltipStyle}
+                        formatter={(v: number, name: string) =>
+                          name === "km"
+                            ? [`${v} km`, "Distance"]
+                            : [`${v} min`, "Duration"]
+                        }
+                        labelFormatter={fmtDate}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey={actChartData[0]?.hasDistance ? "km" : "min"}
+                        stroke="#556B2F" strokeWidth={2}
+                        fill="url(#actGrad)"
+                        dot={{ r: 3, fill: "#556B2F", strokeWidth: 0 }}
+                        activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </>
+              ) : sessionChartData.length > 0 ? (
+                <>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">Activity Sessions</p>
+                  <ResponsiveContainer width="100%" height={130}>
+                    <BarChart data={sessionChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                      <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
+                      <YAxis allowDecimals={false} tick={axisTick} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v, "Sessions"]} labelFormatter={fmtDate} />
+                      <Bar dataKey="count" fill="#556B2F" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </>
               ) : (
                 <div className="h-[130px] flex items-center justify-center">
-                  <p className="text-xs text-muted-foreground">
-                    {actChartData.length === 0 ? "Log runs to see your distance trend" : "Log at least 2 runs to see a chart"}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Log activities to see your trend</p>
                 </div>
               )}
             </div>
@@ -653,7 +699,7 @@ export default function HealthPage() {
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "#B8860B" }} />Protein g</span>
                 </div>
               </div>
-              {nutrChartData.length >= 2 ? (
+              {nutrChartData.length >= 1 ? (
                 <ResponsiveContainer width="100%" height={130}>
                   <ComposedChart data={nutrChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                     <defs>
@@ -664,16 +710,26 @@ export default function HealthPage() {
                     </defs>
                     <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                     <YAxis tick={axisTick} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => name === "caloriesNorm" ? [`${Math.round(v * 100)} kcal`, "Calories"] : [`${v}g`, "Protein"]} labelFormatter={fmtDate} />
-                    <Area type="monotone" dataKey="caloriesNorm" stroke="#556B2F" strokeWidth={1.5} fill="url(#calGrad)" dot={false}
-                      activeDot={{ r: 3, fill: "#556B2F", strokeWidth: 0 }}
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(v: number, name: string) =>
+                        name === "caloriesNorm" ? [`${Math.round(v * 100)} kcal`, "Calories"] : [`${v}g`, "Protein"]
+                      }
+                      labelFormatter={fmtDate}
                     />
-                    <Line type="monotone" dataKey="protein" stroke="#B8860B" strokeWidth={2} dot={false} activeDot={{ r: 3, fill: "#B8860B", strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="caloriesNorm" stroke="#556B2F" strokeWidth={1.5} fill="url(#calGrad)"
+                      dot={{ r: 3, fill: "#556B2F", strokeWidth: 0 }}
+                      activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }}
+                    />
+                    <Line type="monotone" dataKey="protein" stroke="#B8860B" strokeWidth={2}
+                      dot={{ r: 3, fill: "#B8860B", strokeWidth: 0 }}
+                      activeDot={{ r: 4, fill: "#B8860B", strokeWidth: 0 }}
+                    />
                   </ComposedChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[130px] flex items-center justify-center">
-                  <p className="text-xs text-muted-foreground">Log meals across multiple days to see trends</p>
+                  <p className="text-xs text-muted-foreground">Log your first meal to see the nutrition chart</p>
                 </div>
               )}
             </div>
