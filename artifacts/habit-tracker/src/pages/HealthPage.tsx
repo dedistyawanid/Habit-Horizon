@@ -409,67 +409,35 @@ export default function HealthPage() {
             ))}
           </div>
 
-          {/* Period filter — actRange for Activity tab, shared period for others */}
-          <div style={{ marginTop: 20 }}>
+          {/* Period filter — toggle only (stats move below into content) */}
+          <div style={{ marginTop: 12 }}>
             {subTab === "activity" ? (
               <>
-                <div className="flex flex-col gap-2.5">
-                  {/* ── Row 1: Summary stats (only for 30D / Month with data) ── */}
-                  {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
-                    <div className="flex items-center gap-x-8">
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <div className="leading-none">
-                          <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
-                          <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
-                        </div>
-                      </div>
-                      {stats.elevation > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <div className="leading-none">
-                            <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
-                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1.5">
-                        <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <div className="leading-none">
-                          <p className="text-[13px] font-black text-foreground">
-                            {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {/* ── Row 2: Range toggle — right-aligned ── */}
-                  <div className="flex justify-end">
+                {/* Time range toggle — right-aligned */}
+                <div className="flex justify-end">
+                  <div
+                    className="period-toggle-wrap"
+                    style={{ borderRadius: 28, padding: 3, height: 32, width: 252 }}
+                  >
                     <div
-                      className="period-toggle-wrap"
-                      style={{ borderRadius: 28, padding: 3, height: 32, width: 252 }}
-                    >
-                      <div
-                        className="period-toggle-thumb"
-                        style={{
-                          top: 3, bottom: 3, left: 3,
-                          width: "calc(25% - 1.5px)",
-                          transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(actRange)} * 100%))`,
-                          transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
-                        }}
-                      />
-                      {(["7d","30d","month","custom"] as const).map((r) => (
-                        <button
-                          key={r}
-                          onClick={() => setActRange(r)}
-                          className={cn("period-toggle-btn", actRange === r && "is-active")}
-                          style={{ fontSize: 11 }}
-                        >
-                          {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
-                        </button>
-                      ))}
-                    </div>
+                      className="period-toggle-thumb"
+                      style={{
+                        top: 3, bottom: 3, left: 3,
+                        width: "calc(25% - 1.5px)",
+                        transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(actRange)} * 100%))`,
+                        transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                      }}
+                    />
+                    {(["7d","30d","month","custom"] as const).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setActRange(r)}
+                        className={cn("period-toggle-btn", actRange === r && "is-active")}
+                        style={{ fontSize: 11 }}
+                      >
+                        {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 {actRange === "custom" && (
@@ -525,6 +493,37 @@ export default function HealthPage() {
         {/* ══════════════ ACTIVITY TAB ══════════════ */}
         {subTab === "activity" && (
           <div className="space-y-4">
+
+            {/* ── Summary stats row — directly above chart ── */}
+            {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
+              <div className="flex items-center gap-x-8 px-1">
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <div className="leading-none">
+                    <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
+                    <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
+                  </div>
+                </div>
+                {stats.elevation > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <div className="leading-none">
+                      <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
+                      <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <div className="leading-none">
+                    <p className="text-[13px] font-black text-foreground">
+                      {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Activity trend chart */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
