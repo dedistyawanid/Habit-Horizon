@@ -136,6 +136,11 @@ export default function HealthPage() {
   const [showSleepTarget, setShowSleepTarget]   = useState(false);
   const [sleepTargetInput, setSleepTargetInput] = useState("");
 
+  /* Sleep chart range */
+  const [sleepRange, setSleepRange]           = useState<ActRange>("30d");
+  const [sleepCustomStart, setSleepCustomStart] = useState("");
+  const [sleepCustomEnd,   setSleepCustomEnd]   = useState("");
+
   /* Goal weight — localStorage-persisted */
   const [goalWeight, setGoalWeight] = useState<number>(() => {
     try { const v = Number(localStorage.getItem("dedi_goal_weight")); return v > 0 ? v : 60; }
@@ -239,15 +244,26 @@ export default function HealthPage() {
   }, [latestWeight, firstWeight, goalWeight]);
 
   /* ── Derived: Sleep ── */
+  const filteredSleep = useMemo(() => {
+    const { start, end } = getActivityRange(sleepRange, sleepCustomStart, sleepCustomEnd);
+    return sleepLog.filter((e) => e.date >= start && e.date <= end);
+  }, [sleepLog, sleepRange, sleepCustomStart, sleepCustomEnd]);
+
   const sleepChartData = useMemo(() => {
-    const filtered = filterByPeriod(sleepLog, period === "day" ? "week" : period);
-    const map: Record<string, number> = {};
-    filtered.forEach((e) => {
+    const map: Record<string, { hours: number; quality: number; count: number }> = {};
+    filteredSleep.forEach((e) => {
       const h = e.hours + e.minutes / 60;
-      map[e.date] = +(((map[e.date] ?? 0) + h)).toFixed(2);
+      if (!map[e.date]) map[e.date] = { hours: 0, quality: 0, count: 0 };
+      map[e.date].hours   += h;
+      map[e.date].quality += e.quality;
+      map[e.date].count   += 1;
     });
-    return Object.entries(map).sort().map(([date, totalH]) => ({ date, hours: totalH }));
-  }, [sleepLog, period]);
+    return Object.entries(map).sort().map(([date, v]) => ({
+      date,
+      hours:   +v.hours.toFixed(2),
+      quality: +(v.quality / v.count).toFixed(1),
+    }));
+  }, [filteredSleep]);
 
   const todaySleep   = useMemo(() => sleepLog.find((e) => e.date === todayKey) ?? null, [sleepLog, todayKey]);
   const weekSleepAvg = useMemo(() => {
@@ -1274,35 +1290,153 @@ export default function HealthPage() {
               </div>
             )}
 
-            {/* ─── Sleep Bar Chart ─── */}
+            {/* ─── Sleep Trend Chart ─── */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              {/* Header row: title + range selector */}
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Sleep Consistency</p>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "#7B8FA1" }} />
-                  <span className="text-[10px] text-muted-foreground">Hours slept</span>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Sleep Trend</p>
+                <div
+                  className="relative flex items-center"
+                  style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 30, width: 220 }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 3, bottom: 3, left: 3,
+                      width: "calc(25% - 1.5px)",
+                      borderRadius: 24,
+                      background: "#FFFFFF",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                      transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(sleepRange)} * 100%))`,
+                      transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {(["7d","30d","month","custom"] as const).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => setSleepRange(r)}
+                      style={{
+                        flex: 1,
+                        position: "relative",
+                        zIndex: 1,
+                        fontSize: 10,
+                        fontWeight: sleepRange === r ? 600 : 500,
+                        color: sleepRange === r ? "#2D2D2D" : "#9C8B7A",
+                        transition: "color 0.2s",
+                        background: "none",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              {/* Custom date range inputs */}
+              {sleepRange === "custom" && (
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    type="date"
+                    value={sleepCustomStart}
+                    onChange={(e) => setSleepCustomStart(e.target.value)}
+                    className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <span className="text-xs text-muted-foreground shrink-0">→</span>
+                  <input
+                    type="date"
+                    value={sleepCustomEnd}
+                    min={sleepCustomStart}
+                    onChange={(e) => setSleepCustomEnd(e.target.value)}
+                    className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              )}
+
+              {/* Chart */}
               {sleepChartData.length >= 1 ? (
-                <ResponsiveContainer width="100%" height={140}>
-                  <BarChart data={sleepChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
-                    <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
-                    <YAxis domain={[0, Math.max(10, sleepTarget + 2)]} tick={axisTick} tickLine={false} axisLine={false} />
+                <ResponsiveContainer width="100%" height={150}>
+                  <AreaChart data={sleepChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="sleepGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#4A5568" stopOpacity={0.20} />
+                        <stop offset="95%" stopColor="#4A5568" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={fmtDate}
+                      tick={axisTick}
+                      tickLine={false}
+                      axisLine={false}
+                      interval={Math.max(0, Math.ceil(sleepChartData.length / 6) - 1)}
+                    />
+                    <YAxis
+                      domain={[0, Math.max(10, sleepTarget + 2)]}
+                      tick={axisTick}
+                      tickLine={false}
+                      axisLine={false}
+                    />
                     <Tooltip
                       contentStyle={tooltipStyle}
-                      formatter={(v: number) => [`${v.toFixed(1)}h`, "Sleep"]}
                       labelFormatter={fmtDate}
+                      formatter={(value: number, name: string) => {
+                        if (name === "hours")   return [`${value.toFixed(1)}h`, "Hours slept"];
+                        if (name === "quality") return [
+                          `${value.toFixed(1)} / 5 · ${["","Poor","Fair","OK","Good","Great"][Math.round(value)] ?? ""}`,
+                          "Quality"
+                        ];
+                        return [value, name];
+                      }}
                     />
                     <ReferenceLine
-                      y={sleepTarget} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5}
+                      y={sleepTarget}
+                      stroke="#E2725B"
+                      strokeDasharray="4 3"
+                      strokeWidth={1.5}
                       label={{ value: `${sleepTarget}h target`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }}
                     />
-                    <Bar dataKey="hours" fill="#7B8FA1" radius={[6, 6, 0, 0]} maxBarSize={32} />
-                  </BarChart>
+                    <Area
+                      type="monotone"
+                      dataKey="hours"
+                      stroke="#4A5568"
+                      strokeWidth={2}
+                      fill="url(#sleepGrad)"
+                      dot={{ r: sleepChartData.length > 15 ? 2 : 3, fill: "#4A5568", strokeWidth: 0 }}
+                      activeDot={{ r: 4, fill: "#4A5568", strokeWidth: 0 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="quality"
+                      stroke="#B8860B"
+                      strokeWidth={1.5}
+                      strokeDasharray="3 2"
+                      fill="none"
+                      dot={false}
+                      activeDot={{ r: 3, fill: "#B8860B", strokeWidth: 0 }}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[140px] flex items-center justify-center">
-                  <p className="text-xs text-muted-foreground">Log sleep to see your consistency chart</p>
+                <div className="h-[150px] flex items-center justify-center">
+                  <p className="text-xs text-muted-foreground">Log sleep to see your trend</p>
+                </div>
+              )}
+
+              {/* Legend */}
+              {sleepChartData.length >= 1 && (
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-0.5 rounded" style={{ background: "#4A5568" }} />
+                    <span className="text-[10px] text-muted-foreground">Hours slept</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-px border-t border-dashed" style={{ borderColor: "#B8860B" }} />
+                    <span className="text-[10px] text-muted-foreground">Quality (1–5)</span>
+                  </div>
                 </div>
               )}
             </div>
