@@ -180,6 +180,30 @@ export function syncTransaction(t: { id: string; type: string; amount: number; c
 }
 export function deleteTransaction(id: string) { return del("finance_logs", id); }
 
+/* ─── Finance Settings (categories + account sources) ───── */
+export async function syncFinanceSettings(s: {
+  incomeCategories:  string[];
+  expenseCategories: string[];
+  accountSources:    string[];
+  annualTarget:      number;
+}) {
+  const uid = getUserId();
+  if (!uid) return;
+  try {
+    const { error } = await supabase.from("finance_settings").upsert({
+      user_id:           uid,
+      income_categories:  s.incomeCategories,
+      expense_categories: s.expenseCategories,
+      account_sources:    s.accountSources,
+      annual_target:      s.annualTarget,
+      updated_at:         new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    if (error) console.warn("[sync] finance_settings upsert failed:", error.message);
+  } catch (e) {
+    console.warn("[sync] finance_settings error:", e);
+  }
+}
+
 /* ─── Wishlist ───────────────────────────────────────────── */
 export function syncWishlistItem(w: { id: string; title: string; targetAmount: number; currentAmount: number; imageUrl?: string; createdAt?: string }) {
   return upsert("wishlist_items", {
@@ -322,6 +346,24 @@ export async function forcePushAll(): Promise<PushResult[]> {
     image_url:       w.imageUrl ?? null,
     created_at:      w.createdAt ?? new Date().toISOString(),
   })));
+
+  /* finance_settings — single row per user, uses user_id as PK */
+  try {
+    const fs = JSON.parse(localStorage.getItem("dedi_finance_settings") ?? "{}") as Record<string, unknown>;
+    if (Array.isArray(fs.incomeCategories) || Array.isArray(fs.expenseCategories) || Array.isArray(fs.accountSources)) {
+      const { error } = await supabase.from("finance_settings").upsert({
+        user_id:            uid,
+        income_categories:  Array.isArray(fs.incomeCategories)  ? fs.incomeCategories  : [],
+        expense_categories: Array.isArray(fs.expenseCategories) ? fs.expenseCategories : [],
+        account_sources:    Array.isArray(fs.accountSources)    ? fs.accountSources    : [],
+        annual_target:      typeof fs.annualTarget === "number"  ? fs.annualTarget      : 1_000_000_000,
+        updated_at:         new Date().toISOString(),
+      }, { onConflict: "user_id" });
+      results.push({ table: "finance_settings", sent: 1, success: !error, error: error?.message });
+    }
+  } catch (e: unknown) {
+    results.push({ table: "finance_settings", sent: 1, success: false, error: String(e) });
+  }
 
   return results;
 }

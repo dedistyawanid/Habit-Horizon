@@ -50,23 +50,24 @@ export async function fetchAllFromCloud(
 ): Promise<"synced" | "no_data" | "timeout" | "offline" | "error"> {
   if (!navigator.onLine) return "offline";
   try {
-    /* Run all 9 table fetches in parallel, capped at 4 s total */
+    /* Run all 10 table fetches in parallel, capped at 4 s total */
     const overall = Promise.all([
-      fetchTable("habits",          userId),
-      fetchTable("checkins",        userId),
-      fetchTable("health_logs",     userId),   // ← was activity_logs
-      fetchTable("nutrition_logs",  userId),
-      fetchTable("sleep_logs",      userId),
-      fetchTable("weight_logs",     userId),
-      fetchTable("finance_logs",    userId),
-      fetchTable("notes",           userId),
-      fetchTable("wishlist_items",  userId),
+      fetchTable("habits",            userId),
+      fetchTable("checkins",          userId),
+      fetchTable("health_logs",       userId),   // ← was activity_logs
+      fetchTable("nutrition_logs",    userId),
+      fetchTable("sleep_logs",        userId),
+      fetchTable("weight_logs",       userId),
+      fetchTable("finance_logs",      userId),
+      fetchTable("notes",             userId),
+      fetchTable("wishlist_items",    userId),
+      fetchTable("finance_settings",  userId),
     ]);
 
     const results = await withTimeout(overall, 4000);
     if (!results) return "timeout";
 
-    const [habits, checkins, health, meals, sleeps, weights, txns, notes, wishlistRows] = results;
+    const [habits, checkins, health, meals, sleeps, weights, txns, notes, wishlistRows, finSettingsRows] = results;
     let wrote = false;
 
     /** Write to localStorage AND dispatch a storage event so same-tab listeners pick it up. */
@@ -190,6 +191,23 @@ export async function fetchAllFromCloud(
           createdAt:     w.created_at,
         }))
       ));
+      wrote = true;
+    }
+
+    /* finance_settings — single row, user_id is PK */
+    if (finSettingsRows?.length) {
+      const s = finSettingsRows[0];
+      const existing = safeJson<Record<string, unknown>>(
+        localStorage.getItem("dedi_finance_settings"), {}
+      );
+      const merged = {
+        ...existing,
+        ...(Array.isArray(s.income_categories)  ? { incomeCategories:  s.income_categories  } : {}),
+        ...(Array.isArray(s.expense_categories) ? { expenseCategories: s.expense_categories } : {}),
+        ...(Array.isArray(s.account_sources)    ? { accountSources:    s.account_sources    } : {}),
+        ...(s.annual_target != null             ? { annualTarget:      Number(s.annual_target) } : {}),
+      };
+      lsSet("dedi_finance_settings", JSON.stringify(merged));
       wrote = true;
     }
 

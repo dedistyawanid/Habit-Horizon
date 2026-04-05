@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Transaction, FinanceSettings, DEFAULT_FINANCE_SETTINGS } from "@/types/finance";
 import {
   syncTransaction,
   deleteTransaction as dbDeleteTransaction,
+  syncFinanceSettings,
 } from "@/lib/sync";
 
-const TRANSACTIONS_KEY    = "dedi_transactions";
+const TRANSACTIONS_KEY     = "dedi_transactions";
 const FINANCE_SETTINGS_KEY = "dedi_finance_settings";
 
 function load<T>(key: string, fallback: T): T {
@@ -20,15 +21,47 @@ function save<T>(key: string, data: T) {
 }
 
 export function useFinance() {
-  const [transactions,    setTransactions]    = useState<Transaction[]>(() => load(TRANSACTIONS_KEY,     []));
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    () => load(TRANSACTIONS_KEY, [])
+  );
   const [financeSettings, setFinanceSettings] = useState<FinanceSettings>(() => {
     const saved = load<Partial<FinanceSettings>>(FINANCE_SETTINGS_KEY, {});
-    // Merge defaults so new fields (incomeCategories, expenseCategories, accountSources) appear
     return { ...DEFAULT_FINANCE_SETTINGS, ...saved };
   });
 
-  useEffect(() => { save(TRANSACTIONS_KEY,     transactions);    }, [transactions]);
-  useEffect(() => { save(FINANCE_SETTINGS_KEY, financeSettings); }, [financeSettings]);
+  /* Skip syncing on the very first render (initial load from localStorage) */
+  const settingsInitialized = useRef(false);
+  /* Suppress sync when settings are being restored from cloud to avoid echo loop */
+  const skipNextSync = useRef(false);
+
+  useEffect(() => { save(TRANSACTIONS_KEY, transactions); }, [transactions]);
+
+  useEffect(() => {
+    save(FINANCE_SETTINGS_KEY, financeSettings);
+    if (!settingsInitialized.current) {
+      settingsInitialized.current = true;
+      return;
+    }
+    if (skipNextSync.current) {
+      skipNextSync.current = false;
+      return;
+    }
+    syncFinanceSettings(financeSettings);
+  }, [financeSettings]);
+
+  /* Re-hydrate settings when fetchFromCloud writes to localStorage */
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key !== FINANCE_SETTINGS_KEY || !e.newValue) return;
+      try {
+        const saved = JSON.parse(e.newValue) as Partial<FinanceSettings>;
+        skipNextSync.current = true;
+        setFinanceSettings({ ...DEFAULT_FINANCE_SETTINGS, ...saved });
+      } catch { /* ignore */ }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const addTransaction = useCallback((tx: Omit<Transaction, "id" | "createdAt">) => {
     const newTx: Transaction = {
