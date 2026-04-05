@@ -1,0 +1,70 @@
+Floating Action Button (FAB) Implementation:
+
+Centralized Action: Create a single, minimalist FAB (Earth Tone Sage) at the bottom right.
+
+Expandable Menu: When clicked, it expands to show 3 quick-log icons:
+
+Running/Workout (Log Activity)
+
+Meal/Protein (Log Nutrition)
+
+Scale (Log Weight)
+
+Cleanup: REMOVE the large "Log Activity" and "Weight Log" input sections from the main Health page to save space.
+
+2. Contextual Filtering & Analytics:
+
+Pill Style Filters: Place the Time Filters (Today, Week, Month) inside the specific sub-tab ONLY. Make them smaller and more subtle.
+
+Unified Line Chart: Add a high-end Line Chart that adapts based on the sub-tab:
+
+Activity Tab: Shows "Running KM" trend over time.
+
+Nutrition Tab: Shows "Protein Intake" vs "Calorie" trend.
+
+Body Tab: Shows "Weight Progress" towards your 60kg target.
+
+Visual Style: Use smooth curves (no dots) with a soft gradient fill below the line (Earth Tones).
+
+3. Sub-Tab Refinement:
+
+Nutrition Sub-Tab: Display 3 clean progress rings for Protein, Calories, and Carbs.
+
+Body Sub-Tab: Show a "Distance to 60kg" progress bar.
+
+Activity Sub-Tab: Keep the Donut Chart but move it below the new Line Chart.
+
+English Prompt for Replit Agent:
+[V12.1] Health Analytics Overhaul & Smart FAB
+
+1. Multi-Action FAB:
+
+Remove all static "Log" input forms from the Health page.
+
+Implement an expandable Floating Action Button (FAB) in the bottom-right corner.
+
+The FAB should expand to reveal: Log Activity, Log Meal, and Log Weight.
+
+2. Contextual Line Charts:
+
+Add a Responsive Line Chart at the top of each Health sub-tab.
+
+Activity: Plot Distance (km) over the selected period.
+
+Nutrition: Plot Protein (g) vs Calories (kcal).
+
+Body: Plot Weight (kg) progress.
+
+Style: Use smooth Bezier curves, no data-point markers, and a subtle Earth Tone gradient fill.
+
+3. Periodic Filter Optimization:
+
+Move the Time Period Selector (Today/Week/Month) to be smaller and positioned just below the sub-tab navigation.
+
+Ensure these filters apply to both the Stats Cards and the Line Charts in Nutrition and Body tabs as well.
+
+4. Visual Consistency:
+
+Maintain the 28px border-radius and Sage/Sand Earth Tone palette.
+
+Ensure the charts are mobile-friendly and "breathe" with enough padding.

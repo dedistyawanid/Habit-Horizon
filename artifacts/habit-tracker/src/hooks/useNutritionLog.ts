@@ -6,18 +6,20 @@ export interface NutritionEntry {
   name: string;
   calories: number;
   protein: number;
+  carbs: number;
   createdAt: string;
 }
 
 export interface NutritionTargets {
   calories: number;
   protein: number;
+  carbs: number;
 }
 
 const LS_KEY = "dedi_nutrition_log";
 const LS_TARGETS = "dedi_nutrition_targets";
 
-const DEFAULT_TARGETS: NutritionTargets = { calories: 2500, protein: 150 };
+const DEFAULT_TARGETS: NutritionTargets = { calories: 2500, protein: 150, carbs: 300 };
 
 export function useNutritionLog() {
   const [entries, setEntries] = useState<NutritionEntry[]>(() => {
@@ -28,17 +30,14 @@ export function useNutritionLog() {
   const [targets, setTargetsState] = useState<NutritionTargets>(() => {
     try {
       const raw = localStorage.getItem(LS_TARGETS);
-      return raw ? JSON.parse(raw) : DEFAULT_TARGETS;
+      if (!raw) return DEFAULT_TARGETS;
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_TARGETS, ...parsed };
     } catch { return DEFAULT_TARGETS; }
   });
 
-  useEffect(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(entries));
-  }, [entries]);
-
-  useEffect(() => {
-    localStorage.setItem(LS_TARGETS, JSON.stringify(targets));
-  }, [targets]);
+  useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(entries)); }, [entries]);
+  useEffect(() => { localStorage.setItem(LS_TARGETS, JSON.stringify(targets)); }, [targets]);
 
   function addEntry(entry: Omit<NutritionEntry, "id" | "createdAt">) {
     const newEntry: NutritionEntry = {

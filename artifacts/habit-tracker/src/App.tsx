@@ -98,12 +98,14 @@ function AppShell() {
       {/* Bottom navigation with bounce feedback */}
       <BottomNav bouncing={bouncingTab} />
 
-      {/* Multi-action FAB */}
-      <MultiFAB
-        onNewNote={() => setLocation("/notes?new=1")}
-        onNewFinance={() => setLocation("/finance?new=1")}
-        onQuickCheckin={() => setCheckinModalOpen(true)}
-      />
+      {/* Multi-action FAB — hidden on /health (health has its own FAB) */}
+      {location !== "/health" && (
+        <MultiFAB
+          onNewNote={() => setLocation("/notes?new=1")}
+          onNewFinance={() => setLocation("/finance?new=1")}
+          onQuickCheckin={() => setCheckinModalOpen(true)}
+        />
+      )}
 
       {/* Modals */}
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
