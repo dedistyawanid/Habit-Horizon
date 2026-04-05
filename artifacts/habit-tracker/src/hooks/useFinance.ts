@@ -21,7 +21,11 @@ function save<T>(key: string, data: T) {
 
 export function useFinance() {
   const [transactions,    setTransactions]    = useState<Transaction[]>(() => load(TRANSACTIONS_KEY,     []));
-  const [financeSettings, setFinanceSettings] = useState<FinanceSettings>(() => load(FINANCE_SETTINGS_KEY, DEFAULT_FINANCE_SETTINGS));
+  const [financeSettings, setFinanceSettings] = useState<FinanceSettings>(() => {
+    const saved = load<Partial<FinanceSettings>>(FINANCE_SETTINGS_KEY, {});
+    // Merge defaults so new fields (incomeCategories, expenseCategories, accountSources) appear
+    return { ...DEFAULT_FINANCE_SETTINGS, ...saved };
+  });
 
   useEffect(() => { save(TRANSACTIONS_KEY,     transactions);    }, [transactions]);
   useEffect(() => { save(FINANCE_SETTINGS_KEY, financeSettings); }, [financeSettings]);

@@ -220,7 +220,8 @@ export default function HealthPage() {
 
   /* ── Derived: Nutrition ── */
   const filteredNutr  = useMemo(() => filterByPeriod(nutritionLog, period), [nutritionLog, period]);
-  const todayMeals    = useMemo(() => nutritionLog.filter((e) => e.date === todayKey), [nutritionLog, todayKey]);
+  const localDateStr  = new Date().toLocaleDateString("en-CA"); // "YYYY-MM-DD" in device local TZ
+  const todayMeals    = useMemo(() => nutritionLog.filter((e) => e.date.startsWith(localDateStr)), [nutritionLog, localDateStr]);
   const todayCal      = todayMeals.reduce((s, e) => s + e.calories, 0);
   const todayProt     = todayMeals.reduce((s, e) => s + e.protein, 0);
   const todayCarbs    = todayMeals.reduce((s, e) => s + (e.carbs ?? 0), 0);

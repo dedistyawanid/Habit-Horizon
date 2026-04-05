@@ -72,11 +72,11 @@ export function MultiFAB({ open, onToggle, onClose, onNewNote, onNewFinance, onQ
       {/* Centered modal overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-6"
+          className="fixed inset-0 z-[9990] bg-black/60 flex items-center justify-center p-6"
           onClick={onClose}
         >
           <div
-            className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-[28px] shadow-2xl overflow-hidden"
+            className="w-full max-w-sm bg-white dark:bg-card rounded-[28px] shadow-2xl overflow-hidden pointer-events-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

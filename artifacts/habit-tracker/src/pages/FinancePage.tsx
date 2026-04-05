@@ -6,13 +6,10 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import {
-  DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check, Pencil,
+  DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check, Pencil, Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const INCOME_CATEGORIES = ["Salary", "Freelance", "Investment", "Business", "Gift", "Other"];
-const EXPENSE_CATEGORIES = ["Food", "Transport", "Rent", "Health", "Entertainment", "Education", "Shopping", "Utilities", "Other"];
-const ACCOUNT_SOURCES = ["Cash", "BCA", "Mandiri", "BRI", "BNI", "GoPay", "OVO", "DANA", "ShopeePay", "Other"];
+import { CategoryManager } from "@/components/CategoryManager";
 
 function formatIDR(amount: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(amount);
@@ -63,6 +60,7 @@ export default function FinancePage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState("");
+  const [manageOpen, setManageOpen] = useState<"picker" | "income" | "expense" | "source" | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -141,7 +139,10 @@ export default function FinancePage() {
     setShowForm(true);
   }
 
-  const categories = form.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const incomeCategories  = financeSettings.incomeCategories?.length  ? financeSettings.incomeCategories  : ["Salary", "Freelance", "Investment", "Business", "Gift", "Other"];
+  const expenseCategories = financeSettings.expenseCategories?.length ? financeSettings.expenseCategories : ["Food", "Transport", "Rent", "Health", "Entertainment", "Education", "Shopping", "Utilities", "Other"];
+  const accountSources    = financeSettings.accountSources?.length    ? financeSettings.accountSources    : ["Cash", "BCA", "Mandiri", "BRI", "BNI", "GoPay", "OVO", "DANA", "ShopeePay", "Other"];
+  const categories = form.type === "income" ? incomeCategories : expenseCategories;
 
   return (
     <div className="min-h-screen">
@@ -150,14 +151,78 @@ export default function FinancePage() {
           <div>
             <h1 className="text-xl font-bold text-foreground">Finance</h1>
           </div>
-          <button
-            onClick={() => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); }}
-            className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-2 rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add Entry
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setManageOpen("picker")}
+              className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-accent/80 transition-all"
+              title="Manage categories & sources"
+            >
+              <Settings2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); }}
+              className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-2 rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Entry
+            </button>
+          </div>
         </div>
+
+        {/* ── Manage picker ── */}
+        {manageOpen === "picker" && (
+          <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setManageOpen(null)}>
+            <div className="bg-card rounded-t-[28px] w-full max-w-lg pb-6 pt-4 px-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="w-10 h-1 bg-accent rounded-full mx-auto mb-4" />
+              <p className="text-sm font-bold text-foreground mb-3">Manage Finance Lists</p>
+              <div className="space-y-2">
+                {([
+                  { key: "income",  label: "Income Categories",  sub: `${incomeCategories.length} items`  },
+                  { key: "expense", label: "Expense Categories", sub: `${expenseCategories.length} items` },
+                  { key: "source",  label: "Account Sources",    sub: `${accountSources.length} items`    },
+                ] as const).map(({ key, label, sub }) => (
+                  <button
+                    key={key}
+                    onClick={() => setManageOpen(key)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-accent hover:bg-accent/70 transition-colors text-left"
+                  >
+                    <span className="text-sm font-medium text-foreground">{label}</span>
+                    <span className="text-xs text-muted-foreground">{sub} →</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Category & Source Managers ── */}
+        <CategoryManager
+          open={manageOpen === "income"}
+          onClose={() => setManageOpen(null)}
+          title="Income Categories"
+          categories={incomeCategories}
+          onAdd={(name) => setFinanceSettings({ ...financeSettings, incomeCategories: [...incomeCategories, name] })}
+          onRename={(old, next) => setFinanceSettings({ ...financeSettings, incomeCategories: incomeCategories.map((c) => c === old ? next : c) })}
+          onDelete={(name) => setFinanceSettings({ ...financeSettings, incomeCategories: incomeCategories.filter((c) => c !== name) })}
+        />
+        <CategoryManager
+          open={manageOpen === "expense"}
+          onClose={() => setManageOpen(null)}
+          title="Expense Categories"
+          categories={expenseCategories}
+          onAdd={(name) => setFinanceSettings({ ...financeSettings, expenseCategories: [...expenseCategories, name] })}
+          onRename={(old, next) => setFinanceSettings({ ...financeSettings, expenseCategories: expenseCategories.map((c) => c === old ? next : c) })}
+          onDelete={(name) => setFinanceSettings({ ...financeSettings, expenseCategories: expenseCategories.filter((c) => c !== name) })}
+        />
+        <CategoryManager
+          open={manageOpen === "source"}
+          onClose={() => setManageOpen(null)}
+          title="Account Sources"
+          categories={accountSources}
+          onAdd={(name) => setFinanceSettings({ ...financeSettings, accountSources: [...accountSources, name] })}
+          onRename={(old, next) => setFinanceSettings({ ...financeSettings, accountSources: accountSources.map((s) => s === old ? next : s) })}
+          onDelete={(name) => setFinanceSettings({ ...financeSettings, accountSources: accountSources.filter((s) => s !== name) })}
+        />
 
         {/* Annual target progress */}
         <div className="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-[28px] p-5 border border-primary/20">
@@ -445,7 +510,7 @@ export default function FinancePage() {
                 className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Account / Source (optional)</option>
-                {ACCOUNT_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
+                {accountSources.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
               <textarea
                 placeholder="Notes (optional)"
