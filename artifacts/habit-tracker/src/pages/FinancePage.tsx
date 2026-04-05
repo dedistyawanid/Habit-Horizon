@@ -34,6 +34,15 @@ function fmtIDRInput(raw: string): string {
   return Number(digits).toLocaleString("id-ID");
 }
 
+/** Format a YYYY-MM-DD (or ISO) date string as "05 Apr 2026", or "Today" if it matches today. */
+function fmtTxDate(dateStr: string): string {
+  const ymd = dateStr.split("T")[0];
+  const [y, m, d] = ymd.split("-").map(Number);
+  const now = new Date();
+  if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) return "Today";
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 const EMPTY_FORM = {
   title: "",
   amount: "",
@@ -140,7 +149,6 @@ export default function FinancePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Finance</h1>
-            <p className="text-xs text-gray-400 mt-0.5">Track your 1B IDR target</p>
           </div>
           <button
             onClick={() => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); }}
@@ -331,7 +339,7 @@ export default function FinancePage() {
                     <p className="text-xs text-gray-400">
                       {tx.category}
                       {tx.accountSource && <> · {tx.accountSource}</>}
-                      <> · {tx.date}</>
+                      <> · {fmtTxDate(tx.date)}</>
                     </p>
                   </div>
                   <p className={cn(

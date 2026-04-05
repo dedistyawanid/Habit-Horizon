@@ -147,7 +147,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   /** Compress & resize an image file to ≤ maxPx on the longest side at given quality. */
   function compressImage(file: File, maxPx = 220, quality = 0.78): Promise<string> {
     return new Promise((resolve) => {
-      const img = new Image();
+      const img = document.createElement("img") as HTMLImageElement;
       const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
         const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
