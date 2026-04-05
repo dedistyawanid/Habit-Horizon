@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { syncWeight, deleteWeight } from "@/lib/sync";
 
 export interface WeightEntry {
   id: string;
@@ -34,10 +35,12 @@ export function useWeightLog() {
       const filtered = prev.filter((e) => e.date !== entry.date);
       return [...filtered, entry].sort((a, b) => a.date.localeCompare(b.date));
     });
+    syncWeight(entry);
   }, []);
 
   const deleteWeightEntry = useCallback((id: string) => {
     setWeightLog((prev) => prev.filter((e) => e.id !== id));
+    deleteWeight(id);
   }, []);
 
   const latestWeight = weightLog.length > 0 ? weightLog[weightLog.length - 1].weight : null;

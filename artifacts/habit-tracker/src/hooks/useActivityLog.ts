@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { syncActivity, deleteActivity } from "@/lib/sync";
 
 export interface ActivityEntry {
   id: string;
@@ -35,11 +36,13 @@ export function useActivityLog() {
       createdAt: new Date().toISOString(),
     };
     setActivityLog((prev) => [newEntry, ...prev]);
+    syncActivity(newEntry);
     return newEntry;
   }, []);
 
   const deleteActivityEntry = useCallback((id: string) => {
     setActivityLog((prev) => prev.filter((e) => e.id !== id));
+    deleteActivity(id);
   }, []);
 
   return { activityLog, addActivityEntry, deleteActivityEntry };

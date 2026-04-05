@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { syncMeal, deleteMeal } from "@/lib/sync";
 
 export interface NutritionEntry {
   id: string;
@@ -16,8 +17,8 @@ export interface NutritionTargets {
   carbs: number;
 }
 
-const LS_KEY = "dedi_nutrition_log";
-const LS_TARGETS = "dedi_nutrition_targets";
+const LS_KEY      = "dedi_nutrition_log";
+const LS_TARGETS  = "dedi_nutrition_targets";
 
 const DEFAULT_TARGETS: NutritionTargets = { calories: 2500, protein: 150, carbs: 300 };
 
@@ -31,12 +32,11 @@ export function useNutritionLog() {
     try {
       const raw = localStorage.getItem(LS_TARGETS);
       if (!raw) return DEFAULT_TARGETS;
-      const parsed = JSON.parse(raw);
-      return { ...DEFAULT_TARGETS, ...parsed };
+      return { ...DEFAULT_TARGETS, ...JSON.parse(raw) };
     } catch { return DEFAULT_TARGETS; }
   });
 
-  useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(entries)); }, [entries]);
+  useEffect(() => { localStorage.setItem(LS_KEY,     JSON.stringify(entries)); }, [entries]);
   useEffect(() => { localStorage.setItem(LS_TARGETS, JSON.stringify(targets)); }, [targets]);
 
   function addEntry(entry: Omit<NutritionEntry, "id" | "createdAt">) {
@@ -46,10 +46,12 @@ export function useNutritionLog() {
       createdAt: new Date().toISOString(),
     };
     setEntries((prev) => [newEntry, ...prev]);
+    syncMeal(newEntry);
   }
 
   function deleteEntry(id: string) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    deleteMeal(id);
   }
 
   function updateTargets(t: NutritionTargets) {

@@ -18,6 +18,8 @@ import HealthPage from "@/pages/HealthPage";
 import { Settings } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
+import { SyncProvider } from "@/context/SyncContext";
+import { SyncIndicator } from "@/components/SyncIndicator";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,7 @@ function AppShell() {
               <span className="text-primary-foreground text-xs font-bold">D</span>
             </div>
             <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Dedi's Tracker</span>
+            <SyncIndicator />
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
@@ -119,10 +122,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AppProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <AppShell />
-          </WouterRouter>
-          <Toaster />
+          <SyncProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <AppShell />
+            </WouterRouter>
+            <Toaster />
+          </SyncProvider>
         </AppProvider>
       </TooltipProvider>
     </QueryClientProvider>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { syncSleep, deleteSleep } from "@/lib/sync";
 
 export interface SleepEntry {
   id: string;
@@ -26,8 +27,8 @@ export function useSleepLog() {
     } catch { return DEFAULT_TARGET; }
   });
 
-  useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(entries)); }, [entries]);
-  useEffect(() => { localStorage.setItem(LS_TARGET_KEY, String(targetHours)); }, [targetHours]);
+  useEffect(() => { localStorage.setItem(LS_KEY,        JSON.stringify(entries)); }, [entries]);
+  useEffect(() => { localStorage.setItem(LS_TARGET_KEY, String(targetHours));     }, [targetHours]);
 
   function addEntry(entry: Omit<SleepEntry, "id" | "createdAt">) {
     const newEntry: SleepEntry = {
@@ -39,10 +40,12 @@ export function useSleepLog() {
       const filtered = prev.filter((e) => e.date !== entry.date);
       return [newEntry, ...filtered].sort((a, b) => b.date.localeCompare(a.date));
     });
+    syncSleep(newEntry);
   }
 
   function deleteEntry(id: string) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
+    deleteSleep(id);
   }
 
   function setTargetHours(h: number) {
