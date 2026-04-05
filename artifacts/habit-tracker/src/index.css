@@ -407,6 +407,7 @@
   /* ── Health sub-tab sticky bar ──────────────────────── */
   .health-subtab-sticky {
     background: rgba(250, 249, 246, 0.96);
+    border-bottom: 1px solid #E5E0D8;
   }
   .dark .health-subtab-sticky {
     background: hsl(var(--background));   /* solid #161819 — no white bleed */

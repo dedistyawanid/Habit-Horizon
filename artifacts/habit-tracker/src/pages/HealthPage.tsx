@@ -384,7 +384,7 @@ export default function HealthPage() {
 
         {/* ─── SUB-TAB PILLS (sticky) ─── */}
         <div
-          className="health-subtab-sticky sticky top-16 z-20 py-2 -mx-4 px-4"
+          className="health-subtab-sticky sticky top-12 z-20 py-2 -mx-4 px-4"
           style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }}
         >
           <div className="flex gap-1.5">
