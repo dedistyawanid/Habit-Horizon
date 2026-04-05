@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SyncProvider, useSyncStatus } from "@/context/SyncContext";
+import { RefreshProvider, useRefresh } from "@/context/RefreshContext";
 import { BottomNav } from "@/components/BottomNav";
 import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
@@ -19,10 +20,11 @@ import InsightsPage from "@/pages/InsightsPage";
 import FinancePage from "@/pages/FinancePage";
 import HealthPage from "@/pages/HealthPage";
 import LoginPage from "@/pages/LoginPage";
-import { Settings } from "lucide-react";
+import { Settings, RefreshCw } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
 import { useToast } from "@/hooks/use-toast";
+import { fetchAllFromCloud, fetchProfile, applyProfileToLocalStorage } from "@/lib/fetchFromCloud";
 
 const queryClient = new QueryClient();
 const SYNC_TOAST_KEY = "dedi_sync_toast";
@@ -61,28 +63,33 @@ function AppShell() {
   const [settingsOpen,     setSettingsOpen]     = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { triggerSync } = useSyncStatus();
+  const { refreshFromCloud, refreshing } = useRefresh();
 
-  /* Show any deferred sync toast (e.g. "timeout – using local data") and flush queue */
+  /* Show deferred sync toast + immediate queue flush on mount */
   useEffect(() => {
-    /* Deferred toast from cloud hydration phase */
     const pending = sessionStorage.getItem(SYNC_TOAST_KEY);
     if (pending) {
       sessionStorage.removeItem(SYNC_TOAST_KEY);
       try {
         const { title, description } = JSON.parse(pending);
         setTimeout(() => toast({ title, description }), 600);
-      } catch { /* ignore malformed message */ }
+      } catch { /* ignore */ }
     }
-    /* Immediately push any offline-queued mutations to Supabase */
     if (navigator.onLine) triggerSync();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function handleManualRefresh() {
+    if (refreshing) return;
+    await refreshFromCloud();
+    toast({ title: "Data updated from Cloud", description: "All your data has been refreshed." });
+  }
+
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Minimal top bar */}
+      {/* Top bar */}
       <header className="sticky top-0 z-30 glass-header">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -92,17 +99,35 @@ function AppShell() {
             <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Dedi's Tracker</span>
             <SyncIndicator />
           </div>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all"
-            aria-label="Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Manual cloud refresh button */}
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+              aria-label="Refresh from cloud"
+              title="Pull latest data from cloud"
+            >
+              <RefreshCw
+                className="w-4 h-4"
+                style={refreshing ? { animation: "spin 1s linear infinite" } : undefined}
+              />
+            </button>
+
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all"
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
+        <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
       </header>
 
-      {/* Swipeable page content */}
+      {/* Page content */}
       <div
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
@@ -135,8 +160,29 @@ function AppShell() {
   );
 }
 
+/* ── AuthGate: owns the appKey and refresh logic ── */
 function AuthGate() {
   const { user, loading } = useAuth();
+  const [appKey,     setAppKey]     = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshFromCloud = useCallback(async () => {
+    if (!user || refreshing) return;
+    setRefreshing(true);
+    try {
+      const [syncResult, profile] = await Promise.all([
+        fetchAllFromCloud(user.id),
+        fetchProfile(user.id),
+      ]);
+      if (profile) applyProfileToLocalStorage(profile);
+      if (syncResult !== "offline" && syncResult !== "error") {
+        /* Re-mount AppProvider so all hooks re-init from fresh localStorage */
+        setAppKey((k) => k + 1);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user, refreshing]);
 
   if (loading) {
     return (
@@ -173,14 +219,16 @@ function AuthGate() {
   if (!user) return <LoginPage />;
 
   return (
-    <AppProvider>
-      <SyncProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppShell />
-        </WouterRouter>
-        <Toaster />
-      </SyncProvider>
-    </AppProvider>
+    <RefreshProvider value={{ refreshing, refreshFromCloud }}>
+      <AppProvider key={appKey}>
+        <SyncProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <AppShell />
+          </WouterRouter>
+          <Toaster />
+        </SyncProvider>
+      </AppProvider>
+    </RefreshProvider>
   );
 }
 

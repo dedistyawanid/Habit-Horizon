@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import {
   Moon, Sun, Monitor, Upload, Download, Check, X,
   User, Scale, Ruler, Target, Image, Palette, LogOut,
-  RefreshCw, Mail, Flame, Beef,
+  RefreshCw, Mail, Flame, Beef, CloudUpload, AlertCircle,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { upsertProfile } from "@/lib/fetchFromCloud";
 import { getUserId } from "@/lib/supabase";
+import { forcePushAll, type PushResult } from "@/lib/sync";
 
 interface SettingsModalProps {
   open: boolean;
@@ -55,6 +56,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [proteinGoal,    setProteinGoal]    = useState(() => String(safeJson<{protein?:number}>("dedi_nutrition_targets", {}).protein ?? 150));
   const [carbsGoal,      setCarbsGoal]      = useState(() => String(safeJson<{carbs?:number}>("dedi_nutrition_targets", {}).carbs ?? 300));
   const [logoutConfirm,  setLogoutConfirm]  = useState(false);
+  const [pushing,        setPushing]        = useState(false);
+  const [pushResults,    setPushResults]    = useState<PushResult[] | null>(null);
 
   /* Sync health targets to localStorage + Supabase (debounced) */
   const saveHealthTargets = useCallback(() => {
@@ -94,6 +97,25 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     }, 800);
     return () => clearTimeout(t);
   }, [settings.theme, settings.accentTheme, settings.profile.fullName]);
+
+  /* ── Force Push to Supabase ── */
+  async function handleForcePush() {
+    if (pushing) return;
+    setPushResults(null);
+    setPushing(true);
+    try {
+      const results = await forcePushAll();
+      setPushResults(results);
+      const failed = results.filter((r) => !r.success && r.sent > 0);
+      if (failed.length === 0) {
+        toast({ title: "Upload complete!", description: "All data pushed to Supabase successfully." });
+      } else {
+        toast({ title: "Partial upload", description: `${failed.length} table(s) had errors. Check details below.` });
+      }
+    } finally {
+      setPushing(false);
+    }
+  }
 
   /* ── Export / Import ── */
   function handleExportJSON() {
@@ -390,6 +412,62 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
           {/* ── DATA TAB ── */}
           <TabsContent value="data" className="space-y-4 pt-4">
+
+            {/* ── Force Push to Cloud ── */}
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <CloudUpload className="w-4 h-4 text-primary" />
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Force Upload to Cloud</p>
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Pushes everything stored on this device to Supabase right now.
+                Use this if data shows "Pending" and won't auto-sync.
+              </p>
+              <Button
+                onClick={handleForcePush}
+                disabled={pushing}
+                className="w-full gap-2"
+                data-testid="btn-force-push"
+              >
+                <RefreshCw className="w-4 h-4" style={pushing ? { animation: "spin 1s linear infinite" } : undefined} />
+                {pushing ? "Uploading…" : "Push Now"}
+              </Button>
+              <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
+
+              {/* Results table */}
+              {pushResults && (
+                <div className="space-y-1.5 pt-1">
+                  {pushResults.map((r) => (
+                    <div
+                      key={r.table}
+                      className="flex items-center justify-between text-xs px-3 py-2 rounded-xl"
+                      style={{ background: r.success ? "#F0F7EC" : "#FEF2F2" }}
+                    >
+                      <span className="font-mono text-gray-600 dark:text-gray-300">{r.table}</span>
+                      <div className="flex items-center gap-2">
+                        {r.sent > 0 && (
+                          <span className="text-gray-400">{r.sent} row{r.sent !== 1 ? "s" : ""}</span>
+                        )}
+                        {r.success ? (
+                          <span className="flex items-center gap-1 text-green-600 font-semibold">
+                            <Check className="w-3 h-3" /> OK
+                          </span>
+                        ) : (
+                          <span
+                            className="flex items-center gap-1 text-red-500 font-semibold"
+                            title={r.error}
+                          >
+                            <AlertCircle className="w-3 h-3" />
+                            {r.error?.slice(0, 30) ?? "Error"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Export Data</p>
               <p className="text-xs text-gray-400 mb-3">

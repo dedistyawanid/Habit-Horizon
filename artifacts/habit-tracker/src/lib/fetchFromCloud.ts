@@ -1,7 +1,11 @@
 /**
  * fetchFromCloud — pulls all user data from Supabase and writes it to localStorage.
- * Called on every login/session restore so Cloud always wins.
- * Has a hard 4-second timeout — falls back to localStorage silently on failure.
+ * Cloud data WINS over local data.
+ * 4-second overall timeout — falls back gracefully to localStorage.
+ *
+ * Table map (confirmed):
+ *   habits, checkins, health_logs, nutrition_logs, sleep_logs,
+ *   weight_logs, finance_logs, notes, profiles
  */
 import { supabase } from "./supabase";
 
@@ -16,42 +20,41 @@ export interface CloudProfile {
   updated_at: string;
 }
 
-/* ── helpers ── */
 function safeJson<T>(raw: string | null, fallback: T): T {
   try { return raw ? JSON.parse(raw) : fallback; }
   catch { return fallback; }
 }
 
-/** Races a promise against a timeout. Returns null if the timeout wins. */
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   return Promise.race([
-    promise,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+    p,
+    new Promise<null>((res) => setTimeout(() => res(null), ms)),
   ]);
 }
 
-/** Fetches a single table with a per-table timeout, returning null on any error/timeout. */
 async function fetchTable(table: string, userId: string) {
-  const result = await withTimeout(
+  const r = await withTimeout(
     supabase.from(table).select("*").eq("user_id", userId),
     3500,
   );
-  if (!result || result.error) return null;
-  return result.data;
+  if (!r || r.error) {
+    if (r?.error) console.warn(`[cloud] fetch failed (${table}):`, r.error.message);
+    return null;
+  }
+  return r.data;
 }
 
 /* ── full pull: Supabase → localStorage ── */
-export async function fetchAllFromCloud(userId: string): Promise<"synced" | "no_data" | "timeout" | "offline" | "error"> {
+export async function fetchAllFromCloud(
+  userId: string,
+): Promise<"synced" | "no_data" | "timeout" | "offline" | "error"> {
   if (!navigator.onLine) return "offline";
-
   try {
-    let wrote = false;
-
-    /* Run all table fetches in parallel with a 4-second overall budget */
+    /* Run all 8 table fetches in parallel, capped at 4 s total */
     const overall = Promise.all([
       fetchTable("habits",         userId),
       fetchTable("checkins",       userId),
-      fetchTable("activity_logs",  userId),
+      fetchTable("health_logs",    userId),   // ← was activity_logs
       fetchTable("nutrition_logs", userId),
       fetchTable("sleep_logs",     userId),
       fetchTable("weight_logs",    userId),
@@ -60,9 +63,10 @@ export async function fetchAllFromCloud(userId: string): Promise<"synced" | "no_
     ]);
 
     const results = await withTimeout(overall, 4000);
-    if (!results) return "timeout";   // overall timeout
+    if (!results) return "timeout";
 
-    const [habits, checkins, acts, meals, sleeps, weights, txns, notes] = results;
+    const [habits, checkins, health, meals, sleeps, weights, txns, notes] = results;
+    let wrote = false;
 
     if (habits?.length) {
       localStorage.setItem("dedi_habits", JSON.stringify(
@@ -87,9 +91,9 @@ export async function fetchAllFromCloud(userId: string): Promise<"synced" | "no_
       wrote = true;
     }
 
-    if (acts?.length) {
+    if (health?.length) {
       localStorage.setItem("dedi_activity_log", JSON.stringify(
-        acts.map((a) => ({
+        health.map((a) => ({
           id: a.id, date: a.date, type: a.type,
           durationMin: a.duration_min ?? undefined,
           distanceKm: a.distance_km ?? undefined,
@@ -163,16 +167,18 @@ export async function fetchAllFromCloud(userId: string): Promise<"synced" | "no_
 /* ── profile ── */
 export async function fetchProfile(userId: string): Promise<CloudProfile | null> {
   try {
-    const result = await withTimeout(
+    const r = await withTimeout(
       supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
       3000,
     );
-    if (!result || result.error) return null;
-    return result.data as CloudProfile | null;
+    if (!r || r.error) return null;
+    return r.data as CloudProfile | null;
   } catch { return null; }
 }
 
-export async function upsertProfile(profile: Partial<CloudProfile> & { user_id: string }): Promise<void> {
+export async function upsertProfile(
+  profile: Partial<CloudProfile> & { user_id: string },
+): Promise<void> {
   try {
     await supabase.from("profiles").upsert(
       { ...profile, updated_at: new Date().toISOString() },
@@ -185,7 +191,11 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
   if (profile.target_weight != null) {
     localStorage.setItem("dedi_goal_weight", String(profile.target_weight));
   }
-  if (profile.calorie_goal != null || profile.protein_goal != null || profile.carbs_goal != null) {
+  if (
+    profile.calorie_goal != null ||
+    profile.protein_goal != null ||
+    profile.carbs_goal   != null
+  ) {
     const existing = safeJson<Record<string, number>>(
       localStorage.getItem("dedi_nutrition_targets"), {}
     );
