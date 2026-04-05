@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
+import { getTodayKey } from "@/lib/dateUtils";
 import { Transaction } from "@/types/finance";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -36,7 +37,7 @@ function fmtIDRInput(raw: string): string {
 const EMPTY_FORM = {
   title: "",
   amount: "",
-  date: new Date().toISOString().split("T")[0],
+  date: getTodayKey(),
   category: "",
   type: "income" as "income" | "expense",
   accountSource: "",

@@ -342,6 +342,25 @@
     inset: -1px;
   }
 
+  /* ── Bottom Navigation ── */
+  .bottom-nav {
+    background: rgba(255, 255, 255, 0.93);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid #E5E0D8;
+  }
+  .dark .bottom-nav {
+    background: rgba(18, 16, 14, 0.95);
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  /* ── Global: dark-mode card border override ──
+     Any element that carries the light-mode beige border color via inline style
+     gets automatically updated to the dark-mode border in .dark context. */
+  .dark [style*="#E5E0D8"] {
+    border-color: hsl(var(--border)) !important;
+  }
+
   /* Smooth tab transitions */
   .tab-content-enter {
     opacity: 0;

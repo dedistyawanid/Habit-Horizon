@@ -42,25 +42,33 @@ const SLEEP_KEYWORDS = [
 
 function getTypeInfo(type: string) { return ALL_TYPES.find((t) => t.id === type) ?? OTHER_TYPE; }
 
-/** Returns current date as YYYY-MM-DD in the **local** timezone (not UTC). */
+/** Returns current date as YYYY-MM-DD in the device's LOCAL timezone.
+ *  Never use .toISOString() which returns UTC and shifts the date for UTC+7 users. */
 function localToday(): string {
-  return new Date().toLocaleDateString("en-CA"); // en-CA always gives YYYY-MM-DD
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 /* ─── Period helpers ─────────────────────────────────── */
+function localStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 function getPeriodRange(period: Period) {
   const today  = new Date();
-  const todayK = today.toISOString().split("T")[0];
+  const todayK = localStr(today);
   if (period === "day") return { start: todayK, end: todayK };
   if (period === "week") {
     const day = today.getDay();
     const mon = new Date(today); mon.setDate(today.getDate() + (day === 0 ? -6 : 1 - day));
     const sun = new Date(mon);   sun.setDate(mon.getDate() + 6);
-    return { start: mon.toISOString().split("T")[0], end: sun.toISOString().split("T")[0] };
+    return { start: localStr(mon), end: localStr(sun) };
   }
   const s = new Date(today.getFullYear(), today.getMonth(), 1);
   const e = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  return { start: s.toISOString().split("T")[0], end: e.toISOString().split("T")[0] };
+  return { start: localStr(s), end: localStr(e) };
 }
 function filterByPeriod<T extends { date: string }>(items: T[], period: Period) {
   const { start, end } = getPeriodRange(period);
@@ -69,19 +77,19 @@ function filterByPeriod<T extends { date: string }>(items: T[], period: Period) 
 
 function getActivityRange(range: ActRange, customStart: string, customEnd: string): { start: string; end: string } {
   const today = new Date();
-  const todayK = today.toISOString().split("T")[0];
+  const todayK = localStr(today);
   if (range === "7d") {
     const s = new Date(today); s.setDate(today.getDate() - 6);
-    return { start: s.toISOString().split("T")[0], end: todayK };
+    return { start: localStr(s), end: todayK };
   }
   if (range === "30d") {
     const s = new Date(today); s.setDate(today.getDate() - 29);
-    return { start: s.toISOString().split("T")[0], end: todayK };
+    return { start: localStr(s), end: todayK };
   }
   if (range === "month") {
     const s = new Date(today.getFullYear(), today.getMonth(), 1);
     const e = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    return { start: s.toISOString().split("T")[0], end: e.toISOString().split("T")[0] };
+    return { start: localStr(s), end: localStr(e) };
   }
   return { start: customStart || todayK, end: customEnd || todayK };
 }
@@ -341,7 +349,7 @@ export default function HealthPage() {
     addWeightEntry(val, undefined, weightDate);
     setWeightInput("");
     setShowWeight(false);
-    const isToday = weightDate === new Date().toISOString().split("T")[0];
+    const isToday = weightDate === localToday();
     toast({ title: "Weight logged", description: `${val} kg recorded for ${isToday ? "today" : weightDate}.` });
   }
 

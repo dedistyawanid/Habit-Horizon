@@ -20,7 +20,7 @@ export function BottomNav({ bouncing }: BottomNavProps) {
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 safe-area-inset-bottom" style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", boxShadow: "none", borderTop: "1px solid #E5E0D8" }}>
+    <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-40 safe-area-inset-bottom">
       <div className="flex items-stretch max-w-lg mx-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = location === href;
@@ -31,13 +31,18 @@ export function BottomNav({ bouncing }: BottomNavProps) {
               href={href}
               className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-all duration-200 relative",
-                isActive ? "text-primary" : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400",
+                isActive
+                  ? "text-primary"
+                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
                 isBouncing && "animate-bounce"
               )}
               aria-label={label}
             >
               <Icon className={cn("w-5 h-5 transition-transform", isActive && "scale-110")} />
-              <span className={cn("text-[10px] font-medium leading-none", isActive ? "text-primary" : "text-gray-400")}>
+              <span className={cn(
+                "text-[10px] font-medium leading-none",
+                isActive ? "text-primary" : "text-gray-400 dark:text-gray-500"
+              )}>
                 {label}
               </span>
               {isActive && (

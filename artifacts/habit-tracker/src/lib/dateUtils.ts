@@ -1,8 +1,14 @@
 import { Habit } from "@/types/habit";
 import { DateFormat } from "@/types/settings";
 
+/** Convert a Date to YYYY-MM-DD using the device's LOCAL timezone.
+ *  Never use .toISOString() — it returns UTC which shifts WIB (UTC+7) back a day. */
+export function toLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function getTodayKey(): string {
-  return new Date().toISOString().split("T")[0];
+  return toLocalDateStr(new Date());
 }
 
 export function getMonthKey(year: number, month: number): string {
@@ -46,18 +52,18 @@ export function getDayGrid(
 
   for (let i = 0; i < firstDay; i++) {
     const d = new Date(year, month, 1 - (firstDay - i));
-    grid.push({ date: d.toISOString().split("T")[0], day: d.getDate(), inMonth: false });
+    grid.push({ date: toLocalDateStr(d), day: d.getDate(), inMonth: false });
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, month, d);
-    grid.push({ date: date.toISOString().split("T")[0], day: d, inMonth: true });
+    grid.push({ date: toLocalDateStr(date), day: d, inMonth: true });
   }
 
   const remaining = 42 - grid.length;
   for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, month + 1, i);
-    grid.push({ date: d.toISOString().split("T")[0], day: d.getDate(), inMonth: false });
+    grid.push({ date: toLocalDateStr(d), day: d.getDate(), inMonth: false });
   }
 
   return grid;
