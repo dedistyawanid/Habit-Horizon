@@ -3,7 +3,7 @@ import {
   Scale, Dumbbell, Activity, Trash2, Check, Plus, MapPin, Timer,
   Wind, Heart, Zap, TrendingUp, Mountain, Navigation2, Utensils,
   Flame, X, Beef, Wheat, Target, Pencil, Settings2, Moon, Star,
-  AlarmClock, BedDouble, TrendingDown,
+  AlarmClock, BedDouble, TrendingDown, Calendar,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -115,18 +115,22 @@ export default function HealthPage() {
   const [elevation, setElevation] = useState("");
   const [runType, setRunType]     = useState<"Trail"|"Road">("Road");
   const [actLocation, setActLocation] = useState("");
+  const [actDate,     setActDate]     = useState(() => new Date().toISOString().split("T")[0]);
 
   /* Meal form */
-  const [mealName, setMealName]   = useState("");
-  const [mealCal, setMealCal]     = useState("");
-  const [mealProt, setMealProt]   = useState("");
+  const [mealName,  setMealName]  = useState("");
+  const [mealCal,   setMealCal]   = useState("");
+  const [mealProt,  setMealProt]  = useState("");
   const [mealCarbs, setMealCarbs] = useState("");
+  const [mealDate,  setMealDate]  = useState(() => new Date().toISOString().split("T")[0]);
 
   /* Weight form */
   const [weightInput, setWeightInput] = useState("");
+  const [weightDate,  setWeightDate]  = useState(() => new Date().toISOString().split("T")[0]);
 
   /* Sleep form */
   const [sleepHoursInput, setSleepHoursInput]   = useState("");
+  const [sleepDate,       setSleepDate]         = useState(() => new Date().toISOString().split("T")[0]);
   const [sleepMinsInput,  setSleepMinsInput]    = useState("");
   const [sleepQuality, setSleepQuality]         = useState<1|2|3|4|5>(3);
   const [showSleepTarget, setShowSleepTarget]   = useState(false);
@@ -261,7 +265,7 @@ export default function HealthPage() {
     if (h === 0 && m === 0) {
       toast({ title: "Duration required", variant: "destructive" }); return;
     }
-    addSleep({ date: todayKey, hours: h, minutes: m, quality: sleepQuality });
+    addSleep({ date: sleepDate, hours: h, minutes: m, quality: sleepQuality });
     const hits = habitsWithStats.filter((hab) => SLEEP_KEYWORDS.some((kw) => hab.name.toLowerCase().includes(kw)));
     let auto = 0;
     hits.forEach((hab) => { if (!isCheckedInToday(hab.id)) { toggleCheckIn(hab.id); auto++; } });
@@ -281,7 +285,7 @@ export default function HealthPage() {
       }
     }
     addActivityEntry({
-      date: todayKey, type: actType, durationMin: dur,
+      date: actDate, type: actType, durationMin: dur,
       distanceKm:    actType === "Running" ? parseFloat(distance)  : undefined,
       elevationGain: actType === "Running" && elevation ? parseFloat(elevation) : undefined,
       runType:       actType === "Running" ? runType : undefined,
@@ -301,7 +305,7 @@ export default function HealthPage() {
     const carbs = parseFloat(mealCarbs);
     if (!mealName.trim()) { toast({ title: "Meal name required", variant: "destructive" }); return; }
     if (isNaN(cal) || cal < 0) { toast({ title: "Invalid calories", variant: "destructive" }); return; }
-    addMeal({ date: todayKey, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+    addMeal({ date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
     setMealName(""); setMealCal(""); setMealProt(""); setMealCarbs("");
     setShowMeal(false);
     toast({ title: "Meal logged!", description: `${mealName.trim()} — ${cal} kcal` });
@@ -312,10 +316,11 @@ export default function HealthPage() {
     if (isNaN(val) || val <= 0 || val > 500) {
       toast({ title: "Invalid weight", variant: "destructive" }); return;
     }
-    addWeightEntry(val);
+    addWeightEntry(val, undefined, weightDate);
     setWeightInput("");
     setShowWeight(false);
-    toast({ title: "Weight logged", description: `${val} kg recorded for today.` });
+    const isToday = weightDate === new Date().toISOString().split("T")[0];
+    toast({ title: "Weight logged", description: `${val} kg recorded for ${isToday ? "today" : weightDate}.` });
   }
 
   function openFabAction(action: "activity" | "meal" | "weight") {
@@ -650,6 +655,26 @@ export default function HealthPage() {
                 <p className="text-sm font-bold text-foreground">Log Activity</p>
               </div>
 
+              {/* Date selector */}
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="date"
+                  value={actDate}
+                  max={todayKey}
+                  onChange={(e) => setActDate(e.target.value)}
+                  className="flex-1 text-xs bg-transparent border-none outline-none text-foreground"
+                />
+                {actDate !== todayKey && (
+                  <button
+                    onClick={() => setActDate(todayKey)}
+                    className="text-[10px] font-medium text-primary hover:underline shrink-0"
+                  >
+                    Today
+                  </button>
+                )}
+              </div>
+
               {/* Type selector */}
               <div className="flex gap-2">
                 {PRIMARY_TYPES.map(({ id, label, icon: Icon, color }) => (
@@ -783,6 +808,26 @@ export default function HealthPage() {
                 <Utensils className="w-4 h-4 text-primary" />
                 <p className="text-sm font-bold text-foreground">Log Meal</p>
               </div>
+              {/* Date selector */}
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="date"
+                  value={mealDate}
+                  max={todayKey}
+                  onChange={(e) => setMealDate(e.target.value)}
+                  className="flex-1 text-xs bg-transparent border-none outline-none text-foreground"
+                />
+                {mealDate !== todayKey && (
+                  <button
+                    onClick={() => setMealDate(todayKey)}
+                    className="text-[10px] font-medium text-primary hover:underline shrink-0"
+                  >
+                    Today
+                  </button>
+                )}
+              </div>
+
               <div>
                 <Input
                   placeholder="Meal name (e.g. Chicken rice, Oatmeal…)"
@@ -926,6 +971,26 @@ export default function HealthPage() {
                   Goal: {goalWeight} kg <Pencil className="w-3 h-3" />
                 </button>
               </div>
+              {/* Date selector */}
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="date"
+                  value={weightDate}
+                  max={todayKey}
+                  onChange={(e) => setWeightDate(e.target.value)}
+                  className="flex-1 text-xs bg-transparent border-none outline-none text-foreground"
+                />
+                {weightDate !== todayKey && (
+                  <button
+                    onClick={() => setWeightDate(todayKey)}
+                    className="text-[10px] font-medium text-primary hover:underline shrink-0"
+                  >
+                    Today
+                  </button>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -1061,6 +1126,26 @@ export default function HealthPage() {
                 >
                   Target: {sleepTarget}h <Pencil className="w-3 h-3" />
                 </button>
+              </div>
+
+              {/* Date selector */}
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  type="date"
+                  value={sleepDate}
+                  max={todayKey}
+                  onChange={(e) => setSleepDate(e.target.value)}
+                  className="flex-1 text-xs bg-transparent border-none outline-none text-foreground"
+                />
+                {sleepDate !== todayKey && (
+                  <button
+                    onClick={() => setSleepDate(todayKey)}
+                    className="text-[10px] font-medium text-primary hover:underline shrink-0"
+                  >
+                    Today
+                  </button>
+                )}
               </div>
 
               {/* Duration inputs */}
