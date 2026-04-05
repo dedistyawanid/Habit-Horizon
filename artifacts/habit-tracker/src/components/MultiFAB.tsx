@@ -24,51 +24,56 @@ export function MultiFAB({ onNewNote, onNewFinance, onQuickCheckin }: MultiFABPr
   }
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
-      {/* Sub-actions */}
-      {actions.map(({ icon: Icon, label, emoji, onClick, color }, i) => (
-        <div
-          key={label}
-          className={cn(
-            "flex items-center gap-2 transition-all duration-200",
-            open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-          )}
-          style={{ transitionDelay: open ? `${i * 50}ms` : "0ms" }}
-        >
-          <span className="bg-white dark:bg-gray-900 text-xs font-medium text-gray-700 dark:text-gray-300 px-2.5 py-1.5 rounded-full shadow-md border border-gray-100 dark:border-gray-800 whitespace-nowrap">
-            {label}
-          </span>
-          <button
-            onClick={() => handleAction(onClick)}
-            className={cn(
-              "w-11 h-11 rounded-2xl text-white flex items-center justify-center shadow-lg transition-all active:scale-90",
-              color
-            )}
-          >
-            <Icon className="w-5 h-5" />
-          </button>
-        </div>
-      ))}
-
-      {/* Main FAB */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95",
-          open && "rotate-45"
-        )}
-        aria-label="Actions"
-      >
-        {open ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
-      </button>
-
-      {/* Backdrop to close */}
+    <>
+      {/* Backdrop — sits below the FAB but above page content so sub-actions aren't blocked */}
       {open && (
         <div
-          className="fixed inset-0 z-[-1]"
+          className="fixed inset-0 z-[9990]"
           onClick={() => setOpen(false)}
         />
       )}
-    </div>
+
+      <div className="fixed bottom-20 right-4 z-[9999] flex flex-col items-end gap-2">
+        {/* Sub-actions */}
+        {actions.map(({ icon: Icon, label, onClick, color }, i) => (
+          <div
+            key={label}
+            className={cn(
+              "flex items-center gap-2 transition-all duration-200",
+              open ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+            )}
+            style={{ transitionDelay: open ? `${i * 50}ms` : "0ms" }}
+          >
+            <span className="bg-white dark:bg-gray-900 text-xs font-medium text-gray-700 dark:text-gray-300 px-2.5 py-1.5 rounded-full shadow-md border border-gray-100 dark:border-gray-800 whitespace-nowrap select-none">
+              {label}
+            </span>
+            <button
+              onClick={() => handleAction(onClick)}
+              className={cn(
+                "w-11 h-11 rounded-2xl text-white flex items-center justify-center shadow-lg",
+                "transition-all duration-150 active:scale-90 hover:scale-110",
+                color
+              )}
+            >
+              <Icon className="w-5 h-5" />
+            </button>
+          </div>
+        ))}
+
+        {/* Main FAB */}
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            "w-14 h-14 rounded-2xl bg-primary text-primary-foreground",
+            "flex items-center justify-center shadow-xl",
+            "transition-all duration-300 hover:scale-110 active:scale-95",
+            open && "rotate-45"
+          )}
+          aria-label="Actions"
+        >
+          {open ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+        </button>
+      </div>
+    </>
   );
 }

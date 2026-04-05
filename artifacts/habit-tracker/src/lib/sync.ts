@@ -180,12 +180,15 @@ export function syncTransaction(t: { id: string; type: string; amount: number; c
 export function deleteTransaction(id: string) { return del("finance_logs", id); }
 
 /* ─── Notes ──────────────────────────────────────────────── */
-export function syncNote(n: { id: string; title: string; content?: string; category?: string; createdAt?: string; updatedAt?: string }) {
+export function syncNote(n: { id: string; title: string; content?: string; category?: string; createdAt?: string; updatedAt?: string; reminderDate?: string; reminderEnabled?: boolean }) {
   return upsert("notes", {
     id: n.id, user_id: getUserId(), title: n.title, content: n.content ?? null,
     category: n.category ?? null,
     created_at: n.createdAt ?? new Date().toISOString(),
     updated_at: n.updatedAt ?? new Date().toISOString(),
+    /* reminder columns — stored if they exist in Supabase, silently ignored if not */
+    reminder_date:    n.reminderDate    ?? null,
+    reminder_enabled: n.reminderEnabled ?? null,
   });
 }
 export function deleteNote(id: string) { return del("notes", id); }

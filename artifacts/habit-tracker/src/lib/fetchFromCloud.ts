@@ -150,11 +150,24 @@ export async function fetchAllFromCloud(
     }
 
     if (notes?.length) {
+      /* Preserve reminder fields that live only in localStorage (not yet Supabase columns).
+         Build a local id→reminder map BEFORE overwriting so we can merge them back. */
+      const localNotes: Array<{ id: string; reminderDate?: string; reminderEnabled?: boolean }> =
+        safeJson(localStorage.getItem("dedi_quick_notes"), []);
+      const reminderMap = new Map(
+        localNotes.map((n) => [n.id, { reminderDate: n.reminderDate, reminderEnabled: n.reminderEnabled }])
+      );
       localStorage.setItem("dedi_quick_notes", JSON.stringify(
-        notes.map((n) => ({
-          id: n.id, title: n.title, content: n.content ?? "",
-          category: n.category, createdAt: n.created_at, updatedAt: n.updated_at,
-        }))
+        notes.map((n) => {
+          const local = reminderMap.get(n.id);
+          return {
+            id: n.id, title: n.title, content: n.content ?? "",
+            category: n.category, createdAt: n.created_at, updatedAt: n.updated_at,
+            /* Cloud columns (when added) take precedence; fall back to local copy */
+            reminderDate:    (n as Record<string, unknown>).reminder_date    ?? local?.reminderDate    ?? undefined,
+            reminderEnabled: (n as Record<string, unknown>).reminder_enabled ?? local?.reminderEnabled ?? undefined,
+          };
+        })
       ));
       wrote = true;
     }
