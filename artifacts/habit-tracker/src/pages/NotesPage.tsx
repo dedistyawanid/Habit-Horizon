@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Trash2, BookOpen, ExternalLink, Bell, FilePlus, ArrowUpDown } from "lucide-react";
+import { Plus, Search, Trash2, BookOpen, ExternalLink, Bell, FilePlus, ArrowUpDown, LayoutGrid, List } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { QuickNote } from "@/types/notes";
 import { NoteEditor } from "@/components/NoteEditor";
@@ -57,6 +57,7 @@ export default function NotesPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("latest");
   const [sortOpen, setSortOpen] = useState(false);
+  const [notesView, setNotesView] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -158,6 +159,24 @@ export default function NotesPage() {
             <p className="text-xs text-gray-400 mt-0.5">{notes.length} {notes.length === 1 ? "doc" : "docs"}</p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Layout toggle */}
+            <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setNotesView("grid")}
+                className={cn("px-2.5 py-2 transition-colors", notesView === "grid" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+                title="Grid view"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setNotesView("list")}
+                className={cn("px-2.5 py-2 transition-colors", notesView === "list" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+                title="List view"
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {/* Sort dropdown */}
             <div className="relative">
               <button
@@ -233,7 +252,7 @@ export default function NotesPage() {
           })}
         </div>
 
-        {/* Notes grid */}
+        {/* Notes grid / list */}
         {filtered.length === 0 ? (
           <div className="text-center py-16 space-y-3">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
@@ -253,44 +272,71 @@ export default function NotesPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn(notesView === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-2.5")}>
             {filtered.map((note) => {
               const color = getCatColor(note.category);
               const preview = getPreview(note.content);
               const title = note.title || "Untitled";
+              const isList = notesView === "list";
               return (
                 <div
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group bg-white dark:bg-gray-900 p-3.5 transition-all duration-200 cursor-pointer flex flex-col gap-2 relative min-h-[110px]"
-                  style={{ borderRadius: 24, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}
+                  className={cn(
+                    "group bg-white dark:bg-gray-900 transition-all duration-200 cursor-pointer relative",
+                    isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
+                  )}
+                  style={{ borderRadius: 20, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}
                 >
-                  {/* Color accent bar */}
-                  <div
-                    className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
+                  {/* List view: left icon */}
+                  {isList && (
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}22` }}>
+                      <BookOpen className="w-3.5 h-3.5" style={{ color }} />
+                    </div>
+                  )}
 
-                  <div className="pl-3 flex-1 flex flex-col gap-1.5 min-w-0">
-                    {/* Title */}
-                    <h3 className="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">
-                      {title}
-                    </h3>
+                  {/* Content */}
+                  <div className={cn("flex-1 min-w-0", isList ? "flex items-center gap-3" : "flex flex-col gap-1.5")}>
+                    <div className={cn("min-w-0", isList ? "flex-1" : "")}>
+                      {/* Title */}
+                      <h3 className={cn(
+                        "font-bold text-gray-800 dark:text-gray-100 leading-snug",
+                        isList ? "text-sm truncate" : "text-sm line-clamp-2"
+                      )}>
+                        {title}
+                      </h3>
 
-                    {/* Snippet */}
-                    {preview && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1">
-                        {preview}
-                      </p>
-                    )}
+                      {/* Snippet — hide in list if too many chars */}
+                      {preview && !isList && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1 mt-0.5">
+                          {preview}
+                        </p>
+                      )}
+                      {preview && isList && (
+                        <p className="text-xs text-gray-400 truncate leading-relaxed mt-0.5">
+                          {preview}
+                        </p>
+                      )}
+                    </div>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between mt-auto pt-1">
-                      <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>
-                      <div className="flex items-center gap-1">
+                    {/* Footer — timestamp + category pill + icons */}
+                    <div className={cn(
+                      "flex items-center gap-1.5 shrink-0",
+                      isList ? "ml-auto" : "mt-auto pt-1 justify-between"
+                    )}>
+                      {!isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        {/* Category pill */}
+                        <span
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md leading-none"
+                          style={{ backgroundColor: `${color}22`, color }}
+                        >
+                          {note.category}
+                        </span>
+                        {isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}
                         {note.reminderEnabled && note.reminderDate && (
-                          <Bell className="w-2.5 h-2.5 text-amber-400" />
+                          <Bell className="w-2.5 h-2.5 text-amber-400 shrink-0" />
                         )}
                         {note.url && (
                           <a
@@ -300,7 +346,7 @@ export default function NotesPage() {
                             onClick={(e) => e.stopPropagation()}
                             title={getHostname(note.url)}
                           >
-                            <ExternalLink className="w-2.5 h-2.5 text-primary" />
+                            <ExternalLink className="w-2.5 h-2.5 text-primary shrink-0" />
                           </a>
                         )}
                       </div>

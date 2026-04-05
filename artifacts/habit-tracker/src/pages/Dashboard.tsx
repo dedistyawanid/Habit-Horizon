@@ -106,7 +106,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               <span className="text-primary/70 font-medium">{hijriStr}</span>
             </p>
           </div>
-          <div className="shrink-0 flex flex-col items-end gap-2 mt-1">
+          <div className="shrink-0 mt-1">
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -120,14 +120,6 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                 data-testid="avatar-initials"
               >
                 {initials}
-              </div>
-            )}
-            {totalToday > 0 && (
-              <div className="text-right">
-                <span className="text-xl font-black text-gray-800 dark:text-gray-100" data-testid="today-stats">
-                  {todayDone}
-                </span>
-                <span className="text-sm text-gray-400">/{totalToday}</span>
               </div>
             )}
           </div>
