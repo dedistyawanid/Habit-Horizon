@@ -7,7 +7,6 @@ import { AppProvider } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
-import { QuickNoteModal } from "@/components/QuickNoteModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSwipeNav } from "@/hooks/useSwipeNav";
 import NotFound from "@/pages/not-found";
@@ -53,9 +52,7 @@ function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => v
 
 function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
-  const { addNote } = useApp();
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [, setLocation] = useLocation();
 
@@ -101,19 +98,13 @@ function AppShell() {
 
       {/* Multi-action FAB */}
       <MultiFAB
-        onNewNote={() => setNoteModalOpen(true)}
-        onNewFinance={() => { setLocation("/finance?new=1"); }}
+        onNewNote={() => setLocation("/notes?new=1")}
+        onNewFinance={() => setLocation("/finance?new=1")}
         onQuickCheckin={() => setCheckinModalOpen(true)}
       />
 
       {/* Modals */}
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <QuickNoteModal
-        open={noteModalOpen}
-        onClose={() => setNoteModalOpen(false)}
-        onSubmit={addNote}
-        mode="add"
-      />
       <QuickCheckinDialog open={checkinModalOpen} onClose={() => setCheckinModalOpen(false)} />
     </div>
   );

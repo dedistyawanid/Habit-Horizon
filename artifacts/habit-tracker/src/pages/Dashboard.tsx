@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Plus, LayoutGrid, List, SlidersHorizontal, TrendingUp, AlertCircle, Quote, Target, Bell } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
@@ -35,7 +36,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
   const [sortBy, setSortBy] = useState<SortOption>("created");
   const [searchQuery, setSearchQuery] = useState("");
   const [recapHabit, setRecapHabit] = useState<HabitWithStats | null>(null);
-  const [noteDetailId, setNoteDetailId] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   const greeting = getGreeting();
   const quote = getMotivationQuote();
@@ -85,8 +86,6 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
       setEditingHabit(null);
     }
   }
-
-  const noteInDetail = notes.find((n) => n.id === noteDetailId);
 
   return (
     <div className="min-h-screen">
@@ -164,7 +163,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               {todayReminders.map((note) => (
                 <button
                   key={note.id}
-                  onClick={() => setNoteDetailId(note.id)}
+                  onClick={() => setLocation(`/notes?open=${note.id}`)}
                   className="w-full text-left bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-3 hover:shadow-sm transition-all"
                 >
                   <p className="text-sm font-medium text-amber-800 dark:text-amber-200 truncate">{note.title}</p>
@@ -333,29 +332,6 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Note reminder detail */}
-      <Dialog open={!!noteDetailId} onOpenChange={() => setNoteDetailId(null)}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="truncate">{noteInDetail?.title}</DialogTitle>
-          </DialogHeader>
-          {noteInDetail && (
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{noteInDetail.content}</p>
-              {noteInDetail.url && (
-                <a
-                  href={noteInDetail.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary underline break-all"
-                >
-                  {noteInDetail.url}
-                </a>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
