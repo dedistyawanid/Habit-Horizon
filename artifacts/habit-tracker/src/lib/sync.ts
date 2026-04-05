@@ -92,13 +92,22 @@ async function del(table: string, id: string) {
   } catch { enqueue({ table, op: "delete", id, ts: Date.now() }); }
 }
 
+/* ─── Helpers ─────────────────────────────────────────────── */
+const num = (v: unknown): number | null => {
+  const n = Number(v);
+  return isNaN(n) ? null : n;
+};
+
 /* ─── Habits ─────────────────────────────────────────────── */
 export function syncHabit(h: { id: string; name: string; category?: string; frequency?: string; color?: string; icon?: string; createdAt?: string; weeklyStreakTarget?: number; targetDays?: number[] }) {
   return upsert("habits", {
-    id: h.id, user_id: getUserId(), name: h.name, category: h.category ?? null,
-    frequency: h.frequency ?? "Daily", color: h.color ?? null, icon: h.icon ?? null,
+    id: h.id, user_id: getUserId(), name: h.name,
+    category: h.category ?? null,
+    frequency: h.frequency ?? "Daily",
+    color: h.color ?? null,
+    icon: h.icon ?? null,
     created_at: h.createdAt ?? new Date().toISOString(),
-    weekly_streak_target: h.weeklyStreakTarget ?? null,
+    weekly_streak_target: num(h.weeklyStreakTarget),
     target_days: h.targetDays ? JSON.stringify(h.targetDays) : null,
   });
 }
@@ -116,9 +125,12 @@ export function deleteCheckIn(id: string) { return del("checkins", id); }
 export function syncActivity(e: { id: string; date: string; type: string; durationMin?: number; distanceKm?: number; elevationGain?: number; runType?: string; notes?: string; createdAt?: string }) {
   return upsert("health_logs", {
     id: e.id, user_id: getUserId(), date: e.date, type: e.type,
-    duration_min: e.durationMin ?? null, distance_km: e.distanceKm ?? null,
-    elevation_gain: e.elevationGain ?? null, run_type: e.runType ?? null,
-    notes: e.notes ?? null, created_at: e.createdAt ?? new Date().toISOString(),
+    duration_min:   num(e.durationMin),
+    distance_km:    num(e.distanceKm),
+    elevation_gain: num(e.elevationGain),
+    run_type:       e.runType ?? null,
+    notes:          e.notes ?? null,
+    created_at:     e.createdAt ?? new Date().toISOString(),
   });
 }
 export function deleteActivity(id: string) { return del("health_logs", id); }
@@ -127,7 +139,9 @@ export function deleteActivity(id: string) { return del("health_logs", id); }
 export function syncMeal(e: { id: string; date: string; name: string; calories: number; protein: number; carbs?: number; createdAt?: string }) {
   return upsert("nutrition_logs", {
     id: e.id, user_id: getUserId(), date: e.date, name: e.name,
-    calories: e.calories, protein: e.protein, carbs: e.carbs ?? 0,
+    calories: num(e.calories) ?? 0,
+    protein:  num(e.protein)  ?? 0,
+    carbs:    num(e.carbs)    ?? 0,
     created_at: e.createdAt ?? new Date().toISOString(),
   });
 }
@@ -136,8 +150,11 @@ export function deleteMeal(id: string) { return del("nutrition_logs", id); }
 /* ─── Sleep ──────────────────────────────────────────────── */
 export function syncSleep(e: { id: string; date: string; hours: number; minutes: number; quality: number; createdAt?: string }) {
   return upsert("sleep_logs", {
-    id: e.id, user_id: getUserId(), date: e.date, hours: e.hours,
-    minutes: e.minutes, quality: e.quality, created_at: e.createdAt ?? new Date().toISOString(),
+    id: e.id, user_id: getUserId(), date: e.date,
+    hours:   num(e.hours)   ?? 0,
+    minutes: num(e.minutes) ?? 0,
+    quality: num(e.quality) ?? 0,
+    created_at: e.createdAt ?? new Date().toISOString(),
   });
 }
 export function deleteSleep(id: string) { return del("sleep_logs", id); }
@@ -145,7 +162,8 @@ export function deleteSleep(id: string) { return del("sleep_logs", id); }
 /* ─── Weight ─────────────────────────────────────────────── */
 export function syncWeight(e: { id: string; date: string; weight: number }) {
   return upsert("weight_logs", {
-    id: e.id, user_id: getUserId(), date: e.date, weight: e.weight,
+    id: e.id, user_id: getUserId(), date: e.date,
+    weight: num(e.weight) ?? 0,
     created_at: new Date().toISOString(),
   });
 }
@@ -202,11 +220,14 @@ export async function forcePushAll(): Promise<PushResult[]> {
   /* habits */
   const habits = JSON.parse(localStorage.getItem("dedi_habits") ?? "[]");
   await pushBatch("habits", habits.map((h: Record<string, unknown>) => ({
-    id: h.id, user_id: uid, name: h.name, category: h.category ?? null,
-    frequency: h.frequency ?? "Daily", color: h.color ?? null, icon: h.icon ?? null,
-    created_at: h.createdAt ?? new Date().toISOString(),
-    weekly_streak_target: h.weeklyStreakTarget ?? null,
-    target_days: h.targetDays ? JSON.stringify(h.targetDays) : null,
+    id: h.id, user_id: uid, name: h.name,
+    category:             h.category ?? null,
+    frequency:            h.frequency ?? "Daily",
+    color:                h.color ?? null,
+    icon:                 h.icon ?? null,
+    created_at:           h.createdAt ?? new Date().toISOString(),
+    weekly_streak_target: num(h.weeklyStreakTarget),
+    target_days:          Array.isArray(h.targetDays) ? JSON.stringify(h.targetDays) : null,
   })));
 
   /* checkins */
@@ -220,39 +241,50 @@ export async function forcePushAll(): Promise<PushResult[]> {
   const acts = JSON.parse(localStorage.getItem("dedi_activity_log") ?? "[]");
   await pushBatch("health_logs", acts.map((a: Record<string, unknown>) => ({
     id: a.id, user_id: uid, date: a.date, type: a.type,
-    duration_min: a.durationMin ?? null, distance_km: a.distanceKm ?? null,
-    elevation_gain: a.elevationGain ?? null, run_type: a.runType ?? null,
-    notes: a.notes ?? null, created_at: a.createdAt ?? new Date().toISOString(),
+    duration_min:   num(a.durationMin),
+    distance_km:    num(a.distanceKm),
+    elevation_gain: num(a.elevationGain),
+    run_type:       a.runType ?? null,
+    notes:          a.notes ?? null,
+    created_at:     a.createdAt ?? new Date().toISOString(),
   })));
 
   /* nutrition_logs */
   const meals = JSON.parse(localStorage.getItem("dedi_nutrition_log") ?? "[]");
   await pushBatch("nutrition_logs", meals.map((m: Record<string, unknown>) => ({
     id: m.id, user_id: uid, date: m.date, name: m.name,
-    calories: m.calories, protein: m.protein, carbs: m.carbs ?? 0,
+    calories:   num(m.calories) ?? 0,
+    protein:    num(m.protein)  ?? 0,
+    carbs:      num(m.carbs)    ?? 0,
     created_at: m.createdAt ?? new Date().toISOString(),
   })));
 
   /* sleep_logs */
   const sleeps = JSON.parse(localStorage.getItem("dedi_sleep_log") ?? "[]");
   await pushBatch("sleep_logs", sleeps.map((s: Record<string, unknown>) => ({
-    id: s.id, user_id: uid, date: s.date, hours: s.hours,
-    minutes: s.minutes ?? 0, quality: s.quality, created_at: s.createdAt ?? new Date().toISOString(),
+    id: s.id, user_id: uid, date: s.date,
+    hours:      num(s.hours)   ?? 0,
+    minutes:    num(s.minutes) ?? 0,
+    quality:    num(s.quality) ?? 0,
+    created_at: s.createdAt ?? new Date().toISOString(),
   })));
 
   /* weight_logs */
   const weights = JSON.parse(localStorage.getItem("dedi_weight_log") ?? "[]");
   await pushBatch("weight_logs", weights.map((w: Record<string, unknown>) => ({
-    id: w.id, user_id: uid, date: w.date, weight: w.weight,
+    id: w.id, user_id: uid, date: w.date,
+    weight:     num(w.weight) ?? 0,
     created_at: new Date().toISOString(),
   })));
 
   /* finance_logs */
   const txns = JSON.parse(localStorage.getItem("dedi_transactions") ?? "[]");
   await pushBatch("finance_logs", txns.map((t: Record<string, unknown>) => ({
-    id: t.id, user_id: uid, type: t.type, amount: t.amount,
-    category: t.category ?? null, date: t.date,
-    note: (t.note ?? t.notes ?? t.title ?? null) as string | null,
+    id: t.id, user_id: uid, type: t.type,
+    amount:     num(t.amount) ?? 0,
+    category:   t.category ?? null,
+    date:       t.date,
+    note:       (t.note ?? t.notes ?? t.title ?? null) as string | null,
     created_at: t.createdAt ?? new Date().toISOString(),
   })));
 
@@ -260,7 +292,7 @@ export async function forcePushAll(): Promise<PushResult[]> {
   const notes = JSON.parse(localStorage.getItem("dedi_quick_notes") ?? "[]");
   await pushBatch("notes", notes.map((n: Record<string, unknown>) => ({
     id: n.id, user_id: uid, title: n.title, content: n.content ?? null,
-    category: n.category ?? null,
+    category:   n.category ?? null,
     created_at: n.createdAt ?? new Date().toISOString(),
     updated_at: n.updatedAt ?? new Date().toISOString(),
   })));
