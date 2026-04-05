@@ -14,6 +14,7 @@ import Dashboard from "@/pages/Dashboard";
 import NotesPage from "@/pages/NotesPage";
 import InsightsPage from "@/pages/InsightsPage";
 import FinancePage from "@/pages/FinancePage";
+import HealthPage from "@/pages/HealthPage";
 import { Settings } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
@@ -88,6 +89,7 @@ function AppShell() {
           <Route path="/" component={Dashboard} />
           <Route path="/insights" component={InsightsPage} />
           <Route path="/finance" component={FinancePage} />
+          <Route path="/health" component={HealthPage} />
           <Route path="/notes" component={NotesPage} />
           <Route component={NotFound} />
         </Switch>

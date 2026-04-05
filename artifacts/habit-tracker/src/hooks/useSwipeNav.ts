@@ -1,7 +1,7 @@
 import { useRef, useCallback, useState } from "react";
 import { useLocation } from "wouter";
 
-const TAB_ORDER = ["/", "/insights", "/finance", "/notes"];
+const TAB_ORDER = ["/", "/insights", "/finance", "/health", "/notes"];
 const SWIPE_THRESHOLD = 60;
 const SWIPE_TIME_LIMIT = 400;
 

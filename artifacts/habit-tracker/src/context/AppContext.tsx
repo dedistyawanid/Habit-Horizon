@@ -4,11 +4,13 @@ import { useNotes } from "@/hooks/useNotes";
 import { useHabits } from "@/hooks/useHabits";
 import { useFinance } from "@/hooks/useFinance";
 import { useWeightLog } from "@/hooks/useWeightLog";
+import { useActivityLog } from "@/hooks/useActivityLog";
 import { AppSettings } from "@/types/settings";
 import { QuickNote } from "@/types/notes";
 import { Habit, CheckIn, HabitWithStats } from "@/types/habit";
 import { Transaction, FinanceSettings } from "@/types/finance";
 import { WeightEntry } from "@/hooks/useWeightLog";
+import { ActivityEntry } from "@/hooks/useActivityLog";
 
 interface AppContextType {
   // Settings
@@ -57,6 +59,10 @@ interface AppContextType {
   addWeightEntry: (weight: number, notes?: string, date?: string) => void;
   deleteWeightEntry: (id: string) => void;
   latestWeight: number | null;
+  // Activity log
+  activityLog: ActivityEntry[];
+  addActivityEntry: (entry: Omit<ActivityEntry, "id" | "createdAt">) => ActivityEntry;
+  deleteActivityEntry: (id: string) => void;
   // Import
   importData: (data: {
     habits?: Habit[];
@@ -66,6 +72,7 @@ interface AppContextType {
     transactions?: Transaction[];
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
+    activityLog?: ActivityEntry[];
   }) => void;
 }
 
@@ -77,6 +84,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const habitsHook = useHabits();
   const financeHook = useFinance();
   const weightHook = useWeightLog();
+  const activityHook = useActivityLog();
 
   function importData(data: {
     habits?: Habit[];
@@ -86,6 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     transactions?: Transaction[];
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
+    activityLog?: ActivityEntry[];
   }) {
     if (data.habits) localStorage.setItem("dedi_habits", JSON.stringify(data.habits));
     if (data.checkIns) localStorage.setItem("dedi_checkins", JSON.stringify(data.checkIns));
@@ -94,6 +103,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (data.transactions) localStorage.setItem("dedi_transactions", JSON.stringify(data.transactions));
     if (data.financeSettings) localStorage.setItem("dedi_finance_settings", JSON.stringify(data.financeSettings));
     if (data.weightLog) localStorage.setItem("dedi_weight_log", JSON.stringify(data.weightLog));
+    if (data.activityLog) localStorage.setItem("dedi_activity_log", JSON.stringify(data.activityLog));
     window.location.reload();
   }
 
@@ -105,6 +115,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...habitsHook,
         ...financeHook,
         ...weightHook,
+        ...activityHook,
         importData,
       }}
     >

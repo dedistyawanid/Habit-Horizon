@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, BarChart2, Wallet, BookOpen } from "lucide-react";
+import { LayoutDashboard, BarChart2, Wallet, BookOpen, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Habits", icon: LayoutDashboard },
   { href: "/insights", label: "Insights", icon: BarChart2 },
   { href: "/finance", label: "Finance", icon: Wallet },
+  { href: "/health", label: "Health", icon: Heart },
   { href: "/notes", label: "Notes", icon: BookOpen },
 ];
 

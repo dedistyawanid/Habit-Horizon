@@ -39,19 +39,19 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Dashboard**: Personalized greeting, Hijri+Gregorian date display, today's reminders, habit list, performance stats
 - **Habits**: CRUD with category/frequency/description/monthly target/weekly streak target; daily check-in toggle; confetti + fire icon on milestones
 - **Habit History**: Calendar heatmap + bar chart (week-by-week breakdown) + key stats per habit
-- **Bottom Navigation**: Fixed bottom nav with 4 tabs (Habits, Insights, Finance, Notes)
+- **Bottom Navigation**: Fixed bottom nav with 5 tabs (Habits, Insights, Finance, Health, Notes)
 - **Multi-action FAB**: Opens sub-menu with New Note, Finance Entry (navigates to Finance + auto-opens form), Quick Check-in
 - **Swipe Gestures**: Swipe left/right on page content to switch tabs; visual bounce feedback on tab switch
 - **Notes**: Full CRUD, markdown toolbar (Bold, Italic, List), full-screen writing mode, markdown preview in fullscreen, URL reference preview, reminder system (date picker + dashboard reminders section)
 - **Finance Tracker**: Income/expense transactions, BCA/GoPay/etc account source, category filter, annual revenue target (default 1B IDR, editable in Settings > Data), cumulative chart
 - **Insights**: Habit analytics, 3d/7d/30d/12m filters, per-habit breakdown
-- **Weight Log**: Track weight over time with recharts line chart
+- **Health Tab** (`/health`): Weight Log (input + area chart + history), Activity Log (Running/Badminton/Gym with km+min fields), auto-checks matching exercise habits on activity log
 - **Settings**:
   - Profile: name, weight, height, mission, avatar upload
   - Appearance: Light/Dark/System theme, 5 accent color presets (Sage Green default, Violet, Ocean, Sunset, Midnight), date format (DD/MM/YYYY etc.)
   - Categories: Add/rename/delete habit and note categories
-  - Data: Edit annual revenue target, export JSON (full backup incl. finance+weight), export CSV, import JSON
-- **Data Integrity**: All data (habits, check-ins, notes, transactions, financeSettings, weightLog, settings) saved to LocalStorage and included in export/import
+  - Data: Edit annual revenue target, export JSON v3.1 (full backup incl. finance+weight+activity), export CSV, import JSON
+- **Data Integrity**: All data (habits, check-ins, notes, transactions, financeSettings, weightLog, activityLog, settings) saved to LocalStorage and included in export/import v3.1
 
 #### Key Files
 - `src/App.tsx` — App shell, routing, header, swipe gestures, modals
@@ -62,7 +62,10 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `src/components/MonthlyRecap.tsx` — Calendar + bar chart + stats per habit
 - `src/components/QuickNoteModal.tsx` — Note editor with markdown, full-screen mode, reminder
 - `src/components/SettingsModal.tsx` — Settings with accent gallery, annual target editor
-- `src/hooks/useSwipeNav.ts` — Touch swipe detection for tab navigation
+- `src/hooks/useWeightLog.ts` — Weight entry LocalStorage hook (LS key: dedi_weight_log)
+- `src/hooks/useActivityLog.ts` — Activity log LocalStorage hook (LS key: dedi_activity_log)
+- `src/pages/HealthPage.tsx` — Health tab with weight chart + activity log + auto-habit check-in
+- `src/hooks/useSwipeNav.ts` — Touch swipe detection for tab navigation (5 tabs)
 - `src/lib/hijriDate.ts` — Hijri calendar conversion utility
 - `src/lib/exportUtils.ts` — JSON/CSV export (all data points)
 - `src/types/settings.ts` — Theme presets (forest=Sage Green as default)

@@ -3,6 +3,7 @@ import { QuickNote } from "@/types/notes";
 import { AppSettings } from "@/types/settings";
 import { Transaction, FinanceSettings } from "@/types/finance";
 import { WeightEntry } from "@/hooks/useWeightLog";
+import { ActivityEntry } from "@/hooks/useActivityLog";
 
 export function exportAsJSON(
   habits: Habit[],
@@ -11,11 +12,12 @@ export function exportAsJSON(
   settings: AppSettings,
   transactions: Transaction[],
   financeSettings: FinanceSettings,
-  weightLog: WeightEntry[]
+  weightLog: WeightEntry[],
+  activityLog: ActivityEntry[]
 ) {
   const data = {
     exportedAt: new Date().toISOString(),
-    version: "3.0",
+    version: "3.1",
     habits,
     checkIns,
     notes,
@@ -23,6 +25,7 @@ export function exportAsJSON(
     transactions,
     financeSettings,
     weightLog,
+    activityLog,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   downloadBlob(blob, `habit-tracker-backup-${getTodayKey()}.json`);
@@ -64,6 +67,7 @@ export type ImportResult = {
     transactions?: Transaction[];
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
+    activityLog?: ActivityEntry[];
   };
 };
 
@@ -84,6 +88,7 @@ export function parseImportFile(json: string): ImportResult {
         transactions: Array.isArray(parsed.transactions) ? parsed.transactions : undefined,
         financeSettings: parsed.financeSettings || undefined,
         weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : undefined,
+        activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : undefined,
       },
     };
   } catch {
