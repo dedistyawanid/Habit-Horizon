@@ -404,6 +404,27 @@
   .dark .period-toggle-btn           { color: hsl(38 16% 70%); }  /* Muted Beige */
   .dark .period-toggle-btn.is-active { color: hsl(46 30% 93%); }  /* Off-White/Cream */
 
+  /* ── Health sub-tab sticky bar ──────────────────────── */
+  .health-subtab-sticky {
+    background: rgba(250, 249, 246, 0.90);
+  }
+  .dark .health-subtab-sticky {
+    background: rgba(22, 24, 25, 0.92);   /* #161819 at 92% */
+  }
+
+  /* ── Sleep Debt card backgrounds (state-aware) ───────── */
+  .sleep-debt-good,
+  .sleep-debt-warn,
+  .sleep-debt-bad  { border: 1px solid transparent; }
+
+  .sleep-debt-good { background: #F0F4EC; border-color: rgba(92,  124, 108, 0.40); }
+  .sleep-debt-warn { background: #FDF8E8; border-color: rgba(184, 134,  11, 0.40); }
+  .sleep-debt-bad  { background: #FDF2F0; border-color: rgba(226, 114,  91, 0.40); }
+
+  .dark .sleep-debt-good { background: rgba(92,  124, 108, 0.14); border-color: rgba(92,  124, 108, 0.35); }
+  .dark .sleep-debt-warn { background: rgba(184, 134,  11, 0.10); border-color: rgba(184, 134,  11, 0.30); }
+  .dark .sleep-debt-bad  { background: rgba(226, 114,  91, 0.10); border-color: rgba(226, 114,  91, 0.30); }
+
   /* ── Date range custom inputs (Health toggles) ─────── */
   .dark .date-range-input {
     background-color: hsl(30 7% 15%);

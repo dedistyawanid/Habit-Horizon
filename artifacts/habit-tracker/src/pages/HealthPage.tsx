@@ -22,7 +22,7 @@ import { useSleepLog } from "@/hooks/useSleepLog";
 const PRIMARY_TYPES = [
   { id: "Running",   label: "Running",   icon: Wind,    color: "#5c7c6c" },
   { id: "Badminton", label: "Badminton", icon: Activity, color: "#B8860B" },
-  { id: "Workout",   label: "Workout",   icon: Dumbbell, color: "#4A4A4A" },
+  { id: "Workout",   label: "Workout",   icon: Dumbbell, color: "#9C8B7A" },
 ];
 const OTHER_TYPE = { id: "Other", label: "Other", icon: Zap, color: "#9C8B7A" };
 const ALL_TYPES  = [...PRIMARY_TYPES, OTHER_TYPE];
@@ -383,8 +383,8 @@ export default function HealthPage() {
 
         {/* ─── SUB-TAB PILLS (sticky) ─── */}
         <div
-          className="sticky top-16 z-20 py-2 -mx-4 px-4"
-          style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", background: "rgba(250,249,246,0.90)" }}
+          className="health-subtab-sticky sticky top-16 z-20 py-2 -mx-4 px-4"
+          style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }}
         >
           <div className="flex gap-1.5">
             {([
@@ -1232,11 +1232,8 @@ export default function HealthPage() {
             {/* ─── Sleep Debt Card ─── */}
             {weekSleepAvg !== null && (
               <div
-                className="p-4 space-y-2"
-                style={{
-                  borderRadius: 28, border: "1px solid #E5E0D8",
-                  background: weekSleepAvg >= sleepTarget ? "#F0F4EC" : weekSleepAvg >= sleepTarget * 0.8 ? "#FDF8E8" : "#FDF2F0",
-                }}
+                className={cn("p-4 space-y-2", weekSleepAvg >= sleepTarget ? "sleep-debt-good" : weekSleepAvg >= sleepTarget * 0.8 ? "sleep-debt-warn" : "sleep-debt-bad")}
+                style={{ borderRadius: 28 }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
