@@ -307,6 +307,7 @@ export default function HealthPage() {
     if (isNaN(cal) || cal < 0) { toast({ title: "Invalid calories", variant: "destructive" }); return; }
     addMeal({ date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
     setMealName(""); setMealCal(""); setMealProt(""); setMealCarbs("");
+    setMealDate(todayKey);
     setShowMeal(false);
     toast({ title: "Meal logged!", description: `${mealName.trim()} — ${cal} kcal` });
   }
@@ -862,7 +863,10 @@ export default function HealthPage() {
             {/* 3 Progress Rings */}
             <div className="bg-white dark:bg-card p-5" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Today's Targets</p>
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Today's Targets</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
+                </div>
                 <button
                   onClick={() => { setNutrCalGoal(String(targets.calories)); setNutrProtGoal(String(targets.protein)); setNutrCarbsGoal(String(targets.carbs)); setShowNutrTargets(true); }}
                   className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-all"
