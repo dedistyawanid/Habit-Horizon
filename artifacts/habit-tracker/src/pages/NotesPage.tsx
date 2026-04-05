@@ -297,7 +297,7 @@ export default function NotesPage() {
                     "group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/60 transition-all duration-200 cursor-pointer relative",
                     isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
                   )}
-                  style={{ borderRadius: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}
+                  style={{ borderRadius: 28, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}
                 >
                   {/* List view: left icon */}
                   {isList && (

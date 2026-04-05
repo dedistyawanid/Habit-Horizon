@@ -125,7 +125,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         </div>
 
         {/* Mission + Quote */}
-        <div className="bg-white dark:bg-gray-900 p-4 space-y-2" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white dark:bg-gray-900 p-4 space-y-2" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
           {profile.mission && (
             <div className="flex gap-2 items-center">
               <Target className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -188,7 +188,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         {habitsWithStats.length > 0 && (topPerforming || needsAttention) && (
           <div className="grid grid-cols-2 gap-3">
             {topPerforming && (
-              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Top Habit</p>
@@ -200,7 +200,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               </div>
             )}
             {needsAttention && needsAttention.id !== topPerforming?.id && (
-              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                   <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Needs Work</p>
