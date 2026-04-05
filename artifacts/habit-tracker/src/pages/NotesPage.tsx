@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Trash2, BookOpen, ExternalLink, Bell, FilePlus, ArrowUpDown, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, Trash2, BookOpen, ExternalLink, Bell, FilePlus, ArrowUpDown, LayoutGrid, List, Tag } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { QuickNote } from "@/types/notes";
 import { NoteEditor } from "@/components/NoteEditor";
+import { CategoryManager } from "@/components/CategoryManager";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const CAT_COLORS: Record<string, string> = {
@@ -50,7 +50,7 @@ const SORT_LABELS: Record<SortMode, string> = {
 };
 
 export default function NotesPage() {
-  const { notes, addNote, updateNote, deleteNote, settings } = useApp();
+  const { notes, addNote, updateNote, deleteNote, settings, addNoteCategory, renameNoteCategory, deleteNoteCategory } = useApp();
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("All");
@@ -58,6 +58,7 @@ export default function NotesPage() {
   const [sortMode, setSortMode] = useState<SortMode>("latest");
   const [sortOpen, setSortOpen] = useState(false);
   const [notesView, setNotesView] = useState<"grid" | "list">("grid");
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -217,16 +218,25 @@ export default function NotesPage() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <Input
-            placeholder="Search notes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 bg-white dark:bg-gray-900 h-9 text-sm rounded-xl"
-            data-testid="input-note-search"
-          />
+        {/* Search + category manager */}
+        <div className="flex gap-2 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Input
+              placeholder="Search notes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 bg-white dark:bg-gray-900 h-9 text-sm rounded-xl"
+              data-testid="input-note-search"
+            />
+          </div>
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            title="Manage note categories"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-primary hover:border-primary/40 transition-all shrink-0"
+          >
+            <Tag className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Category pills */}
@@ -373,6 +383,16 @@ export default function NotesPage() {
           </div>
         )}
       </div>
+
+      <CategoryManager
+        open={showCategoryManager}
+        onClose={() => setShowCategoryManager(false)}
+        title="Note Categories"
+        categories={settings.noteCategories}
+        onAdd={addNoteCategory}
+        onRename={renameNoteCategory}
+        onDelete={deleteNoteCategory}
+      />
     </div>
   );
 }

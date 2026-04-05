@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Plus, LayoutGrid, List, SlidersHorizontal, TrendingUp, AlertCircle, Quote, Target, Bell } from "lucide-react";
+import { Plus, LayoutGrid, List, TrendingUp, AlertCircle, Quote, Target, Bell, Tag } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
 import { HabitForm } from "@/components/HabitForm";
 import { MonthlyRecap } from "@/components/MonthlyRecap";
+import { CategoryManager } from "@/components/CategoryManager";
 import { Habit, HabitWithStats } from "@/types/habit";
 import { getGreeting, getMotivationQuote } from "@/lib/dateUtils";
 import { toHijri, formatHijri } from "@/lib/hijriDate";
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 type SortOption = "name" | "performance" | "created";
@@ -27,6 +27,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
     habitsWithStats, topPerforming, needsAttention,
     addHabit, updateHabit, deleteHabit,
     checkIns, settings, notes,
+    addHabitCategory, renameHabitCategory, deleteHabitCategory,
   } = useApp();
 
   const [view, setView] = useState<"grid" | "list">("list");
@@ -36,6 +37,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
   const [sortBy, setSortBy] = useState<SortOption>("created");
   const [searchQuery, setSearchQuery] = useState("");
   const [recapHabit, setRecapHabit] = useState<HabitWithStats | null>(null);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [, setLocation] = useLocation();
 
   const greeting = getGreeting();
@@ -91,16 +93,13 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
 
-        {/* Big greeting header — reference style */}
+        {/* Greeting header — compact single line */}
         <div className="flex items-start justify-between pt-1">
           <div>
-            <h1 className="text-4xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
-              {greeting.split(" ")[0]}
+            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+              {greeting}, {firstName}
             </h1>
-            <p className="text-3xl font-light text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
-              {greeting.split(" ").slice(1).join(" ") || "there"}
-            </p>
-            <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+            <p className="text-xs text-gray-400 mt-1 leading-relaxed">
               {gregorianStr}
               <span className="mx-1.5 text-gray-300">·</span>
               <span className="text-primary/70 font-medium">{hijriStr}</span>
@@ -254,8 +253,8 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
           </div>
         </div>
 
-        {/* Category pills */}
-        <div className="flex gap-1.5 flex-wrap">
+        {/* Category pills + manage button */}
+        <div className="flex gap-1.5 flex-wrap items-center">
           {allCategories.map((cat) => {
             const count = cat === "All"
               ? habitsWithStats.length
@@ -277,6 +276,13 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               </button>
             );
           })}
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            title="Manage categories"
+            className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-primary hover:border-primary/40 transition-all"
+          >
+            <Tag className="w-3 h-3" />
+          </button>
           <Button
             size="sm"
             className="h-7 px-3 text-xs rounded-full ml-auto gap-1"
@@ -324,6 +330,15 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
       </div>
 
       {/* Modals */}
+      <CategoryManager
+        open={showCategoryManager}
+        onClose={() => setShowCategoryManager(false)}
+        title="Habit Categories"
+        categories={settings.habitCategories}
+        onAdd={addHabitCategory}
+        onRename={renameHabitCategory}
+        onDelete={deleteHabitCategory}
+      />
       <HabitForm open={showForm} onClose={() => setShowForm(false)} onSubmit={addHabit} mode="add" />
       <HabitForm
         open={!!editingHabit}

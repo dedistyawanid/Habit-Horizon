@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette, DollarSign } from "lucide-react";
+import { useRef } from "react";
+import { Moon, Sun, Monitor, Upload, Download, Check, X, User, Scale, Ruler, Target, Image, Palette } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useApp } from "@/context/AppContext";
-import { AppSettings, DateFormat, Theme, THEME_PRESETS, AccentTheme } from "@/types/settings";
+import { DateFormat, Theme, THEME_PRESETS, AccentTheme } from "@/types/settings";
 import { exportAsCSV, exportAsJSON, parseImportFile } from "@/lib/exportUtils";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -25,115 +25,16 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
 
 const DATE_FORMATS: DateFormat[] = ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"];
 
-function CategoryList({
-  categories,
-  onAdd,
-  onRename,
-  onDelete,
-  label,
-}: {
-  categories: string[];
-  onAdd: (name: string) => void;
-  onRename: (oldName: string, newName: string) => void;
-  onDelete: (name: string) => void;
-  label: string;
-}) {
-  const [newCat, setNewCat] = useState("");
-  const [editingCat, setEditingCat] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
-
-  function handleAdd() {
-    const trimmed = newCat.trim();
-    if (!trimmed || categories.includes(trimmed)) return;
-    onAdd(trimmed);
-    setNewCat("");
-  }
-
-  function startEdit(cat: string) {
-    setEditingCat(cat);
-    setEditValue(cat);
-  }
-
-  function commitEdit(cat: string) {
-    const trimmed = editValue.trim();
-    if (trimmed && trimmed !== cat && !categories.includes(trimmed)) {
-      onRename(cat, trimmed);
-    }
-    setEditingCat(null);
-  }
-
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
-      <div className="space-y-1.5">
-        {categories.map((cat) => (
-          <div key={cat} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg px-3 py-2">
-            {editingCat === cat ? (
-              <>
-                <Input
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") commitEdit(cat); if (e.key === "Escape") setEditingCat(null); }}
-                  className="h-6 text-sm flex-1 border-none bg-transparent p-0 focus-visible:ring-0"
-                  autoFocus
-                />
-                <button onClick={() => commitEdit(cat)} className="text-emerald-500 hover:text-emerald-700">
-                  <Check className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => setEditingCat(null)} className="text-gray-400 hover:text-gray-600">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{cat}</span>
-                <button onClick={() => startEdit(cat)} className="text-gray-400 hover:text-gray-600">
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => onDelete(cat)} className="text-gray-400 hover:text-red-500">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <Input
-          placeholder="New category name"
-          value={newCat}
-          onChange={(e) => setNewCat(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
-          className="text-sm"
-        />
-        <Button size="sm" onClick={handleAdd} variant="outline">
-          <Plus className="w-3.5 h-3.5" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function formatIDR(n: number): string {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(n % 1_000_000_000 === 0 ? 0 : 2)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
-  return n.toLocaleString();
-}
-
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { toast } = useToast();
   const {
     settings, updateSettings, updateProfile,
-    addHabitCategory, renameHabitCategory, deleteHabitCategory,
-    addNoteCategory, renameNoteCategory, deleteNoteCategory,
     habits, checkIns, notes, importData,
-    transactions, financeSettings, setFinanceSettings,
-    weightLog, activityLog,
+    transactions, financeSettings, weightLog, activityLog,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const [annualTargetInput, setAnnualTargetInput] = useState<string>("");
 
   function handleExportJSON() {
     exportAsJSON(habits, checkIns, notes, settings, transactions, financeSettings, weightLog, activityLog);
@@ -177,18 +78,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     updateProfile({ avatarUrl: "", avatarType: "initials" });
   }
 
-  function handleSetAnnualTarget() {
-    const raw = annualTargetInput.trim().replace(/[,_]/g, "");
-    const num = Number(raw);
-    if (isNaN(num) || num <= 0) {
-      toast({ title: "Invalid target", description: "Please enter a valid positive number.", variant: "destructive" });
-      return;
-    }
-    setFinanceSettings({ ...financeSettings, annualTarget: num });
-    setAnnualTargetInput("");
-    toast({ title: "Annual target updated", description: `New target: IDR ${formatIDR(num)}` });
-  }
-
   const initials = (settings.profile.fullName || "DS")
     .split(" ")
     .map((n: string) => n[0])
@@ -204,23 +93,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="mt-2">
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
           </TabsList>
 
-          {/* PROFILE TAB */}
+          {/* ── PROFILE TAB ── */}
           <TabsContent value="profile" className="space-y-5 pt-4">
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
                 {settings.profile.avatarUrl ? (
-                  <img
-                    src={settings.profile.avatarUrl}
-                    alt="Avatar"
-                    className="w-20 h-20 rounded-2xl object-cover"
-                  />
+                  <img src={settings.profile.avatarUrl} alt="Avatar" className="w-20 h-20 rounded-2xl object-cover" />
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
                     {initials}
@@ -246,13 +130,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   </Button>
                 )}
               </div>
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
+              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
             </div>
 
             <div className="space-y-3">
@@ -276,8 +154,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <Input
                     value={settings.profile.weight}
                     onChange={(e) => updateProfile({ weight: e.target.value })}
-                    placeholder="e.g. 72"
-                    type="number"
+                    placeholder="e.g. 72" type="number"
                     data-testid="input-weight"
                   />
                 </div>
@@ -288,8 +165,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <Input
                     value={settings.profile.height}
                     onChange={(e) => updateProfile({ height: e.target.value })}
-                    placeholder="e.g. 175"
-                    type="number"
+                    placeholder="e.g. 175" type="number"
                     data-testid="input-height"
                   />
                 </div>
@@ -308,10 +184,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 />
               </div>
             </div>
-
           </TabsContent>
 
-          {/* APPEARANCE TAB */}
+          {/* ── APPEARANCE TAB ── */}
           <TabsContent value="appearance" className="space-y-5 pt-4">
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Theme Mode</p>
@@ -337,8 +212,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5" />
-                Accent Color
+                <Palette className="w-3.5 h-3.5" /> Accent Color
               </p>
               <div className="grid grid-cols-1 gap-2">
                 {THEME_PRESETS.map((preset) => (
@@ -353,10 +227,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                         : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
                     )}
                   >
-                    <div
-                      className="w-8 h-8 rounded-xl shrink-0"
-                      style={{ backgroundColor: preset.previewColor }}
-                    />
+                    <div className="w-8 h-8 rounded-xl shrink-0" style={{ backgroundColor: preset.previewColor }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{preset.name}</p>
                       <p className="text-xs text-gray-400">{preset.description}</p>
@@ -393,67 +264,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
           </TabsContent>
 
-          {/* CATEGORIES TAB */}
-          <TabsContent value="categories" className="space-y-6 pt-4">
-            <CategoryList
-              label="Habit Categories"
-              categories={settings.habitCategories}
-              onAdd={addHabitCategory}
-              onRename={renameHabitCategory}
-              onDelete={deleteHabitCategory}
-            />
-            <div className="border-t border-gray-100 dark:border-gray-800" />
-            <CategoryList
-              label="Note Categories"
-              categories={settings.noteCategories}
-              onAdd={addNoteCategory}
-              onRename={renameNoteCategory}
-              onDelete={deleteNoteCategory}
-            />
-          </TabsContent>
-
-          {/* DATA TAB */}
+          {/* ── DATA TAB ── */}
           <TabsContent value="data" className="space-y-4 pt-4">
-            {/* Annual Revenue Target */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
-              <div>
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-primary" />
-                  Annual Revenue Target
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Current target:{" "}
-                  <span className="font-semibold text-primary">
-                    IDR {financeSettings.annualTarget.toLocaleString()}
-                  </span>
-                  {" "}({formatIDR(financeSettings.annualTarget)})
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="e.g. 2000000000"
-                  value={annualTargetInput}
-                  onChange={(e) => setAnnualTargetInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSetAnnualTarget(); }}
-                  className="text-sm flex-1"
-                  data-testid="input-annual-target"
-                />
-                <Button
-                  onClick={handleSetAnnualTarget}
-                  size="sm"
-                  className="shrink-0"
-                  data-testid="btn-set-annual-target"
-                >
-                  <Check className="w-3.5 h-3.5 mr-1" />
-                  Set
-                </Button>
-              </div>
-              <p className="text-[10px] text-gray-400">
-                Quick amounts: 500M = 500000000 &nbsp;·&nbsp; 1B = 1000000000 &nbsp;·&nbsp; 2B = 2000000000
-              </p>
-            </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Export Data</p>
               <p className="text-xs text-gray-400 mb-3">
@@ -475,21 +287,14 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Import Data</p>
               <p className="text-xs text-gray-400 mb-3">Restore data from a JSON backup file. This will overwrite your current data.</p>
               <Button
-                variant="outline"
-                className="gap-2 w-full border-dashed"
+                variant="outline" className="gap-2 w-full border-dashed"
                 onClick={() => fileInputRef.current?.click()}
                 data-testid="btn-import-data"
               >
                 <Upload className="w-4 h-4" />
                 Choose Backup File (.json)
               </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleImport}
-              />
+              <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-xs text-gray-500 space-y-1">

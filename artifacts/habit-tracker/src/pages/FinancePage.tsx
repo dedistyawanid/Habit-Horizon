@@ -5,7 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import {
-  DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check,
+  DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check, Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +35,14 @@ const EMPTY_FORM = {
 };
 
 export default function FinancePage() {
-  const { transactions, financeSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome } = useApp();
+  const { transactions, financeSettings, setFinanceSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -135,12 +137,62 @@ export default function FinancePage() {
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-primary" />
             <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">Annual Revenue Goal</span>
-            <span className="ml-auto text-xs text-gray-500">{new Date().getFullYear()}</span>
+            <span className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-gray-500">{new Date().getFullYear()}</span>
+              <button
+                onClick={() => { setEditingGoal((v) => !v); setGoalInput(""); }}
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all"
+                title="Edit goal"
+              >
+                {editingGoal ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3 h-3" />}
+              </button>
+            </span>
           </div>
-          <div className="flex items-end justify-between mb-2">
-            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatShort(currentYearIncome)}</span>
-            <span className="text-xs text-gray-500">/ {formatShort(annualTarget)} IDR</span>
-          </div>
+
+          {editingGoal ? (
+            <div className="flex gap-2 mb-3">
+              <input
+                type="number"
+                placeholder={`Current: ${annualTarget.toLocaleString()}`}
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const num = Number(goalInput.trim());
+                    if (!isNaN(num) && num > 0) {
+                      setFinanceSettings({ ...financeSettings, annualTarget: num });
+                      setEditingGoal(false);
+                      setGoalInput("");
+                    }
+                  }
+                  if (e.key === "Escape") setEditingGoal(false);
+                }}
+                className="flex-1 px-3 py-2 rounded-xl border border-primary/30 bg-white/70 dark:bg-gray-800/70 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                autoFocus
+                data-testid="input-annual-target"
+              />
+              <button
+                onClick={() => {
+                  const num = Number(goalInput.trim());
+                  if (!isNaN(num) && num > 0) {
+                    setFinanceSettings({ ...financeSettings, annualTarget: num });
+                    setEditingGoal(false);
+                    setGoalInput("");
+                  }
+                }}
+                className="px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1"
+                data-testid="btn-set-annual-target"
+              >
+                <Check className="w-3.5 h-3.5" /> Set
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-end justify-between mb-2">
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatShort(currentYearIncome)}</span>
+              <span className="text-xs text-gray-500">/ {formatShort(annualTarget)} IDR</span>
+            </div>
+          )}
+
           <div className="h-2.5 bg-white/60 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-700"
