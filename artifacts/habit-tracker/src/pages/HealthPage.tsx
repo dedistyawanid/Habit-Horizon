@@ -330,10 +330,10 @@ export default function HealthPage() {
           </div>
 
           {/* Period filter — sliding pill segmented control */}
-          <div className="flex justify-end mt-2">
+          <div className="flex justify-end" style={{ marginTop: 20 }}>
             <div
               className="relative flex items-center"
-              style={{ background: "#F2F0EB", borderRadius: 28, padding: 3, height: 32, width: 192 }}
+              style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 192 }}
             >
               {/* Sliding white pill */}
               <div
@@ -344,7 +344,7 @@ export default function HealthPage() {
                   width: "calc(33.333% - 2px)",
                   borderRadius: 24,
                   background: "#FFFFFF",
-                  boxShadow: "0 1px 6px rgba(0,0,0,0.10), 0 0.5px 2px rgba(0,0,0,0.06)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.05)",
                   transform: `translateX(calc(${["day","week","month"].indexOf(period)} * 100%))`,
                   transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
                   pointerEvents: "none",
@@ -364,6 +364,7 @@ export default function HealthPage() {
                     transition: "color 0.2s",
                     background: "none",
                     border: "none",
+                    outline: "none",
                     cursor: "pointer",
                     letterSpacing: 0,
                   }}
