@@ -413,42 +413,39 @@ export default function HealthPage() {
           <div style={{ marginTop: 20 }}>
             {subTab === "activity" ? (
               <>
-                {/* Stats (left) + Range toggle (right) in one row — wraps on narrow screens */}
-                <div className="flex items-center flex-wrap gap-2">
-                  {/* ── Left: compact summary stats ── */}
-                  <div className="flex items-center gap-x-6 flex-1 min-w-0">
-                    {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
-                      <>
+                <div className="flex flex-col gap-2.5">
+                  {/* ── Row 1: Summary stats (only for 30D / Month with data) ── */}
+                  {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
+                    <div className="flex items-center gap-x-8">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <div className="leading-none">
+                          <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
+                          <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
+                        </div>
+                      </div>
+                      {stats.elevation > 0 && (
                         <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
                           <div className="leading-none">
-                            <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
-                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
+                            <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
+                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
                           </div>
                         </div>
-                        {stats.elevation > 0 && (
-                          <div className="flex items-center gap-1.5">
-                            <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
-                            <div className="leading-none">
-                              <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
-                              <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1.5">
-                          <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <div className="leading-none">
-                            <p className="text-[13px] font-black text-foreground">
-                              {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
-                          </div>
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <div className="leading-none">
+                          <p className="text-[13px] font-black text-foreground">
+                            {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
                         </div>
-                      </>
-                    )}
-                  </div>
-                  {/* ── Right: range toggle ── */}
-                  <div className="shrink-0">
+                      </div>
+                    </div>
+                  )}
+                  {/* ── Row 2: Range toggle — right-aligned ── */}
+                  <div className="flex justify-end">
                     <div
                       className="period-toggle-wrap"
                       style={{ borderRadius: 28, padding: 3, height: 32, width: 252 }}
