@@ -761,7 +761,7 @@ export default function HealthPage() {
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">All Activity</p>
                 <div className="space-y-2">
-                  {activityLog.slice(0, 15).map((entry) => {
+                  {[...activityLog].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 15).map((entry) => {
                     const info = getTypeInfo(entry.type);
                     const Icon = info.icon;
                     const metricPrimary   = entry.type === "Running" && entry.distanceKm != null ? `${entry.distanceKm} km` : `${entry.durationMin ?? "—"} min`;
@@ -772,7 +772,7 @@ export default function HealthPage() {
                       entry.location || null,
                     ].filter(Boolean).join(" · ");
                     return (
-                      <div key={entry.id} className="group flex items-center gap-3 bg-white px-4 py-3" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                      <div key={entry.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${info.color}1A` }}>
                           <Icon className="w-4 h-4" style={{ color: info.color }} />
                         </div>
@@ -785,7 +785,7 @@ export default function HealthPage() {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                          <button onClick={() => deleteActivityEntry(entry.id)} className="p-1 rounded text-muted-foreground/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => deleteActivityEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
@@ -928,8 +928,8 @@ export default function HealthPage() {
             {todayMeals.length > 0 ? (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Today's Meals</p>
-                {todayMeals.map((meal) => (
-                  <div key={meal.id} className="group flex items-center gap-3 bg-white px-4 py-3" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                {[...todayMeals].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).map((meal) => (
+                  <div key={meal.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                     <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
                       <Utensils className="w-4 h-4 text-primary" />
                     </div>
@@ -941,7 +941,7 @@ export default function HealthPage() {
                         {meal.carbs   > 0  && <span className="text-xs text-muted-foreground">{meal.carbs}g carbs</span>}
                       </div>
                     </div>
-                    <button onClick={() => deleteMeal(meal.id)} className="p-1 rounded text-muted-foreground/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => deleteMeal(meal.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
@@ -1086,8 +1086,8 @@ export default function HealthPage() {
             {weightLog.length > 0 ? (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Weight History</p>
-                {[...weightLog].reverse().slice(0, 10).map((entry) => (
-                  <div key={entry.id} className="group flex items-center justify-between px-4 py-3 bg-white" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                {[...weightLog].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10).map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between px-4 py-3 bg-white transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center">
                         <Scale className="w-3.5 h-3.5 text-primary" />
@@ -1096,7 +1096,7 @@ export default function HealthPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                      <button onClick={() => deleteWeightEntry(entry.id)} className="p-1 rounded text-muted-foreground/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                      <button onClick={() => deleteWeightEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
@@ -1297,11 +1297,11 @@ export default function HealthPage() {
             {sleepLog.length > 0 ? (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Sleep History</p>
-                {sleepLog.slice(0, 14).map((entry) => {
+                {[...sleepLog].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14).map((entry) => {
                   const totalH = entry.hours + entry.minutes / 60;
                   const onTarget = totalH >= sleepTarget;
                   return (
-                    <div key={entry.id} className="group flex items-center gap-3 bg-white px-4 py-3" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                    <div key={entry.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#4A556810" }}>
                         <Moon className="w-4 h-4" style={{ color: "#4A5568" }} />
                       </div>
@@ -1321,7 +1321,7 @@ export default function HealthPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                        <button onClick={() => deleteSleep(entry.id)} className="p-1 rounded text-muted-foreground/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onClick={() => deleteSleep(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>

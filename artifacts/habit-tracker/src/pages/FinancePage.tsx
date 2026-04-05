@@ -58,7 +58,8 @@ export default function FinancePage() {
   const filteredTx = useMemo(() => {
     return transactions
       .filter((t) => filterType === "all" || t.type === filterType)
-      .filter((t) => filterCategory === "all" || t.category === filterCategory);
+      .filter((t) => filterCategory === "all" || t.category === filterCategory)
+      .sort((a, b) => b.date.localeCompare(a.date));
   }, [transactions, filterType, filterCategory]);
 
   const availableCategories = useMemo(() => {
@@ -283,7 +284,11 @@ export default function FinancePage() {
           ) : (
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {filteredTx.map((tx) => (
-                <div key={tx.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                <div
+                  key={tx.id}
+                  onClick={() => startEdit(tx)}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all active:scale-[0.98] cursor-pointer"
+                >
                   <div className={cn(
                     "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
                     tx.type === "income" ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-red-50 dark:bg-red-900/20"
@@ -307,11 +312,17 @@ export default function FinancePage() {
                   )}>
                     {tx.type === "income" ? "+" : "-"}{formatShort(tx.amount)}
                   </p>
-                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEdit(tx)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-primary transition-colors">
+                  <div className="flex gap-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); startEdit(tx); }}
+                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-gray-400/60 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 active:text-primary transition-colors"
+                    >
                       <Edit2 className="w-3 h-3" />
                     </button>
-                    <button onClick={() => deleteTransaction(tx.id)} className="p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteTransaction(tx.id); }}
+                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-gray-400/60 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:text-red-500 transition-colors"
+                    >
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>

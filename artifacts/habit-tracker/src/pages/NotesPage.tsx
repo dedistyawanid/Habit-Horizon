@@ -282,7 +282,7 @@ export default function NotesPage() {
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
                   className={cn(
-                    "group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/60 transition-all duration-200 cursor-pointer relative",
+                    "group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/60 transition-all duration-150 cursor-pointer relative active:scale-[0.98]",
                     isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
                   )}
                   style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}

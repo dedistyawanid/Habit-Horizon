@@ -117,7 +117,7 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
         )}
         <div
           data-testid={`habit-card-${habit.id}`}
-          className="bg-white dark:bg-card px-4 py-3 flex items-center gap-3 transition-all duration-200"
+          className="bg-white dark:bg-card px-4 py-3 flex items-center gap-3 transition-all duration-150 active:scale-[0.98]"
           style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}
         >
           <button
@@ -177,7 +177,7 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
       )}
       <div
         data-testid={`habit-card-${habit.id}`}
-        className="bg-white dark:bg-card p-4 transition-all duration-200"
+        className="bg-white dark:bg-card p-4 transition-all duration-150 active:scale-[0.98]"
         style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}
       >
         <div className="flex items-start justify-between mb-3">
