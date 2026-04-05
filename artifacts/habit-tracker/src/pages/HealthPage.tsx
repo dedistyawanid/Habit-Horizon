@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Scale, Dumbbell, Activity, Trash2, Check, Plus, MapPin, Timer,
   Wind, Heart, Zap, TrendingUp, Mountain, Navigation2, Utensils,
-  Flame, X, Beef, Wheat, Target,
+  Flame, X, Beef, Wheat, Target, Pencil, Settings2,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ export default function HealthPage() {
     activityLog, addActivityEntry, deleteActivityEntry,
     habitsWithStats, isCheckedInToday, toggleCheckIn,
   } = useApp();
-  const { entries: nutritionLog, targets, addEntry: addMeal, deleteEntry: deleteMeal } = useNutritionLog();
+  const { entries: nutritionLog, targets, addEntry: addMeal, deleteEntry: deleteMeal, updateTargets } = useNutritionLog();
   const { toast } = useToast();
 
   /* UI state */
@@ -92,8 +92,24 @@ export default function HealthPage() {
   /* Weight form */
   const [weightInput, setWeightInput] = useState("");
 
-  const todayKey   = new Date().toISOString().split("T")[0];
-  const GOAL_WEIGHT = 60;
+  /* Goal weight — localStorage-persisted */
+  const [goalWeight, setGoalWeight] = useState<number>(() => {
+    try { const v = Number(localStorage.getItem("dedi_goal_weight")); return v > 0 ? v : 60; }
+    catch { return 60; }
+  });
+  useEffect(() => { localStorage.setItem("dedi_goal_weight", String(goalWeight)); }, [goalWeight]);
+
+  /* Goal weight modal */
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [goalInput, setGoalInput]         = useState("");
+
+  /* Nutrition targets modal */
+  const [showNutrTargets, setShowNutrTargets]   = useState(false);
+  const [nutrCalGoal,  setNutrCalGoal]          = useState("");
+  const [nutrProtGoal, setNutrProtGoal]         = useState("");
+  const [nutrCarbsGoal, setNutrCarbsGoal]       = useState("");
+
+  const todayKey = new Date().toISOString().split("T")[0];
 
   /* ── Derived: Activity ── */
   const filteredAct = useMemo(() => filterByPeriod(activityLog, period), [activityLog, period]);
@@ -146,16 +162,16 @@ export default function HealthPage() {
 
   /* ── Derived: Body ── */
   const bodyChartData = useMemo(() =>
-    [...weightLog].slice(-20).map((e) => ({ date: e.date, weight: e.weight, goal: GOAL_WEIGHT })),
-    [weightLog]
+    [...weightLog].slice(-20).map((e) => ({ date: e.date, weight: e.weight, goal: goalWeight })),
+    [weightLog, goalWeight]
   );
   const firstWeight = weightLog.length > 0 ? weightLog[0].weight : null;
   const goalProgress = useMemo(() => {
-    if (latestWeight === null || firstWeight === null || firstWeight === GOAL_WEIGHT) return 0;
-    const total = Math.abs(firstWeight - GOAL_WEIGHT);
+    if (latestWeight === null || firstWeight === null || firstWeight === goalWeight) return 0;
+    const total = Math.abs(firstWeight - goalWeight);
     const done  = Math.abs(firstWeight - latestWeight);
     return Math.min(100, Math.max(0, Math.round((done / total) * 100)));
-  }, [latestWeight, firstWeight]);
+  }, [latestWeight, firstWeight, goalWeight]);
 
   /* ─── Handlers ─── */
   function handleLogActivity() {
@@ -261,22 +277,24 @@ export default function HealthPage() {
             ))}
           </div>
 
-          {/* Period filter — small, below sub-tabs */}
-          <div className="flex gap-1.5 mt-2">
-            {(["day", "week", "month"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={cn(
-                  "flex-1 py-1 rounded-lg text-[11px] font-medium border transition-all",
-                  period === p
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "text-muted-foreground border-accent bg-transparent hover:text-primary"
-                )}
-              >
-                {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
-              </button>
-            ))}
+          {/* Period filter — iOS segmented control */}
+          <div className="flex justify-end mt-2">
+            <div className="flex items-center gap-0 p-0.5 rounded-lg" style={{ background: "#E8E3DA" }}>
+              {(["day", "week", "month"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={cn(
+                    "px-3 py-1 rounded-md text-[11px] font-semibold transition-all duration-200",
+                    period === p
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -529,7 +547,15 @@ export default function HealthPage() {
 
             {/* 3 Progress Rings */}
             <div className="bg-white dark:bg-card p-5" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-4">Today's Targets</p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Today's Targets</p>
+                <button
+                  onClick={() => { setNutrCalGoal(String(targets.calories)); setNutrProtGoal(String(targets.protein)); setNutrCarbsGoal(String(targets.carbs)); setShowNutrTargets(true); }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-all"
+                >
+                  <Settings2 className="w-3 h-3" /> Edit targets
+                </button>
+              </div>
               <div className="flex justify-around items-start">
                 <ProgressRing pct={calPct}   color="#556B2F" label="Calories" value={todayCal.toString()}   unit="kcal" size={96} />
                 <ProgressRing pct={protPct}  color="#B8860B" label="Protein"  value={`${todayProt}g`}       unit={`/ ${targets.protein}g`} size={96} />
@@ -614,7 +640,12 @@ export default function HealthPage() {
                   <Scale className="w-4 h-4 text-primary" />
                   <p className="text-sm font-bold text-foreground">Log Weight</p>
                 </div>
-                <span className="text-xs text-muted-foreground">Target: {GOAL_WEIGHT} kg</span>
+                <button
+                  onClick={() => { setGoalInput(String(goalWeight)); setShowGoalModal(true); }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-all"
+                >
+                  Goal: {goalWeight} kg <Pencil className="w-3 h-3" />
+                </button>
               </div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -634,7 +665,7 @@ export default function HealthPage() {
                 <p className="text-[10px] text-muted-foreground text-center">
                   Current: <span className="font-semibold text-primary">{latestWeight} kg</span>
                   {" · "}
-                  {latestWeight === GOAL_WEIGHT ? "🎯 Goal reached!" : `${Math.abs(latestWeight - GOAL_WEIGHT).toFixed(1)} kg ${latestWeight > GOAL_WEIGHT ? "to lose" : "to gain"}`}
+                  {latestWeight === goalWeight ? "🎯 Goal reached!" : `${Math.abs(latestWeight - goalWeight).toFixed(1)} kg ${latestWeight > goalWeight ? "to lose" : "to gain"}`}
                 </p>
               )}
             </div>
@@ -662,7 +693,7 @@ export default function HealthPage() {
                     <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                     <YAxis domain={["auto", "auto"]} tick={axisTick} tickLine={false} axisLine={false} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => name === "weight" ? [`${v} kg`, "Weight"] : [`${v} kg`, "Goal"]} labelFormatter={fmtDate} />
-                    <ReferenceLine y={GOAL_WEIGHT} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: `${GOAL_WEIGHT}kg goal`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }} />
+                    <ReferenceLine y={goalWeight} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: `${goalWeight}kg goal`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }} />
                     <Area type="monotone" dataKey="weight" stroke="#556B2F" strokeWidth={2} fill="url(#bodyGrad)" dot={false} activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
@@ -673,17 +704,25 @@ export default function HealthPage() {
               )}
             </div>
 
-            {/* 60kg goal progress bar */}
+            {/* Goal progress bar */}
             {latestWeight !== null && firstWeight !== null && (
-              <div className="bg-white dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="bg-white dark:bg-card px-5 py-4 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-primary" />
-                    <p className="text-sm font-bold text-foreground">Goal: {GOAL_WEIGHT} kg</p>
+                    <p className="text-sm font-bold text-foreground">Goal: {goalWeight} kg</p>
                   </div>
-                  <span className="text-xs font-semibold text-primary">{goalProgress}%</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-primary">{goalProgress}%</span>
+                    <button
+                      onClick={() => { setGoalInput(String(goalWeight)); setShowGoalModal(true); }}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-all"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
-                <div className="h-2.5 bg-accent rounded-full overflow-hidden">
+                <div className="h-1.5 bg-accent rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{ width: `${goalProgress}%`, background: "hsl(var(--primary))" }}
@@ -692,8 +731,8 @@ export default function HealthPage() {
                 <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                   <span>Start: {firstWeight} kg</span>
                   <span>
-                    {latestWeight === GOAL_WEIGHT ? "🎯 Goal reached!" :
-                      `${Math.abs(latestWeight - GOAL_WEIGHT).toFixed(1)} kg ${latestWeight > GOAL_WEIGHT ? "to lose" : "to gain"}`}
+                    {latestWeight === goalWeight ? "🎯 Goal reached!" :
+                      `${Math.abs(latestWeight - goalWeight).toFixed(1)} kg ${latestWeight > goalWeight ? "to lose" : "to gain"}`}
                   </span>
                 </div>
               </div>
@@ -846,6 +885,97 @@ export default function HealthPage() {
           <Button onClick={handleLogWeight} className="flex-1 gap-1.5"><Check className="w-4 h-4" />Log Weight</Button>
         </div>
       </BottomModal>
+
+      {/* Goal Weight Modal */}
+      {showGoalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowGoalModal(false)}
+        >
+          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <p className="text-base font-bold text-foreground">Edit Weight Goal</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Set your target weight in kg</p>
+            </div>
+            <div className="relative">
+              <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="number" placeholder={`Current goal: ${goalWeight} kg`}
+                value={goalInput} onChange={(e) => setGoalInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const v = parseFloat(goalInput);
+                    if (!isNaN(v) && v > 0 && v < 500) { setGoalWeight(v); setShowGoalModal(false); toast({ title: "Goal updated", description: `New target: ${v} kg` }); }
+                  }
+                }}
+                className="pl-10 text-sm" step="0.5" min="30" max="300" autoFocus
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowGoalModal(false)} className="flex-1">Cancel</Button>
+              <Button className="flex-1 gap-1.5" onClick={() => {
+                const v = parseFloat(goalInput);
+                if (!isNaN(v) && v > 0 && v < 500) { setGoalWeight(v); setShowGoalModal(false); toast({ title: "Goal updated", description: `New target: ${v} kg` }); }
+              }}>
+                <Check className="w-4 h-4" /> Save Goal
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Nutrition Targets Modal */}
+      {showNutrTargets && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowNutrTargets(false)}
+        >
+          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <p className="text-base font-bold text-foreground">Daily Nutrition Goals</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Set your daily macro targets</p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Daily Calories (kcal)</label>
+                <div className="relative mt-1">
+                  <Flame className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder={`Current: ${targets.calories} kcal`} value={nutrCalGoal} onChange={(e) => setNutrCalGoal(e.target.value)} className="pl-9 text-sm" min="500" max="10000" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Daily Protein (g)</label>
+                <div className="relative mt-1">
+                  <Beef className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder={`Current: ${targets.protein}g`} value={nutrProtGoal} onChange={(e) => setNutrProtGoal(e.target.value)} className="pl-9 text-sm" min="0" max="1000" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Daily Carbs (g)</label>
+                <div className="relative mt-1">
+                  <Wheat className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder={`Current: ${targets.carbs}g`} value={nutrCarbsGoal} onChange={(e) => setNutrCarbsGoal(e.target.value)} className="pl-9 text-sm" min="0" max="2000" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowNutrTargets(false)} className="flex-1">Cancel</Button>
+              <Button className="flex-1 gap-1.5" onClick={() => {
+                const cal   = parseFloat(nutrCalGoal)  || targets.calories;
+                const prot  = parseFloat(nutrProtGoal) || targets.protein;
+                const carbs = parseFloat(nutrCarbsGoal)|| targets.carbs;
+                updateTargets({ calories: cal, protein: prot, carbs });
+                setShowNutrTargets(false);
+                toast({ title: "Targets updated", description: `${cal} kcal · ${prot}g protein · ${carbs}g carbs` });
+              }}>
+                <Check className="w-4 h-4" /> Save Targets
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════ HEALTH FAB ══════════════ */}
       <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-2">
