@@ -147,10 +147,10 @@ export default function HealthPage() {
                     type="monotone"
                     dataKey="weight"
                     stroke="var(--color-primary)"
-                    strokeWidth={2.5}
+                    strokeWidth={1.5}
                     fill="url(#healthWeightGrad)"
-                    dot={{ r: 3.5, fill: "var(--color-primary)", strokeWidth: 0 }}
-                    activeDot={{ r: 5, fill: "var(--color-primary)", strokeWidth: 2, stroke: "#fff" }}
+                    dot={false}
+                    activeDot={{ r: 4, fill: "var(--color-primary)", strokeWidth: 0 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>

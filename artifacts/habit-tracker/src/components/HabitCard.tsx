@@ -138,10 +138,10 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
               {habit.name}
             </p>
             <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="flex-1 habit-progress-track">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${habit.completionPercentage}%`, backgroundColor: catColor }}
+                  className="habit-progress-fill"
+                  style={{ width: `${habit.completionPercentage}%` }}
                 />
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -212,11 +212,11 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
           </div>
         </div>
 
-        {/* Thin progress bar */}
-        <div className="h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-2">
+        {/* Premium gradient progress bar */}
+        <div className="habit-progress-track mb-2.5">
           <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${habit.completionPercentage}%`, backgroundColor: catColor }}
+            className="habit-progress-fill"
+            style={{ width: `${habit.completionPercentage}%` }}
           />
         </div>
 

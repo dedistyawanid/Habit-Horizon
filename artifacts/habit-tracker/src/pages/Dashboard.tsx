@@ -150,7 +150,12 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               <span>Today's Progress</span>
               <span className="font-semibold text-primary">{Math.round((todayDone / totalToday) * 100)}%</span>
             </div>
-            <Progress value={totalToday > 0 ? (todayDone / totalToday) * 100 : 0} className="h-2" />
+            <div className="habit-progress-track">
+              <div
+                className="habit-progress-fill"
+                style={{ width: `${totalToday > 0 ? (todayDone / totalToday) * 100 : 0}%` }}
+              />
+            </div>
           </div>
         )}
 
