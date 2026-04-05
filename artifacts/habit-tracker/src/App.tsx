@@ -136,7 +136,7 @@ function AppShell() {
             <div className="w-7 h-7 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
               <span className="text-primary-foreground text-xs font-bold">D</span>
             </div>
-            <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Dedi's Tracker</span>
+            <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Horizon Hub</span>
             <SyncIndicator />
           </div>
 
