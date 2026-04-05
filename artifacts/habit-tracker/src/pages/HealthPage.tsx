@@ -329,19 +329,44 @@ export default function HealthPage() {
             ))}
           </div>
 
-          {/* Period filter — iOS segmented control */}
+          {/* Period filter — sliding pill segmented control */}
           <div className="flex justify-end mt-2">
-            <div className="flex items-center gap-0 p-0.5 rounded-lg" style={{ background: "#E8E3DA" }}>
+            <div
+              className="relative flex items-center"
+              style={{ background: "#F2F0EB", borderRadius: 28, padding: 3, height: 32, width: 192 }}
+            >
+              {/* Sliding white pill */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 3, bottom: 3,
+                  left: 3,
+                  width: "calc(33.333% - 2px)",
+                  borderRadius: 24,
+                  background: "#FFFFFF",
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.10), 0 0.5px 2px rgba(0,0,0,0.06)",
+                  transform: `translateX(calc(${["day","week","month"].indexOf(period)} * 100%))`,
+                  transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                  pointerEvents: "none",
+                }}
+              />
               {(["day", "week", "month"] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={cn(
-                    "px-3 py-1 rounded-md text-[11px] font-semibold transition-all duration-200",
-                    period === p
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
+                  style={{
+                    flex: 1,
+                    position: "relative",
+                    zIndex: 1,
+                    fontSize: 12,
+                    fontWeight: period === p ? 600 : 500,
+                    color: period === p ? "#2D2D2D" : "#9C8B7A",
+                    transition: "color 0.2s",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    letterSpacing: 0,
+                  }}
                 >
                   {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
                 </button>
