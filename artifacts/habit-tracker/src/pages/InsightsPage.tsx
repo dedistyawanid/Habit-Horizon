@@ -134,8 +134,8 @@ export default function InsightsPage() {
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Insights</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Deep dive into your habit performance</p>
+          <h1 className="text-xl font-bold text-foreground">Insights</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Deep dive into your habit performance</p>
         </div>
 
         {/* Summary stats */}
@@ -145,20 +145,20 @@ export default function InsightsPage() {
             { icon: TrendingUp, label: "Avg Rate", value: `${avgCompletion}%`, color: "text-blue-500" },
             { icon: Flame, label: "Best Streak", value: `${topStreak}d`, color: "text-orange-500" },
           ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
+            <div key={label} className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
               <Icon className={cn("w-4 h-4 mb-1.5", color)} />
-              <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">{value}</p>
+              <p className="text-xs text-muted-foreground">{label}</p>
+              <p className="text-xl font-bold text-foreground mt-0.5">{value}</p>
             </div>
           ))}
         </div>
 
         {/* Overall completion trend */}
-        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Completion Rate</h2>
+              <h2 className="text-sm font-semibold text-foreground">Completion Rate</h2>
             </div>
             <div className="flex gap-1">
               {RANGE_OPTIONS.map(({ value, label }) => (
@@ -169,7 +169,7 @@ export default function InsightsPage() {
                     "px-2 py-1 rounded-lg text-xs font-medium transition-all",
                     chartRange === value
                       ? "bg-primary text-primary-foreground"
-                      : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      : "text-muted-foreground hover:bg-accent"
                   )}
                 >
                   {label}
@@ -190,10 +190,10 @@ export default function InsightsPage() {
 
         {/* Category charts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Category Performance</h2>
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Category Performance</h2>
             {categoryData.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-8">No habits yet</p>
+              <p className="text-xs text-muted-foreground text-center py-8">No habits yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={categoryData} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
@@ -211,10 +211,10 @@ export default function InsightsPage() {
             )}
           </div>
 
-          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Habits by Category</h2>
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Habits by Category</h2>
             {categoryPieData.length === 0 ? (
-              <p className="text-xs text-gray-400 text-center py-8">No habits yet</p>
+              <p className="text-xs text-muted-foreground text-center py-8">No habits yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
@@ -232,13 +232,13 @@ export default function InsightsPage() {
         </div>
 
         {/* Individual habit trend */}
-        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Individual Habit (Last 30 Days)</h2>
+            <h2 className="text-sm font-semibold text-foreground">Individual Habit (Last 30 Days)</h2>
             <select
               value={selectedHabit ?? ""}
               onChange={(e) => setSelectedHabit(e.target.value || null)}
-              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none"
+              className="text-xs border border-[hsl(var(--border))] rounded-lg px-2 py-1 bg-card text-foreground focus:outline-none"
             >
               <option value="">Select a habit...</option>
               {habits.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
@@ -255,15 +255,15 @@ export default function InsightsPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-xs text-gray-400 text-center py-8">Select a habit to see its check-in pattern</p>
+            <p className="text-xs text-muted-foreground text-center py-8">Select a habit to see its check-in pattern</p>
           )}
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Leaderboard (This Month)</h2>
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Leaderboard (This Month)</h2>
           {habitsWithStats.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-4">No habits tracked yet</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No habits tracked yet</p>
           ) : (
             <div className="space-y-3">
               {[...habitsWithStats]
@@ -274,18 +274,18 @@ export default function InsightsPage() {
                     <span className={cn(
                       "w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                       i === 0 ? "bg-yellow-100 text-yellow-700" :
-                      i === 1 ? "bg-gray-100 text-gray-600" :
+                      i === 1 ? "bg-accent text-muted-foreground" :
                       i === 2 ? "bg-orange-100 text-orange-700" :
-                      "bg-slate-50 text-gray-400 dark:bg-gray-800"
+                      "bg-accent text-muted-foreground"
                     )}>
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">{h.name}</span>
-                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 ml-2">{h.completionPercentage}%</span>
+                        <span className="text-xs font-medium text-foreground truncate">{h.name}</span>
+                        <span className="text-xs font-semibold text-muted-foreground ml-2">{h.completionPercentage}%</span>
                       </div>
-                      <div className="h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <div className="h-1 bg-accent rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{

@@ -148,7 +148,7 @@ export default function FinancePage() {
       <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Finance</h1>
+            <h1 className="text-xl font-bold text-foreground">Finance</h1>
           </div>
           <button
             onClick={() => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); }}
@@ -163,12 +163,12 @@ export default function FinancePage() {
         <div className="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-[28px] p-5 border border-primary/20">
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">Annual Revenue Goal</span>
+            <span className="font-semibold text-sm text-foreground">Annual Revenue Goal</span>
             <span className="ml-auto flex items-center gap-2">
-              <span className="text-xs text-gray-500">{new Date().getFullYear()}</span>
+              <span className="text-xs text-muted-foreground">{new Date().getFullYear()}</span>
               <button
                 onClick={() => { setEditingGoal((v) => !v); setGoalInput(""); }}
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all"
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-white/60 dark:hover:bg-accent transition-all"
                 title="Edit goal"
               >
                 {editingGoal ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3 h-3" />}
@@ -194,7 +194,7 @@ export default function FinancePage() {
                   }
                   if (e.key === "Escape") setEditingGoal(false);
                 }}
-                className="flex-1 px-3 py-2 rounded-xl border border-primary/30 bg-white/70 dark:bg-gray-800/70 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="flex-1 px-3 py-2 rounded-xl border border-primary/30 bg-white/70 dark:bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 autoFocus
                 data-testid="input-annual-target"
               />
@@ -215,42 +215,42 @@ export default function FinancePage() {
             </div>
           ) : (
             <div className="flex items-end justify-between mb-2">
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatShort(currentYearIncome)}</span>
-              <span className="text-xs text-gray-500">/ {formatShort(annualTarget)} IDR</span>
+              <span className="text-2xl font-bold text-foreground">{formatShort(currentYearIncome)}</span>
+              <span className="text-xs text-muted-foreground">/ {formatShort(annualTarget)} IDR</span>
             </div>
           )}
 
-          <div className="h-2.5 bg-white/60 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-accent rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-700"
               style={{ width: `${annualProgress}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1.5">{annualProgress.toFixed(2)}% of {formatShort(annualTarget)} target</p>
+          <p className="text-xs text-muted-foreground mt-1.5">{annualProgress.toFixed(2)}% of {formatShort(annualTarget)} target</p>
         </div>
 
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
             <div className="flex items-center gap-1.5 mb-1">
               <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-xs text-gray-500">Balance</span>
+              <span className="text-xs text-muted-foreground">Balance</span>
             </div>
             <p className={cn("text-lg font-bold", currentBalance >= 0 ? "text-emerald-600" : "text-red-500")}>
               {formatShort(currentBalance)}
             </p>
           </div>
-          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-[#5c7c6c]" />
-              <span className="text-xs text-gray-500">Revenue</span>
+              <span className="text-xs text-muted-foreground">Revenue</span>
             </div>
             <p className="text-lg font-bold text-[#5c7c6c]">{formatShort(totalIncome)}</p>
           </div>
-          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-xs text-gray-500">Expenses</span>
+              <span className="text-xs text-muted-foreground">Expenses</span>
             </div>
             <p className="text-lg font-bold text-red-500">{formatShort(totalExpenses)}</p>
           </div>
@@ -258,8 +258,8 @@ export default function FinancePage() {
 
         {/* Chart */}
         {cumulativeData.length > 1 && (
-          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Revenue Growth</h2>
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Revenue Growth</h2>
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={cumulativeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -273,9 +273,9 @@ export default function FinancePage() {
         )}
 
         {/* Transaction list */}
-        <div className="bg-white dark:bg-card rounded-[28px] border border-[#E5E0D8] dark:border-white/10 overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-y-2">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex-1">Transactions</h2>
+        <div className="bg-white dark:bg-card rounded-[28px] border border-[#E5E0D8] dark:border-[hsl(var(--border))] overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-[hsl(var(--border))] flex-wrap gap-y-2">
+            <h2 className="text-sm font-semibold text-foreground flex-1">Transactions</h2>
             <div className="flex gap-1">
               {(["all", "income", "expense"] as const).map((t) => (
                 <button
@@ -283,7 +283,7 @@ export default function FinancePage() {
                   onClick={() => setFilterType(t)}
                   className={cn(
                     "px-2 py-1 rounded-lg text-xs font-medium capitalize transition-all",
-                    filterType === t ? "bg-primary text-primary-foreground" : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    filterType === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
                   )}
                 >
                   {t}
@@ -294,7 +294,7 @@ export default function FinancePage() {
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none"
+                className="text-xs border border-[hsl(var(--border))] rounded-lg px-2 py-1 bg-card text-foreground focus:outline-none"
               >
                 {availableCategories.map((c) => (
                   <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>
@@ -304,7 +304,7 @@ export default function FinancePage() {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none"
+              className="text-xs border border-[hsl(var(--border))] rounded-lg px-2 py-1 bg-card text-foreground focus:outline-none"
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -313,7 +313,7 @@ export default function FinancePage() {
             </select>
           </div>
           {filteredTx.length === 0 ? (
-            <div className="text-center py-10 text-gray-400 text-xs">
+            <div className="text-center py-10 text-muted-foreground text-xs">
               <DollarSign className="w-7 h-7 mx-auto mb-2 opacity-40" />
               No transactions yet.
             </div>
@@ -323,7 +323,7 @@ export default function FinancePage() {
                 <div
                   key={tx.id}
                   onClick={() => startEdit(tx)}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all active:scale-[0.98] cursor-pointer"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-all active:scale-[0.98] cursor-pointer"
                 >
                   <div className={cn(
                     "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
@@ -335,8 +335,8 @@ export default function FinancePage() {
                     }
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{tx.title}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-sm font-medium text-foreground truncate">{tx.title}</p>
+                    <p className="text-xs text-muted-foreground">
                       {tx.category}
                       {tx.accountSource && <> · {tx.accountSource}</>}
                       <> · {fmtTxDate(tx.date)}</>
@@ -351,13 +351,13 @@ export default function FinancePage() {
                   <div className="flex gap-0.5">
                     <button
                       onClick={(e) => { e.stopPropagation(); startEdit(tx); }}
-                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-gray-400/60 hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-700 active:text-primary transition-colors"
+                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-muted-foreground/60 hover:text-primary hover:bg-accent dark:hover:bg-accent active:text-primary transition-colors"
                     >
                       <Edit2 className="w-3 h-3" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); deleteTransaction(tx.id); }}
-                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-gray-400/60 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:text-red-500 transition-colors"
+                      className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg text-muted-foreground/60 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:text-red-500 transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -374,16 +374,16 @@ export default function FinancePage() {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="bg-white dark:bg-card rounded-[28px] w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="font-semibold text-foreground">
                 {editId ? "Edit Transaction" : "New Transaction"}
               </h3>
-              <button onClick={() => { setShowForm(false); setEditId(null); }} className="p-1 rounded-lg text-gray-400 hover:text-gray-600">
+              <button onClick={() => { setShowForm(false); setEditId(null); }} className="p-1 rounded-lg text-muted-foreground hover:text-muted-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Type toggle */}
-            <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mb-4">
+            <div className="flex rounded-xl overflow-hidden border border-[hsl(var(--border))] mb-4">
               {(["income", "expense"] as const).map((t) => (
                 <button
                   key={t}
@@ -392,7 +392,7 @@ export default function FinancePage() {
                     "flex-1 py-2 text-sm font-medium capitalize transition-all",
                     form.type === t
                       ? t === "income" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
-                      : "text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      : "text-muted-foreground hover:bg-accent"
                   )}
                 >
                   {t}
@@ -405,10 +405,10 @@ export default function FinancePage() {
                 placeholder="Title"
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 pointer-events-none select-none">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none select-none">
                   Rp
                 </span>
                 <input
@@ -420,7 +420,7 @@ export default function FinancePage() {
                     const digits = e.target.value.replace(/\D/g, "");
                     setForm((f) => ({ ...f, amount: digits }));
                   }}
-                  className="field-dark w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="field-dark w-full pl-8 pr-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -428,12 +428,12 @@ export default function FinancePage() {
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  className="field-dark px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <select
                   value={form.category}
                   onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="field-dark px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                   <option value="">Category</option>
                   {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -442,7 +442,7 @@ export default function FinancePage() {
               <select
                 value={form.accountSource}
                 onChange={(e) => setForm((f) => ({ ...f, accountSource: e.target.value }))}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Account / Source (optional)</option>
                 {ACCOUNT_SOURCES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -452,14 +452,14 @@ export default function FinancePage() {
                 value={form.notes}
                 onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 rows={2}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
               />
             </div>
 
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }}
-                className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
               >
                 Cancel
               </button>

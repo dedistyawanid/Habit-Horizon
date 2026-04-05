@@ -481,7 +481,7 @@ export default function HealthPage() {
                       type="date"
                       value={customStart}
                       onChange={(e) => setCustomStart(e.target.value)}
-                      className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
+                      className="flex-1 text-xs bg-white border border-[hsl(var(--border))] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                     />
                     <span className="text-xs text-muted-foreground shrink-0">→</span>
                     <input
@@ -489,7 +489,7 @@ export default function HealthPage() {
                       value={customEnd}
                       min={customStart}
                       onChange={(e) => setCustomEnd(e.target.value)}
-                      className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
+                      className="flex-1 text-xs bg-white border border-[hsl(var(--border))] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                     />
                   </div>
                 )}
@@ -658,7 +658,7 @@ export default function HealthPage() {
               </div>
 
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
+              <div className="flex items-center gap-2 bg-accent dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-[hsl(var(--border))] dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -811,7 +811,7 @@ export default function HealthPage() {
                 <p className="text-sm font-bold text-foreground">Log Meal</p>
               </div>
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
+              <div className="flex items-center gap-2 bg-accent dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-[hsl(var(--border))] dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -987,7 +987,7 @@ export default function HealthPage() {
                 </button>
               </div>
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
+              <div className="flex items-center gap-2 bg-accent dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-[hsl(var(--border))] dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -1144,7 +1144,7 @@ export default function HealthPage() {
               </div>
 
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
+              <div className="flex items-center gap-2 bg-accent dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-[hsl(var(--border))] dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -1310,7 +1310,7 @@ export default function HealthPage() {
                     type="date"
                     value={sleepCustomStart}
                     onChange={(e) => setSleepCustomStart(e.target.value)}
-                    className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
+                    className="flex-1 text-xs bg-white border border-[hsl(var(--border))] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                   />
                   <span className="text-xs text-muted-foreground shrink-0">→</span>
                   <input
@@ -1318,7 +1318,7 @@ export default function HealthPage() {
                     value={sleepCustomEnd}
                     min={sleepCustomStart}
                     onChange={(e) => setSleepCustomEnd(e.target.value)}
-                    className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
+                    className="flex-1 text-xs bg-white border border-[hsl(var(--border))] rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                   />
                 </div>
               )}
@@ -1577,7 +1577,7 @@ export default function HealthPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
           onClick={() => setShowSleepTarget(false)}
         >
-          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1620,7 +1620,7 @@ export default function HealthPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
           onClick={() => setShowGoalModal(false)}
         >
-          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1659,7 +1659,7 @@ export default function HealthPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
           onClick={() => setShowNutrTargets(false)}
         >
-          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1719,7 +1719,7 @@ export default function HealthPage() {
             className={cn("flex items-center gap-2 transition-all duration-200", fabOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none")}
             style={{ transitionDelay: fabOpen ? `${i * 40}ms` : "0ms" }}
           >
-            <span className="bg-white text-xs font-medium text-foreground px-3 py-1.5 rounded-full whitespace-nowrap" style={{ border: "1px solid #E5E0D8", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+            <span className="bg-card text-xs font-medium text-foreground px-3 py-1.5 rounded-full whitespace-nowrap" style={{ border: "1px solid #E5E0D8", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
               {label}
             </span>
             <button

@@ -147,22 +147,22 @@ export default function NotesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Notes</h1>
-            <p className="text-xs text-gray-400 mt-0.5">{notes.length} {notes.length === 1 ? "doc" : "docs"}</p>
+            <h1 className="text-xl font-bold text-foreground">Notes</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{notes.length} {notes.length === 1 ? "doc" : "docs"}</p>
           </div>
           <div className="flex items-center gap-2">
             {/* Layout toggle */}
-            <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <div className="flex bg-card border border-[hsl(var(--border))] rounded-xl overflow-hidden">
               <button
                 onClick={() => setNotesView("grid")}
-                className={cn("px-2.5 py-2 transition-colors", notesView === "grid" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+                className={cn("px-2.5 py-2 transition-colors", notesView === "grid" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-muted-foreground")}
                 title="Grid view"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setNotesView("list")}
-                className={cn("px-2.5 py-2 transition-colors", notesView === "list" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+                className={cn("px-2.5 py-2 transition-colors", notesView === "list" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-muted-foreground")}
                 title="List view"
               >
                 <List className="w-3.5 h-3.5" />
@@ -173,13 +173,13 @@ export default function NotesPage() {
             <div className="relative">
               <button
                 onClick={(e) => { e.stopPropagation(); setSortOpen((v) => !v); }}
-                className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-[hsl(var(--border))] bg-card text-xs text-muted-foreground dark:text-muted-foreground hover:border-[hsl(var(--border))] transition-colors"
               >
                 <ArrowUpDown className="w-3 h-3" />
                 {SORT_LABELS[sortMode]}
               </button>
               {sortOpen && (
-                <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg overflow-hidden min-w-[140px]">
+                <div className="absolute right-0 top-full mt-1 z-50 bg-card rounded-xl border border-[hsl(var(--border))] shadow-lg overflow-hidden min-w-[140px]">
                   {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
                     <button
                       key={mode}
@@ -188,7 +188,7 @@ export default function NotesPage() {
                         "w-full text-left px-3 py-2.5 text-xs transition-colors",
                         sortMode === mode
                           ? "bg-primary/10 text-primary font-semibold"
-                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          : "text-muted-foreground dark:text-muted-foreground hover:bg-accent"
                       )}
                     >
                       {SORT_LABELS[mode]}
@@ -212,19 +212,19 @@ export default function NotesPage() {
         {/* Search + category manager */}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
               placeholder="Search notes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 bg-white dark:bg-gray-900 h-9 text-sm rounded-xl"
+              className="pl-8 bg-card h-9 text-sm rounded-xl"
               data-testid="input-note-search"
             />
           </div>
           <button
             onClick={() => setShowCategoryManager(true)}
             title="Manage note categories"
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-primary hover:border-primary/40 transition-all shrink-0"
+            className="w-9 h-9 rounded-xl flex items-center justify-center bg-card border border-[hsl(var(--border))] text-muted-foreground hover:text-primary hover:border-primary/40 transition-all shrink-0"
           >
             <Tag className="w-3.5 h-3.5" />
           </button>
@@ -257,7 +257,7 @@ export default function NotesPage() {
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
               <BookOpen className="w-7 h-7 text-primary" />
             </div>
-            <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
+            <p className="text-muted-foreground font-medium text-sm">
               {notes.length === 0 ? "No notes yet" : "No notes match your filter"}
             </p>
             {notes.length === 0 && (
@@ -282,7 +282,7 @@ export default function NotesPage() {
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
                   className={cn(
-                    "group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/60 transition-all duration-150 cursor-pointer relative active:scale-[0.98]",
+                    "group bg-card border border-[hsl(var(--border))] transition-all duration-150 cursor-pointer relative active:scale-[0.98]",
                     isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
                   )}
                   style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
@@ -299,7 +299,7 @@ export default function NotesPage() {
                     <div className={cn("min-w-0", isList ? "flex-1" : "")}>
                       {/* Title */}
                       <h3 className={cn(
-                        "font-bold text-gray-800 dark:text-gray-100 leading-snug",
+                        "font-bold text-foreground leading-snug",
                         isList ? "text-sm truncate" : "text-sm line-clamp-2"
                       )}>
                         {title}
@@ -307,12 +307,12 @@ export default function NotesPage() {
 
                       {/* Snippet — hide in list if too many chars */}
                       {preview && !isList && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1 mt-0.5">
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-1 mt-0.5">
                           {preview}
                         </p>
                       )}
                       {preview && isList && (
-                        <p className="text-xs text-gray-400 truncate leading-relaxed mt-0.5">
+                        <p className="text-xs text-muted-foreground truncate leading-relaxed mt-0.5">
                           {preview}
                         </p>
                       )}
@@ -323,13 +323,13 @@ export default function NotesPage() {
                       "flex items-center gap-1.5 shrink-0",
                       isList ? "ml-auto" : "mt-auto pt-1 justify-between"
                     )}>
-                      {!isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}
+                      {!isList && <span className="text-[10px] text-muted-foreground">{formatDate(note.updatedAt)}</span>}
                       <div className="flex items-center gap-1.5 flex-wrap justify-end">
                         {/* Category pill */}
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md leading-none bg-accent text-primary">
                           {note.category}
                         </span>
-                        {isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}
+                        {isList && <span className="text-[10px] text-muted-foreground">{formatDate(note.updatedAt)}</span>}
                         {note.reminderEnabled && note.reminderDate && (
                           <Bell className="w-2.5 h-2.5 text-amber-400 shrink-0" />
                         )}
@@ -356,7 +356,7 @@ export default function NotesPage() {
                       "absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all",
                       confirmDelete === note.id
                         ? "opacity-100 bg-red-50 dark:bg-red-900/20 text-red-500"
-                        : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"
+                        : "hover:bg-accent text-muted-foreground"
                     )}
                     title={confirmDelete === note.id ? "Confirm delete" : "Delete"}
                   >

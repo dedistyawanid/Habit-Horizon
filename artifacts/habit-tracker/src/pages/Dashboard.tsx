@@ -103,12 +103,12 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         {/* Greeting header — compact single line */}
         <div className="flex items-start justify-between pt-1">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+            <h1 className="text-2xl font-black text-foreground leading-tight tracking-tight">
               {greeting}, {firstName}
             </h1>
-            <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               {gregorianStr}
-              <span className="mx-1.5 text-gray-300">·</span>
+              <span className="mx-1.5 text-muted-foreground">·</span>
               <span className="text-primary/70 font-medium">{hijriStr}</span>
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               />
             ) : (
               <div
-                className="w-12 h-12 rounded-full bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-sm font-bold text-white dark:text-gray-900 shadow-md"
+                className="w-12 h-12 rounded-full bg-card dark:bg-card flex items-center justify-center text-sm font-bold text-white dark:text-foreground shadow-md"
                 data-testid="avatar-initials"
               >
                 {initials}
@@ -146,7 +146,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
           )}
           <div className="flex gap-2 items-start">
             <Quote className="w-3.5 h-3.5 text-primary/50 shrink-0 mt-0.5" />
-            <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed italic" data-testid="motivation-quote">
+            <p className="text-muted-foreground text-xs leading-relaxed italic" data-testid="motivation-quote">
               {quote}
             </p>
           </div>
@@ -155,7 +155,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         {/* Today's progress bar */}
         {totalToday > 0 && (
           <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-gray-400">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>Today's Progress</span>
               <span className="font-semibold text-primary">{Math.round((todayDone / totalToday) * 100)}%</span>
             </div>
@@ -205,10 +205,10 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Top Habit</p>
                 </div>
-                <p className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate" data-testid="top-habit-name">
+                <p className="font-semibold text-sm text-foreground truncate" data-testid="top-habit-name">
                   {topPerforming.name}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">{topPerforming.completionPercentage}% this month</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{topPerforming.completionPercentage}% this month</p>
               </div>
             )}
             {needsAttention && needsAttention.id !== topPerforming?.id && (
@@ -217,10 +217,10 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                   <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                   <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Needs Work</p>
                 </div>
-                <p className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate" data-testid="attention-habit-name">
+                <p className="font-semibold text-sm text-foreground truncate" data-testid="attention-habit-name">
                   {needsAttention.name}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">{needsAttention.completionPercentage}% this month</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{needsAttention.completionPercentage}% this month</p>
               </div>
             )}
           </div>
@@ -233,12 +233,12 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               placeholder="Search habits..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white dark:bg-gray-900 text-sm h-9"
+              className="bg-card text-sm h-9"
               data-testid="input-search"
             />
           </div>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-28 bg-white dark:bg-gray-900 h-9 text-xs" data-testid="sort-by">
+            <SelectTrigger className="w-28 bg-card h-9 text-xs" data-testid="sort-by">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -247,17 +247,17 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               <SelectItem value="performance">Best</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5 h-9">
+          <div className="flex bg-card border border-[hsl(var(--border))] rounded-lg p-0.5 h-9">
             <button
               onClick={() => setView("grid")}
-              className={cn("px-2 rounded-md transition-colors", view === "grid" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+              className={cn("px-2 rounded-md transition-colors", view === "grid" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
               data-testid="btn-grid-view"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setView("list")}
-              className={cn("px-2 rounded-md transition-colors", view === "list" ? "bg-primary/10 text-primary" : "text-gray-400 hover:text-gray-600")}
+              className={cn("px-2 rounded-md transition-colors", view === "list" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
               data-testid="btn-list-view"
             >
               <List className="w-3.5 h-3.5" />
@@ -291,7 +291,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
           <button
             onClick={() => setShowCategoryManager(true)}
             title="Manage categories"
-            className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-primary hover:border-primary/40 transition-all"
+            className="w-7 h-7 rounded-full flex items-center justify-center bg-card border border-[hsl(var(--border))] text-muted-foreground hover:text-primary hover:border-primary/40 transition-all"
           >
             <Tag className="w-3 h-3" />
           </button>
@@ -314,14 +314,14 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                 <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
                   <Plus className="w-7 h-7 text-primary" />
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 font-medium text-sm">No habits yet</p>
-                <p className="text-xs text-gray-400">Start building your first habit today!</p>
+                <p className="text-muted-foreground font-medium text-sm">No habits yet</p>
+                <p className="text-xs text-muted-foreground">Start building your first habit today!</p>
                 <Button onClick={() => setShowForm(true)} size="sm" className="mt-2" data-testid="btn-empty-add">
                   Add First Habit
                 </Button>
               </div>
             ) : (
-              <p className="text-gray-400 text-sm">No habits match your filter</p>
+              <p className="text-muted-foreground text-sm">No habits match your filter</p>
             )}
           </div>
         ) : (
