@@ -156,7 +156,7 @@ export default function FinancePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-36 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Finance</h1>
@@ -469,7 +469,7 @@ export default function FinancePage() {
               No wishlist items yet. Add your first goal!
             </div>
           ) : (
-            <div className="p-4 grid gap-3 sm:grid-cols-2">
+            <div className="p-4 grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
               {wishlist.map((item) => {
                 const pct = item.targetAmount > 0 ? Math.min(100, Math.round((item.currentAmount / item.targetAmount) * 100)) : 0;
                 const done = pct >= 100;
