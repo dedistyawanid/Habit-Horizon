@@ -230,6 +230,7 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
     };
     localStorage.setItem("dedi_nutrition_targets", JSON.stringify(merged));
   }
+  /* ── Merge theme_selection + avatarUrl ── */
   if (profile.theme_selection) {
     const themeData = safeJson<Record<string, string>>(profile.theme_selection, {});
     const existing  = safeJson<Record<string, unknown>>(
@@ -237,8 +238,18 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
     );
     if (themeData.theme)       existing.theme       = themeData.theme;
     if (themeData.accentTheme) existing.accentTheme = themeData.accentTheme;
+
+    /* Restore avatar from cloud — avatarUrl lives inside theme_selection JSON */
+    if (themeData.avatarUrl !== undefined) {
+      if (!existing.profile || typeof existing.profile !== "object") existing.profile = {};
+      const prof = existing.profile as Record<string, unknown>;
+      prof.avatarUrl  = themeData.avatarUrl;
+      prof.avatarType = themeData.avatarUrl ? "upload" : "initials";
+    }
+
     localStorage.setItem("dedi_app_settings", JSON.stringify(existing));
   }
+
   if (profile.display_name) {
     const existing = safeJson<Record<string, unknown>>(
       localStorage.getItem("dedi_app_settings"), {}

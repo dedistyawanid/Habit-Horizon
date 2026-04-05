@@ -32,7 +32,9 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Type**: React + Vite web app
 - **Preview path**: `/`
 - **Purpose**: Personal minimalist habit tracker for Dedi Styawan
-- **Data storage**: Browser LocalStorage only (no backend required)
+- **Data storage**: Browser LocalStorage (offline-first) + Supabase cloud sync (multi-device)
+- **Supabase project**: `dvhscmrnchajjxdjbfph.supabase.co`
+- **Sync strategy**: All writes go to LocalStorage immediately; a background queue pushes changes to Supabase. On app mount, cloud data hydrates localStorage (cloud wins). Profile row in `profiles` table stores display_name, nutrition goals, target_weight, and `theme_selection` JSON (which embeds avatarUrl as a compressed base64 JPEG ≤220px).
 - **Design system**: Earth-tone minimalist aesthetic. Cream body (`#FAF9F6`), white cards (`#FFFFFF`) with 1px warm border (`#E5E0D8`), 28px border radius, no shadows. Deep charcoal headings (`#2D2926`). BottomNav white glass `rgba(255,255,255,0.92)` + blur.
 
 #### Features

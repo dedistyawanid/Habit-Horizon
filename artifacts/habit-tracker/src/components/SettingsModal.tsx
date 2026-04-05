@@ -83,7 +83,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     return () => clearTimeout(t);
   }, [saveHealthTargets]);
 
-  /* Auto-save theme + name to Supabase when changed */
+  /* Auto-save theme + name (+ current avatarUrl) to Supabase when changed.
+     avatarUrl is included in the JSON so theme changes never wipe the cloud avatar. */
   useEffect(() => {
     const t = setTimeout(() => {
       upsertProfile({
@@ -92,11 +93,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         theme_selection:  JSON.stringify({
           theme:       settings.theme,
           accentTheme: settings.accentTheme,
+          avatarUrl:   settings.profile.avatarUrl ?? "",
         }),
       });
     }, 800);
     return () => clearTimeout(t);
-  }, [settings.theme, settings.accentTheme, settings.profile.fullName]);
+  }, [settings.theme, settings.accentTheme, settings.profile.fullName]); // avatarUrl intentionally excluded (pushed immediately on change)
 
   /* ── Force Push to Supabase ── */
   async function handleForcePush() {
@@ -142,18 +144,57 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     reader.readAsText(file);
     e.target.value = "";
   }
-  function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  /** Compress & resize an image file to ≤ maxPx on the longest side at given quality. */
+  function compressImage(file: File, maxPx = 220, quality = 0.78): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+        const w = Math.round(img.width  * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width  = w;
+        canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(objectUrl);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = objectUrl;
+    });
+  }
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      updateProfile({ avatarUrl: ev.target?.result as string, avatarType: "upload" });
-    };
-    reader.readAsDataURL(file);
     e.target.value = "";
+    const avatarUrl = await compressImage(file);
+    /* Update local state immediately */
+    updateProfile({ avatarUrl, avatarType: "upload" });
+    /* Push to Supabase right away — avatarUrl lives inside theme_selection JSON */
+    upsertProfile({
+      user_id:         getUserId(),
+      display_name:    settings.profile.fullName || null,
+      theme_selection: JSON.stringify({
+        theme:       settings.theme,
+        accentTheme: settings.accentTheme,
+        avatarUrl,
+      }),
+    });
   }
+
   function clearAvatar() {
     updateProfile({ avatarUrl: "", avatarType: "initials" });
+    /* Remove avatar from Supabase immediately */
+    upsertProfile({
+      user_id:         getUserId(),
+      display_name:    settings.profile.fullName || null,
+      theme_selection: JSON.stringify({
+        theme:       settings.theme,
+        accentTheme: settings.accentTheme,
+        avatarUrl:   "",
+      }),
+    });
   }
 
   async function handleLogout() {
