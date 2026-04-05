@@ -257,10 +257,13 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 6px 20px rgba(100, 78, 60, 0.12);
   }
   .dark .glass-header {
     background: rgba(0, 0, 0, 0.5);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.38);
   }
   .habit-progress-track {
     height: 6px;
@@ -355,10 +358,13 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -6px 20px rgba(100, 78, 60, 0.12);
   }
   .dark .bottom-nav {
     background: rgba(0, 0, 0, 0.5);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.38);
   }
 
   /* ── Progress ring track: dark-mode tinted warm charcoal ── */
@@ -410,10 +416,13 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 6px 20px rgba(100, 78, 60, 0.10);
   }
   .dark .health-subtab-sticky {
     background: rgba(0, 0, 0, 0.5);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.30);
   }
 
   /* ── Sleep Debt card backgrounds (state-aware) ───────── */
