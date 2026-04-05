@@ -406,10 +406,11 @@
 
   /* ── Health sub-tab sticky bar ──────────────────────── */
   .health-subtab-sticky {
-    background: rgba(250, 249, 246, 0.90);
+    background: rgba(250, 249, 246, 0.96);
   }
   .dark .health-subtab-sticky {
-    background: rgba(22, 24, 25, 0.92);   /* #161819 at 92% */
+    background: hsl(var(--background));   /* solid #161819 — no white bleed */
+    border-bottom: 1px solid hsl(var(--border));
   }
 
   /* ── Sleep Debt card backgrounds (state-aware) ───────── */
