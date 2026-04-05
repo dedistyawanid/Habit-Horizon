@@ -472,7 +472,7 @@ export default function FinancePage() {
                 const pct = item.targetAmount > 0 ? Math.min(100, Math.round((item.currentAmount / item.targetAmount) * 100)) : 0;
                 const done = pct >= 100;
                 return (
-                  <div key={item.id} className="bg-accent dark:bg-accent rounded-2xl overflow-hidden border border-[hsl(var(--border))]">
+                  <div key={item.id} className="bg-white dark:bg-accent rounded-2xl overflow-hidden border border-[hsl(var(--border))]">
                     {item.imageUrl ? (
                       <div className="w-full h-36 overflow-hidden">
                         <img
