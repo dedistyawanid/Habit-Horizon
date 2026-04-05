@@ -7,15 +7,6 @@ import { CategoryManager } from "@/components/CategoryManager";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-const CAT_COLORS: Record<string, string> = {
-  General: "#879A77", Work: "#3b82f6", Personal: "#ec4899", Health: "#10b981",
-  Finance: "#f59e0b", Ideas: "#8b5cf6", Shopping: "#06b6d4", Travel: "#f97316",
-  Journal: "#9BB5A0", Script: "#B8A9C9", Tasks: "#C9C5A8", Other: "#C9B5A8",
-};
-
-function getCatColor(cat: string) {
-  return CAT_COLORS[cat] || "#879A77";
-}
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -243,7 +234,6 @@ export default function NotesPage() {
         <div className="flex gap-1.5 flex-wrap">
           {categoriesWithNotes.map((cat) => {
             const count = cat === "All" ? notes.length : notes.filter((n) => n.category === cat).length;
-            const color = getCatColor(cat);
             return (
               <button
                 key={cat}
@@ -251,10 +241,9 @@ export default function NotesPage() {
                 className={cn(
                   "px-2.5 py-1 rounded-full text-xs font-medium transition-all border",
                   filterCat === cat
-                    ? "text-white border-transparent"
-                    : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-primary/40"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-accent text-accent-foreground border-accent hover:bg-accent/70 hover:text-primary"
                 )}
-                style={filterCat === cat ? { backgroundColor: color } : {}}
               >
                 {cat} {cat !== "All" && <span className="opacity-70">({count})</span>}
               </button>
@@ -284,7 +273,6 @@ export default function NotesPage() {
         ) : (
           <div className={cn(notesView === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-2.5")}>
             {filtered.map((note) => {
-              const color = getCatColor(note.category);
               const preview = getPreview(note.content);
               const title = note.title || "Untitled";
               const isList = notesView === "list";
@@ -297,12 +285,12 @@ export default function NotesPage() {
                     "group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/60 transition-all duration-200 cursor-pointer relative",
                     isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
                   )}
-                  style={{ borderRadius: 28, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}
+                  style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
                 >
                   {/* List view: left icon */}
                   {isList && (
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}22` }}>
-                      <BookOpen className="w-3.5 h-3.5" style={{ color }} />
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-accent">
+                      <BookOpen className="w-3.5 h-3.5 text-primary" />
                     </div>
                   )}
 
@@ -338,10 +326,7 @@ export default function NotesPage() {
                       {!isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}
                       <div className="flex items-center gap-1.5 flex-wrap justify-end">
                         {/* Category pill */}
-                        <span
-                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md leading-none"
-                          style={{ backgroundColor: `${color}22`, color }}
-                        >
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md leading-none bg-accent text-primary">
                           {note.category}
                         </span>
                         {isList && <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>}

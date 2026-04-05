@@ -204,7 +204,7 @@ export default function FinancePage() {
 
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-4 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
             <div className="flex items-center gap-1.5 mb-1">
               <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
               <span className="text-xs text-gray-500">Balance</span>
@@ -213,14 +213,14 @@ export default function FinancePage() {
               {formatShort(currentBalance)}
             </p>
           </div>
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-4 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
               <span className="text-xs text-gray-500">Revenue</span>
             </div>
             <p className="text-lg font-bold text-blue-600">{formatShort(totalIncome)}</p>
           </div>
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-4 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
             <div className="flex items-center gap-1.5 mb-1">
               <TrendingDown className="w-3.5 h-3.5 text-red-400" />
               <span className="text-xs text-gray-500">Expenses</span>
@@ -231,7 +231,7 @@ export default function FinancePage() {
 
         {/* Chart */}
         {cumulativeData.length > 1 && (
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Revenue Growth</h2>
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={cumulativeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
@@ -246,7 +246,7 @@ export default function FinancePage() {
         )}
 
         {/* Transaction list */}
-        <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] border border-gray-100 dark:border-gray-800 overflow-hidden">
+        <div className="bg-white dark:bg-card rounded-[28px] border border-[#E5E0D8] dark:border-white/10 overflow-hidden">
           <div className="flex items-center gap-2 p-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-y-2">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex-1">Transactions</h2>
             <div className="flex gap-1">
@@ -325,7 +325,7 @@ export default function FinancePage() {
       {/* Add/Edit form modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-card rounded-[28px] w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                 {editId ? "Edit Transaction" : "New Transaction"}

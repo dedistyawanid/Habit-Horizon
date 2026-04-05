@@ -8,10 +8,18 @@ function loadSettings(): AppSettings {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
+    const THEME_MIGRATION: Record<string, AccentTheme> = {
+      classic: "sage",
+      ocean: "slate",
+      sunset: "terracotta",
+      midnight: "sage",
+    };
+    const storedTheme = parsed.accentTheme as string;
     const accentTheme: AccentTheme =
-      parsed.accentTheme === "forest"
-        ? "sage"
-        : (parsed.accentTheme as AccentTheme) || DEFAULT_SETTINGS.accentTheme;
+      THEME_MIGRATION[storedTheme] ??
+      (["sage", "terracotta", "forest", "ochre", "slate"].includes(storedTheme)
+        ? (storedTheme as AccentTheme)
+        : DEFAULT_SETTINGS.accentTheme);
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,

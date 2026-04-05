@@ -175,7 +175,7 @@ export default function HealthPage() {
             </div>
 
             {/* Donut — Activity Split */}
-            <div className="bg-[#F4F5F3] dark:bg-card p-4 flex items-center gap-5" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+            <div className="bg-white dark:bg-card p-4 flex items-center gap-5" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
               {/* Donut */}
               <div className="relative shrink-0 w-[88px] h-[88px]">
                 <PieChart width={88} height={88}>
@@ -226,7 +226,7 @@ export default function HealthPage() {
         )}
 
         {/* ─── WEIGHT HUB ─── */}
-        <div className="bg-[#F4F5F3] dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Scale className="w-4 h-4 text-primary" />
@@ -307,7 +307,7 @@ export default function HealthPage() {
         </div>
 
         {/* ─── LOG ACTIVITY ─── */}
-        <div className="bg-[#F4F5F3] dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
           <div className="flex items-center gap-2">
             <Dumbbell className="w-4 h-4 text-primary" />
             <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Log Activity</p>
@@ -496,16 +496,16 @@ function StatCard({
 }) {
   return (
     <div
-      className="bg-[#F4F5F3] dark:bg-card p-4 flex flex-col gap-2"
-      style={{ borderRadius: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
+      className="bg-white dark:bg-card p-4 flex flex-col gap-2.5"
+      style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
     >
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}18` }}>
-        <Icon className="w-4 h-4" style={{ color }} />
+      <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-accent">
+        <Icon className="w-4 h-4 text-primary" />
       </div>
       <div>
-        <p className="text-xl font-black text-gray-900 dark:text-white leading-none">{value}</p>
-        <p className="text-[10px] text-gray-400 mt-0.5 leading-snug">{unit}</p>
-        <p className="text-[9px] text-gray-300 dark:text-gray-600 uppercase tracking-wide mt-1">{label}</p>
+        <p className="text-3xl font-black text-foreground leading-none tracking-tight">{value}</p>
+        <p className="text-xs font-medium text-muted-foreground mt-1">{unit}</p>
+        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider mt-0.5">{label}</p>
       </div>
     </div>
   );

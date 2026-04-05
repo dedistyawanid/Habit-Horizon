@@ -125,7 +125,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         </div>
 
         {/* Mission + Quote */}
-        <div className="bg-[#F4F5F3] dark:bg-card p-4 space-y-2" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white dark:bg-card p-4 space-y-2" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
           {profile.mission && (
             <div className="flex gap-2 items-center">
               <Target className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -188,7 +188,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         {habitsWithStats.length > 0 && (topPerforming || needsAttention) && (
           <div className="grid grid-cols-2 gap-3">
             {topPerforming && (
-              <div className="bg-[#F4F5F3] dark:bg-card p-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+              <div className="bg-white dark:bg-card p-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Top Habit</p>
@@ -200,7 +200,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               </div>
             )}
             {needsAttention && needsAttention.id !== topPerforming?.id && (
-              <div className="bg-[#F4F5F3] dark:bg-card p-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+              <div className="bg-white dark:bg-card p-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                   <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Needs Work</p>
@@ -268,8 +268,8 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                 className={cn(
                   "px-2.5 py-1 rounded-full text-xs font-medium transition-all border",
                   filterCategory === cat
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-primary/40"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-accent text-accent-foreground border-accent hover:bg-accent/70 hover:text-primary"
                 )}
               >
                 {cat} {count > 0 && <span className="opacity-70">({count})</span>}

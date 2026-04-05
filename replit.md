@@ -33,7 +33,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Preview path**: `/`
 - **Purpose**: Personal minimalist habit tracker for Dedi Styawan
 - **Data storage**: Browser LocalStorage only (no backend required)
-- **Default theme**: Sage & Charcoal — dark charcoal primary (#1F1F1F), off-white card surface (#F4F5F3), sage-to-mint gradient background (#A8C0B2→#DCE6E1), blue accent (#C9D5F5). Light mode default.
+- **Design system**: Earth-tone minimalist aesthetic. Cream body (`#FAF9F6`), white cards (`#FFFFFF`) with 1px warm border (`#E5E0D8`), 28px border radius, no shadows. Deep charcoal headings (`#2D2926`). BottomNav white glass `rgba(255,255,255,0.92)` + blur.
 
 #### Features
 - **Dashboard**: Personalized greeting, Hijri+Gregorian date display, today's reminders, habit list, performance stats
@@ -48,7 +48,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Health Tab** (`/health`): Weight Log (input + area chart + history), Activity Log (Running/Badminton/Gym with km+min fields), auto-checks matching exercise habits on activity log
 - **Settings**:
   - Profile: name, weight, height, mission, avatar upload
-  - Appearance: Light/Dark/System theme, 5 accent color presets (Sage Green default, Violet, Ocean, Sunset, Midnight), date format (DD/MM/YYYY etc.)
+  - Appearance: Light/Dark/System theme, 5 earth-tone accent presets: Sage & Charcoal `#556B2F` (default), Terracotta & Sand `#E2725B`, Deep Forest `#2D3A2D`, Autumn Ochre `#B8860B`, Stone & Slate `#4A4A4A`. Date format (DD/MM/YYYY etc.)
   - Categories: Add/rename/delete habit and note categories
   - Data: Edit annual revenue target, export JSON v3.1 (full backup incl. finance+weight+activity), export CSV, import JSON
 - **Data Integrity**: All data (habits, check-ins, notes, transactions, financeSettings, weightLog, activityLog, settings) saved to LocalStorage and included in export/import v3.1
@@ -68,7 +68,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `src/hooks/useSwipeNav.ts` — Touch swipe detection for tab navigation (5 tabs)
 - `src/lib/hijriDate.ts` — Hijri calendar conversion utility
 - `src/lib/exportUtils.ts` — JSON/CSV export (all data points)
-- `src/types/settings.ts` — Theme presets (forest=Sage Green as default)
+- `src/types/settings.ts` — `AccentTheme` type: `"sage"|"terracotta"|"forest"|"ochre"|"slate"`. 5 earth-tone presets. Migration logic in `useSettings.ts` auto-converts old names.
 - `src/types/finance.ts` — Finance types (Transaction, FinanceSettings)
 
 ### API Server (`artifacts/api-server`)

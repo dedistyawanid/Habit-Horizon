@@ -8,13 +8,13 @@ import { TrendingUp, Award, Flame, BarChart2, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Health: "#10b981",
-  Work: "#3b82f6",
-  Skill: "#8b5cf6",
-  Finance: "#f59e0b",
-  Social: "#ec4899",
-  Personal: "#06b6d4",
-  Other: "#6b7280",
+  Health: "#556B2F",
+  Work: "#B8860B",
+  Skill: "#4A4A4A",
+  Finance: "#E2725B",
+  Social: "#2D3A2D",
+  Personal: "#7B8B6F",
+  Other: "#9C8B7A",
 };
 
 type ChartRange = "3d" | "7d" | "30d" | "12m";
@@ -145,7 +145,7 @@ export default function InsightsPage() {
             { icon: TrendingUp, label: "Avg Rate", value: `${avgCompletion}%`, color: "text-blue-500" },
             { icon: Flame, label: "Best Streak", value: `${topStreak}d`, color: "text-orange-500" },
           ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-4 border border-gray-100 dark:border-gray-800">
+            <div key={label} className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
               <Icon className={cn("w-4 h-4 mb-1.5", color)} />
               <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">{value}</p>
@@ -154,7 +154,7 @@ export default function InsightsPage() {
         </div>
 
         {/* Overall completion trend */}
-        <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-primary" />
@@ -190,7 +190,7 @@ export default function InsightsPage() {
 
         {/* Category charts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Category Performance</h2>
             {categoryData.length === 0 ? (
               <p className="text-xs text-gray-400 text-center py-8">No habits yet</p>
@@ -211,7 +211,7 @@ export default function InsightsPage() {
             )}
           </div>
 
-          <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Habits by Category</h2>
             {categoryPieData.length === 0 ? (
               <p className="text-xs text-gray-400 text-center py-8">No habits yet</p>
@@ -232,7 +232,7 @@ export default function InsightsPage() {
         </div>
 
         {/* Individual habit trend */}
-        <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Individual Habit (Last 30 Days)</h2>
             <select
@@ -260,7 +260,7 @@ export default function InsightsPage() {
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-[#F4F5F3] dark:bg-card rounded-[28px] p-5 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-white/10">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Leaderboard (This Month)</h2>
           {habitsWithStats.length === 0 ? (
             <p className="text-xs text-gray-400 text-center py-4">No habits tracked yet</p>
