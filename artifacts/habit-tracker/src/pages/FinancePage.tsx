@@ -80,6 +80,13 @@ export default function FinancePage() {
     }
   }, []);
 
+  /* Notify App shell to hide FAB while the manage picker is open */
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("finance-manage-open", {
+      detail: { active: manageOpen === "picker" },
+    }));
+  }, [manageOpen]);
+
   const annualTarget = financeSettings.annualTarget;
   const annualProgress = Math.min(100, (currentYearIncome / annualTarget) * 100);
 
@@ -179,12 +186,25 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* ── Manage picker ── */}
+        {/* ── Manage picker (centered glassmorphism modal) ── */}
         {manageOpen === "picker" && (
-          <div className="fixed inset-0 z-[500] bg-black/50 backdrop-blur-sm flex items-end justify-center" onClick={() => setManageOpen(null)}>
-            <div className="bg-card rounded-t-[28px] w-full max-w-lg pb-10 pt-4 px-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className="w-10 h-1 bg-accent rounded-full mx-auto mb-4" />
-              <p className="text-sm font-bold text-foreground mb-3">Manage Finance Lists</p>
+          <div
+            className="fixed inset-0 z-[500] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6"
+            onClick={() => setManageOpen(null)}
+          >
+            <div
+              className="glass-modal-card w-full max-w-sm p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <p className="text-base font-bold text-foreground">Manage Finance Lists</p>
+                <button
+                  onClick={() => setManageOpen(null)}
+                  className="w-7 h-7 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/10 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
               <div className="space-y-2">
                 {([
                   { key: "income",  label: "Income Categories",  sub: `${incomeCategories.length} items`  },
@@ -194,7 +214,7 @@ export default function FinancePage() {
                   <button
                     key={key}
                     onClick={() => setManageOpen(key)}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-accent hover:bg-accent/70 transition-colors text-left"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/30 dark:bg-white/5 hover:bg-white/50 dark:hover:bg-white/10 transition-colors text-left"
                   >
                     <span className="text-sm font-medium text-foreground">{label}</span>
                     <span className="text-xs text-muted-foreground">{sub} →</span>

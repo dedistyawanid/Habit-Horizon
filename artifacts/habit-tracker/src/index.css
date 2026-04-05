@@ -410,6 +410,19 @@
   .dark .period-toggle-btn           { color: hsl(38 16% 70%); }  /* Muted Beige */
   .dark .period-toggle-btn.is-active { color: hsl(46 30% 93%); }  /* Off-White/Cream */
 
+  /* ── Glassmorphism centered modal card ──────────────── */
+  .glass-modal-card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 24px;
+  }
+  .dark .glass-modal-card {
+    background: rgba(28, 26, 24, 0.80);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   /* ── Health sub-tab sticky bar ──────────────────────── */
   .health-subtab-sticky {
     background: rgba(255, 255, 255, 0.4);

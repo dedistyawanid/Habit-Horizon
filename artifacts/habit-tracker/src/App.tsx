@@ -91,10 +91,11 @@ function SyncProgressBar({ visible }: { visible: boolean }) {
 }
 
 function AppShell() {
-  const [settingsOpen,     setSettingsOpen]     = useState(false);
-  const [checkinModalOpen, setCheckinModalOpen] = useState(false);
-  const [fabOpen,          setFabOpen]          = useState(false);
-  const [notesSelecting,   setNotesSelecting]   = useState(false);
+  const [settingsOpen,       setSettingsOpen]       = useState(false);
+  const [checkinModalOpen,   setCheckinModalOpen]   = useState(false);
+  const [fabOpen,            setFabOpen]            = useState(false);
+  const [notesSelecting,     setNotesSelecting]     = useState(false);
+  const [financeManageOpen,  setFinanceManageOpen]  = useState(false);
 
   /* Listen for Notes selection mode changes to hide/show FAB */
   useEffect(() => {
@@ -103,6 +104,15 @@ function AppShell() {
     }
     window.addEventListener("notes-selection-change", handler);
     return () => window.removeEventListener("notes-selection-change", handler);
+  }, []);
+
+  /* Listen for Finance manage modal open/close to hide/show FAB */
+  useEffect(() => {
+    function handler(e: Event) {
+      setFinanceManageOpen((e as CustomEvent<{ active: boolean }>).detail.active);
+    }
+    window.addEventListener("finance-manage-open", handler);
+    return () => window.removeEventListener("finance-manage-open", handler);
   }, []);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [location, setLocation] = useLocation();
@@ -198,7 +208,7 @@ function AppShell() {
         onNewNote={() => { setFabOpen(false); setLocation("/notes?new=1"); }}
         onNewFinance={() => { setFabOpen(false); setLocation("/finance?new=1"); }}
         onQuickCheckin={() => { setFabOpen(false); setCheckinModalOpen(true); }}
-        hidden={notesSelecting}
+        hidden={notesSelecting || financeManageOpen}
       />
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
