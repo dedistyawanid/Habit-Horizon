@@ -413,35 +413,35 @@ export default function HealthPage() {
           <div style={{ marginTop: 20 }}>
             {subTab === "activity" ? (
               <>
-                {/* Stats (left) + Range toggle (right) in one row */}
-                <div className="flex items-center gap-2">
+                {/* Stats (left) + Range toggle (right) in one row — wraps on narrow screens */}
+                <div className="flex items-center flex-wrap gap-2">
                   {/* ── Left: compact summary stats ── */}
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-x-5 flex-1 min-w-0">
                     {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
                       <>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-primary shrink-0" />
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
                           <div className="leading-none">
-                            <p className="text-[11px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
-                            <p className="text-[9px] text-muted-foreground">distance</p>
+                            <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
+                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
                           </div>
                         </div>
                         {stats.elevation > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Mountain className="w-3 h-3 text-primary shrink-0" />
+                          <div className="flex items-center gap-1.5">
+                            <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
                             <div className="leading-none">
-                              <p className="text-[11px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
-                              <p className="text-[9px] text-muted-foreground">elevation</p>
+                              <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
+                              <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
                             </div>
                           </div>
                         )}
-                        <div className="flex items-center gap-1">
-                          <Timer className="w-3 h-3 text-primary shrink-0" />
+                        <div className="flex items-center gap-1.5">
+                          <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
                           <div className="leading-none">
-                            <p className="text-[11px] font-black text-foreground">
+                            <p className="text-[13px] font-black text-foreground">
                               {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
                             </p>
-                            <p className="text-[9px] text-muted-foreground">active</p>
+                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
                           </div>
                         </div>
                       </>
