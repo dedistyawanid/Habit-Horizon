@@ -58,7 +58,7 @@ const THEMES: Record<WeatherState, Theme> = {
 /* ─── SVG Illustrations ──────────────────────────── */
 function SunIllustration() {
   return (
-    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="absolute bottom-0 right-0 opacity-90">
+    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="opacity-90 block">
       {/* Glow */}
       <circle cx="72" cy="62" r="34" fill="#FFD54F" opacity="0.25" />
       {/* Body */}
@@ -79,7 +79,7 @@ function SunIllustration() {
 
 function RainIllustration() {
   return (
-    <svg width="120" height="110" viewBox="0 0 120 110" fill="none" className="absolute bottom-0 right-0 opacity-95">
+    <svg width="120" height="110" viewBox="0 0 120 110" fill="none" className="opacity-95 block">
       {/* Umbrella canopy */}
       <path d="M20 54 Q60 14 100 54" fill="#7B9E6B" />
       <path d="M20 54 Q60 20 100 54" fill="none" stroke="#5A7A4A" strokeWidth="2" />
@@ -99,7 +99,7 @@ function RainIllustration() {
 
 function NightIllustration() {
   return (
-    <svg width="120" height="110" viewBox="0 0 120 110" fill="none" className="absolute bottom-0 right-0 opacity-90">
+    <svg width="120" height="110" viewBox="0 0 120 110" fill="none" className="opacity-90 block">
       {/* Moon */}
       <circle cx="78" cy="50" r="26" fill="#2A4060" />
       <circle cx="90" cy="38" r="22" fill="#0D1B2A" />
@@ -115,7 +115,7 @@ function NightIllustration() {
 
 function CloudIllustration() {
   return (
-    <svg width="130" height="90" viewBox="0 0 130 90" fill="none" className="absolute bottom-0 right-0 opacity-80">
+    <svg width="130" height="90" viewBox="0 0 130 90" fill="none" className="opacity-80 block">
       <ellipse cx="70" cy="65" rx="50" ry="22" fill="white" opacity="0.7" />
       <ellipse cx="55" cy="58" rx="30" ry="20" fill="white" opacity="0.8" />
       <ellipse cx="80" cy="52" rx="28" ry="22" fill="white" opacity="0.85" />
@@ -126,7 +126,7 @@ function CloudIllustration() {
 
 function StormIllustration() {
   return (
-    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="absolute bottom-0 right-0 opacity-90">
+    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="opacity-90 block">
       <ellipse cx="60" cy="40" rx="38" ry="20" fill="#3A3A5E" opacity="0.8" />
       <ellipse cx="50" cy="35" rx="28" ry="16" fill="#4A4A6E" opacity="0.9" />
       {/* Lightning bolt */}
@@ -141,7 +141,7 @@ function StormIllustration() {
 
 function SnowyIllustration() {
   return (
-    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="absolute bottom-0 right-0 opacity-80">
+    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" className="opacity-80 block">
       <ellipse cx="60" cy="38" rx="36" ry="18" fill="white" opacity="0.6" />
       <ellipse cx="50" cy="32" rx="26" ry="16" fill="white" opacity="0.75" />
       {/* Snowflakes */}
@@ -203,11 +203,13 @@ export function WeatherCard() {
         minHeight: 128,
       }}
     >
-      {/* Illustration — absolute bottom-right */}
-      <Illustration />
+      {/* Illustration — explicit z=0 so content always renders above */}
+      <div style={{ position: "absolute", bottom: 0, right: 0, zIndex: 0, pointerEvents: "none" }}>
+        <Illustration />
+      </div>
 
-      {/* Content */}
-      <div className="relative z-10 p-5 flex items-start justify-between" style={{ minHeight: 128 }}>
+      {/* Content — explicit z=10 */}
+      <div className="relative p-5 flex items-start justify-between" style={{ minHeight: 128, zIndex: 10 }}>
         {/* Left: location + stats */}
         <div className="flex flex-col justify-between h-full gap-3">
           {/* Location */}
