@@ -6,6 +6,7 @@ import { HabitCard } from "@/components/HabitCard";
 import { HabitForm } from "@/components/HabitForm";
 import { MonthlyRecap } from "@/components/MonthlyRecap";
 import { CategoryManager } from "@/components/CategoryManager";
+import { WeatherCard } from "@/components/WeatherCard";
 import { Habit, HabitWithStats } from "@/types/habit";
 import { getGreeting, getMotivationQuote } from "@/lib/dateUtils";
 import { toHijri, formatHijri } from "@/lib/hijriDate";
@@ -128,6 +129,9 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
             )}
           </div>
         </div>
+
+        {/* Weather */}
+        <WeatherCard />
 
         {/* Mission + Quote */}
         <div className="bg-white dark:bg-card p-4 space-y-2" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
