@@ -181,8 +181,8 @@ export default function FinancePage() {
 
         {/* ── Manage picker ── */}
         {manageOpen === "picker" && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setManageOpen(null)}>
-            <div className="bg-card rounded-t-[28px] w-full max-w-lg pb-6 pt-4 px-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[500] bg-black/50 backdrop-blur-sm flex items-end justify-center" onClick={() => setManageOpen(null)}>
+            <div className="bg-card rounded-t-[28px] w-full max-w-lg pb-10 pt-4 px-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="w-10 h-1 bg-accent rounded-full mx-auto mb-4" />
               <p className="text-sm font-bold text-foreground mb-3">Manage Finance Lists</p>
               <div className="space-y-2">
