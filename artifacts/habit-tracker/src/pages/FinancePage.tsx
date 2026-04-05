@@ -444,13 +444,13 @@ export default function FinancePage() {
         </div>
 
         {/* ─── Wishlist & Goals ─────────────────────────────── */}
-        <div className="bg-card rounded-[20px] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border))]">
+        <div className="bg-[#181c1e] rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-foreground text-sm">Wishlist & Goals</span>
+              <span className="font-semibold text-[#f2f0e6] text-sm">Wishlist & Goals</span>
               {wishlist.length > 0 && (
-                <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">{wishlist.length}</span>
+                <span className="text-xs bg-primary/20 text-[#f2f0e6] font-medium px-2 py-0.5 rounded-full">{wishlist.length}</span>
               )}
             </div>
             <button
@@ -462,7 +462,7 @@ export default function FinancePage() {
           </div>
 
           {wishlist.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground text-xs">
+            <div className="text-center py-10 text-[#9C8B7A] text-xs">
               <PiggyBank className="w-8 h-8 mx-auto mb-2 opacity-40" />
               No wishlist items yet. Add your first goal!
             </div>
@@ -545,7 +545,19 @@ export default function FinancePage() {
                           <button
                             onClick={() => {
                               const amt = Number(savingsInput[item.id] || 0);
-                              if (amt > 0) { addWishlistSavings(item.id, amt); setSavingsInput((s) => ({ ...s, [item.id]: "" })); }
+                              if (amt > 0) {
+                                addWishlistSavings(item.id, amt);
+                                addTransaction({
+                                  type: "expense",
+                                  title: `Savings for ${item.title}`,
+                                  amount: amt,
+                                  category: "Savings",
+                                  date: getTodayKey(),
+                                  accountSource: "",
+                                  notes: "",
+                                });
+                                setSavingsInput((s) => ({ ...s, [item.id]: "" }));
+                              }
                               setShowSavings(null);
                             }}
                             className="px-2.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
