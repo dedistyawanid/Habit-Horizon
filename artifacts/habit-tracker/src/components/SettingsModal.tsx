@@ -236,10 +236,10 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 )}
                 <button
                   onClick={() => avatarInputRef.current?.click()}
-                  className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-1.5 shadow-sm hover:shadow-md transition-all"
+                  className="absolute -bottom-2 -right-2 bg-card border border-[hsl(var(--border))] rounded-lg p-1.5 shadow-sm hover:shadow-md transition-all"
                   data-testid="btn-upload-avatar"
                 >
-                  <Image className="w-3.5 h-3.5 text-gray-500" />
+                  <Image className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
               <div className="flex gap-2">
@@ -309,14 +309,11 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             {/* ── Health & Nutrition Targets (synced to cloud) ── */}
-            <div
-              className="rounded-2xl p-4 space-y-3"
-              style={{ background: "#F5F4F0", border: "1px solid #E5E0D8" }}
-            >
+            <div className="rounded-2xl p-4 space-y-3 bg-accent border border-[hsl(var(--border))]">
               <div className="flex items-center gap-2 mb-1">
                 <RefreshCw className="w-3.5 h-3.5 text-primary" />
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Health &amp; Nutrition Targets</p>
-                <span className="text-xs text-gray-400 ml-auto">Cloud-synced</span>
+                <p className="text-sm font-semibold text-foreground">Health &amp; Nutrition Targets</p>
+                <span className="text-xs text-muted-foreground ml-auto">Cloud-synced</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -328,7 +325,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={targetWeight}
                     onChange={(e) => setTargetWeight(e.target.value)}
                     placeholder="e.g. 60" type="number"
-                    className="bg-white"
                     data-testid="input-target-weight"
                   />
                 </div>
@@ -340,7 +336,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={calorieGoal}
                     onChange={(e) => setCalorieGoal(e.target.value)}
                     placeholder="e.g. 2500" type="number"
-                    className="bg-white"
                     data-testid="input-calorie-goal"
                   />
                 </div>
@@ -352,7 +347,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={proteinGoal}
                     onChange={(e) => setProteinGoal(e.target.value)}
                     placeholder="e.g. 150" type="number"
-                    className="bg-white"
                     data-testid="input-protein-goal"
                   />
                 </div>
@@ -364,19 +358,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={carbsGoal}
                     onChange={(e) => setCarbsGoal(e.target.value)}
                     placeholder="e.g. 300" type="number"
-                    className="bg-white"
                     data-testid="input-carbs-goal"
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-400">Saved automatically · synced across all your devices</p>
+              <p className="text-xs text-muted-foreground">Saved automatically · synced across all your devices</p>
             </div>
           </TabsContent>
 
           {/* ── APPEARANCE TAB ── */}
           <TabsContent value="appearance" className="space-y-5 pt-4">
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Theme Mode</p>
+              <p className="text-sm font-semibold text-foreground mb-3">Theme Mode</p>
               <div className="grid grid-cols-3 gap-2">
                 {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
                   <button
@@ -387,18 +380,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                       "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all",
                       settings.theme === value
                         ? "border-primary bg-primary/5 dark:bg-primary/10"
-                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
+                        : "border-[hsl(var(--border))] hover:border-[hsl(var(--border))]"
                     )}
                   >
-                    <Icon className={cn("w-5 h-5", settings.theme === value ? "text-primary" : "text-gray-400")} />
-                    <span className={cn("text-xs font-medium", settings.theme === value ? "text-primary" : "text-gray-500")}>{label}</span>
+                    <Icon className={cn("w-5 h-5", settings.theme === value ? "text-primary" : "text-muted-foreground")} />
+                    <span className={cn("text-xs font-medium", settings.theme === value ? "text-primary" : "text-muted-foreground")}>{label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-1.5">
+              <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5" /> Accent Color
               </p>
               <div className="grid grid-cols-1 gap-2">
@@ -410,18 +403,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
                       settings.accentTheme === preset.id
-                        ? "border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800"
-                        : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
+                        ? "border-foreground/40 bg-accent"
+                        : "border-[hsl(var(--border))] hover:border-[hsl(var(--border))]"
                     )}
                   >
                     <div className="w-8 h-8 rounded-xl shrink-0" style={{ backgroundColor: preset.previewColor }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{preset.name}</p>
-                      <p className="text-xs text-gray-400">{preset.description}</p>
+                      <p className="text-sm font-medium text-foreground">{preset.name}</p>
+                      <p className="text-xs text-muted-foreground">{preset.description}</p>
                     </div>
                     {settings.accentTheme === preset.id && (
-                      <div className="w-5 h-5 rounded-full bg-gray-800 dark:bg-gray-200 flex items-center justify-center shrink-0">
-                        <Check className="w-3 h-3 text-white dark:text-gray-900" />
+                      <div className="w-5 h-5 rounded-full bg-foreground flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 text-white dark:text-background" />
                       </div>
                     )}
                   </button>
@@ -430,7 +423,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Date Format</p>
+              <p className="text-sm font-semibold text-foreground mb-3">Date Format</p>
               <div className="grid grid-cols-3 gap-2">
                 {DATE_FORMATS.map((fmt) => (
                   <button
@@ -441,7 +434,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                       "p-2.5 rounded-xl border-2 text-xs font-mono transition-all",
                       settings.dateFormat === fmt
                         ? "border-primary bg-primary/5 text-primary"
-                        : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300"
+                        : "border-[hsl(var(--border))] text-muted-foreground hover:border-[hsl(var(--border))]"
                     )}
                   >
                     {fmt}
@@ -455,12 +448,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           <TabsContent value="data" className="space-y-4 pt-4">
 
             {/* ── Force Push to Cloud ── */}
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+            <div className="rounded-2xl border border-[hsl(var(--border))] p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <CloudUpload className="w-4 h-4 text-primary" />
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Force Upload to Cloud</p>
+                <p className="text-sm font-semibold text-foreground">Force Upload to Cloud</p>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Pushes everything stored on this device to Supabase right now.
                 Use this if data shows "Pending" and won't auto-sync.
               </p>
@@ -482,12 +475,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     <div
                       key={r.table}
                       className="flex items-center justify-between text-xs px-3 py-2 rounded-xl"
-                      style={{ background: r.success ? "#F0F7EC" : "#FEF2F2" }}
+                      style={{ background: r.success ? "hsl(130 15% 14%)" : "hsl(0 15% 14%)" }}
                     >
-                      <span className="font-mono text-gray-600 dark:text-gray-300">{r.table}</span>
+                      <span className="font-mono text-foreground">{r.table}</span>
                       <div className="flex items-center gap-2">
                         {r.sent > 0 && (
-                          <span className="text-gray-400">{r.sent} row{r.sent !== 1 ? "s" : ""}</span>
+                          <span className="text-muted-foreground">{r.sent} row{r.sent !== 1 ? "s" : ""}</span>
                         )}
                         {r.success ? (
                           <span className="flex items-center gap-1 text-green-600 font-semibold">
@@ -510,8 +503,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Export Data</p>
-              <p className="text-xs text-gray-400 mb-3">
+              <p className="text-sm font-semibold text-foreground mb-1">Export Data</p>
+              <p className="text-xs text-muted-foreground mb-3">
                 Downloads a full backup including habits, notes, finance transactions, weight log, and settings.
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -524,9 +517,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               </div>
             </div>
 
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Import Data</p>
-              <p className="text-xs text-gray-400 mb-3">Restore data from a JSON backup file. This will overwrite your current data.</p>
+            <div className="border-t border-[hsl(var(--border))] pt-4">
+              <p className="text-sm font-semibold text-foreground mb-1">Import Data</p>
+              <p className="text-xs text-muted-foreground mb-3">Restore data from a JSON backup file. This will overwrite your current data.</p>
               <Button
                 variant="outline" className="gap-2 w-full border-dashed"
                 onClick={() => fileInputRef.current?.click()}
@@ -537,7 +530,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
+            <div className="bg-accent/50 rounded-xl p-3 text-xs text-muted-foreground space-y-1">
               <p><span className="font-semibold">Habits:</span> {habits.length}</p>
               <p><span className="font-semibold">Check-ins:</span> {checkIns.length}</p>
               <p><span className="font-semibold">Notes:</span> {notes.length}</p>
@@ -549,20 +542,20 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
         {/* ── ACCOUNT / LOGOUT (always visible below tabs) ── */}
         <div
-          className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800"
+          className="mt-4 pt-4 border-t border-[hsl(var(--border))]"
         >
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: "#F5F4F0" }}
             >
-              <Mail className="w-4 h-4 text-gray-500" />
+              <Mail className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+              <p className="text-sm font-semibold text-foreground truncate">
                 {user?.email ?? "Not signed in"}
               </p>
-              <p className="text-xs text-gray-400">Signed in · data synced to cloud</p>
+              <p className="text-xs text-muted-foreground">Signed in · data synced to cloud</p>
             </div>
             <button
               onClick={handleLogout}
@@ -579,7 +572,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </button>
           </div>
           {logoutConfirm && (
-            <p className="text-xs text-gray-400 mt-2 ml-12">
+            <p className="text-xs text-muted-foreground mt-2 ml-12">
               This will clear local data on this device. Your cloud data remains safe.
               <button
                 onClick={() => setLogoutConfirm(false)}

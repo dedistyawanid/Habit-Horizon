@@ -416,7 +416,7 @@ export default function HealthPage() {
                 {/* Stats (left) + Range toggle (right) in one row — wraps on narrow screens */}
                 <div className="flex items-center flex-wrap gap-2">
                   {/* ── Left: compact summary stats ── */}
-                  <div className="flex items-center gap-x-5 flex-1 min-w-0">
+                  <div className="flex items-center gap-x-6 flex-1 min-w-0">
                     {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
                       <>
                         <div className="flex items-center gap-1.5">
