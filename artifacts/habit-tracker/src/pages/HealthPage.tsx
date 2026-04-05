@@ -494,37 +494,6 @@ export default function HealthPage() {
         {subTab === "activity" && (
           <div className="space-y-4">
 
-            {/* ── Summary stats row — directly above chart ── */}
-            {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
-              <div className="flex items-center gap-x-8 px-1">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <div className="leading-none">
-                    <p className="text-[13px] font-black text-foreground">{stats.distance.toFixed(1)} km</p>
-                    <p className="text-[10px] text-muted-foreground/80 mt-0.5">distance</p>
-                  </div>
-                </div>
-                {stats.elevation > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <Mountain className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <div className="leading-none">
-                      <p className="text-[13px] font-black text-foreground">{Math.round(stats.elevation)} m</p>
-                      <p className="text-[10px] text-muted-foreground/80 mt-0.5">elevation</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-1.5">
-                  <Timer className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <div className="leading-none">
-                    <p className="text-[13px] font-black text-foreground">
-                      {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/80 mt-0.5">active</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Activity trend chart */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
               {actChartData.length > 0 ? (
@@ -587,6 +556,35 @@ export default function HealthPage() {
                 </div>
               )}
             </div>
+
+            {/* ── Summary stats — below chart, centered, large typography ── */}
+            {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
+              <div className="bg-card rounded-[24px] px-4 py-5">
+                <div className={cn("grid gap-4 text-center", stats.elevation > 0 ? "grid-cols-3" : "grid-cols-2")}>
+                  <div className="flex flex-col items-center gap-1">
+                    <MapPin className="w-4 h-4 text-primary mb-0.5" />
+                    <p className="text-2xl font-black text-foreground leading-none">{stats.distance.toFixed(1)}</p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">km distance</p>
+                  </div>
+                  {stats.elevation > 0 && (
+                    <div className="flex flex-col items-center gap-1">
+                      <Mountain className="w-4 h-4 text-primary mb-0.5" />
+                      <p className="text-2xl font-black text-foreground leading-none">{Math.round(stats.elevation)}</p>
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">m elevation</p>
+                    </div>
+                  )}
+                  <div className="flex flex-col items-center gap-1">
+                    <Timer className="w-4 h-4 text-primary mb-0.5" />
+                    <p className="text-2xl font-black text-foreground leading-none">
+                      {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}` : `${stats.minutes}`}
+                    </p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                      {stats.minutes >= 60 ? "hrs active" : "min active"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Stat cards */}
             {filteredAct.length > 0 && (
