@@ -253,14 +253,14 @@
     box-shadow: none;
   }
   .glass-header {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid #E5E0D8;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .glass-header {
-    background: rgba(22, 24, 25, 0.94);      /* #161819 at 94% */
-    border-bottom: 1px solid hsl(var(--border));
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .habit-progress-track {
     height: 6px;
@@ -351,14 +351,14 @@
 
   /* ── Bottom Navigation ── */
   .bottom-nav {
-    background: rgba(255, 255, 255, 0.93);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid #E5E0D8;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .bottom-nav {
-    background: rgba(22, 24, 25, 0.97);      /* #161819 — no blue tint */
-    border-top: 1px solid hsl(var(--border));
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* ── Progress ring track: dark-mode tinted warm charcoal ── */
@@ -406,12 +406,14 @@
 
   /* ── Health sub-tab sticky bar ──────────────────────── */
   .health-subtab-sticky {
-    background: rgba(250, 249, 246, 0.96);
-    border-bottom: 1px solid #E5E0D8;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .health-subtab-sticky {
-    background: hsl(var(--background));   /* solid #161819 — no white bleed */
-    border-bottom: 1px solid hsl(var(--border));
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* ── Sleep Debt card backgrounds (state-aware) ───────── */
