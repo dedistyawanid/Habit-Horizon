@@ -25,6 +25,7 @@ import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
 import { useToast } from "@/hooks/use-toast";
 import { fetchAllFromCloud, fetchProfile, applyProfileToLocalStorage } from "@/lib/fetchFromCloud";
+import { flushQueue } from "@/lib/sync";
 
 const queryClient = new QueryClient();
 const SYNC_TOAST_KEY = "dedi_sync_toast";
@@ -84,7 +85,10 @@ function AppShell() {
   async function handleManualRefresh() {
     if (refreshing) return;
     await refreshFromCloud();
-    toast({ title: "Data updated from Cloud", description: "All your data has been refreshed." });
+    toast({
+      title: "Sync complete",
+      description: "Local changes pushed & cloud data refreshed.",
+    });
   }
 
   return (
@@ -101,18 +105,15 @@ function AppShell() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Manual cloud refresh button */}
+            {/* Two-way sync button: push local → pull cloud */}
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}
-              className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
-              aria-label="Refresh from cloud"
-              title="Pull latest data from cloud"
+              className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all disabled:opacity-60"
+              aria-label="Sync data"
+              title={refreshing ? "Syncing…" : "Push local changes & pull cloud data"}
             >
-              <RefreshCw
-                className="w-4 h-4"
-                style={refreshing ? { animation: "spin 1s linear infinite" } : undefined}
-              />
+              <RefreshCw className={`w-4 h-4 transition-transform ${refreshing ? "animate-spin" : ""}`} />
             </button>
 
             <button
@@ -124,7 +125,6 @@ function AppShell() {
             </button>
           </div>
         </div>
-        <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
       </header>
 
       {/* Page content */}
@@ -170,6 +170,10 @@ function AuthGate() {
     if (!user || refreshing) return;
     setRefreshing(true);
     try {
+      /* ① Push any locally-queued offline ops first */
+      if (navigator.onLine) await flushQueue();
+
+      /* ② Pull everything from Supabase into localStorage */
       const [syncResult, profile] = await Promise.all([
         fetchAllFromCloud(user.id),
         fetchProfile(user.id),

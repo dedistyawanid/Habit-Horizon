@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils";
 type SortOption = "name" | "performance" | "created";
 type FilterCategory = "All" | string;
 
+/** Strip all HTML tags and collapse whitespace — used to sanitize rich-text note previews */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
+
 interface DashboardProps {
   onNewHabit?: () => void;
 }
@@ -175,8 +180,10 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
                   className="w-full text-left bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-3 hover:shadow-sm transition-all"
                 >
                   <p className="text-sm font-medium text-amber-800 dark:text-amber-200 truncate">{note.title}</p>
-                  {note.content && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 line-clamp-1">{note.content}</p>
+                  {note.content && stripHtml(note.content) && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 line-clamp-1">
+                      {stripHtml(note.content)}
+                    </p>
                   )}
                 </button>
               ))}
