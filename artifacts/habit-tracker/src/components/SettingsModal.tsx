@@ -1,15 +1,13 @@
 import { useState, useRef } from "react";
-import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image } from "lucide-react";
+import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/context/AppContext";
-import { AppSettings, DateFormat, Theme } from "@/types/settings";
+import { AppSettings, DateFormat, Theme, THEME_PRESETS, AccentTheme } from "@/types/settings";
 import { exportAsCSV, exportAsJSON, parseImportFile } from "@/lib/exportUtils";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -172,7 +170,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const initials = (settings.profile.fullName || "DS")
     .split(" ")
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
@@ -203,7 +201,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     className="w-20 h-20 rounded-2xl object-cover"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-2xl font-bold text-violet-600 dark:text-violet-400">
+                  <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
                     {initials}
                   </div>
                 )}
@@ -294,7 +292,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           {/* APPEARANCE TAB */}
           <TabsContent value="appearance" className="space-y-5 pt-4">
             <div>
-              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Theme</p>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Theme Mode</p>
               <div className="grid grid-cols-3 gap-2">
                 {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
                   <button
@@ -304,12 +302,48 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     className={cn(
                       "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all",
                       settings.theme === value
-                        ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
+                        ? "border-primary bg-primary/5 dark:bg-primary/10"
                         : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                     )}
                   >
-                    <Icon className={cn("w-5 h-5", settings.theme === value ? "text-violet-600" : "text-gray-400")} />
-                    <span className={cn("text-xs font-medium", settings.theme === value ? "text-violet-600" : "text-gray-500")}>{label}</span>
+                    <Icon className={cn("w-5 h-5", settings.theme === value ? "text-primary" : "text-gray-400")} />
+                    <span className={cn("text-xs font-medium", settings.theme === value ? "text-primary" : "text-gray-500")}>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5" />
+                Accent Color
+              </p>
+              <div className="grid grid-cols-1 gap-2">
+                {THEME_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => updateSettings({ accentTheme: preset.id as AccentTheme })}
+                    data-testid={`accent-btn-${preset.id}`}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
+                      settings.accentTheme === preset.id
+                        ? "border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800"
+                        : "border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
+                    )}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-xl shrink-0"
+                      style={{ backgroundColor: preset.previewColor }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{preset.name}</p>
+                      <p className="text-xs text-gray-400">{preset.description}</p>
+                    </div>
+                    {settings.accentTheme === preset.id && (
+                      <div className="w-5 h-5 rounded-full bg-gray-800 dark:bg-gray-200 flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 text-white dark:text-gray-900" />
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -324,9 +358,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                     onClick={() => updateSettings({ dateFormat: fmt })}
                     data-testid={`date-format-btn-${fmt}`}
                     className={cn(
-                      "p-2.5 rounded-xl border-2 text-sm font-mono transition-all",
+                      "p-2.5 rounded-xl border-2 text-xs font-mono transition-all",
                       settings.dateFormat === fmt
-                        ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-400"
+                        ? "border-primary bg-primary/5 text-primary"
                         : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300"
                     )}
                   >

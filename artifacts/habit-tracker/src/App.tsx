@@ -1,25 +1,85 @@
-import { useState } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useState, useRef } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
-import { NavBar } from "@/components/NavBar";
+import { BottomNav } from "@/components/BottomNav";
+import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
+import { QuickNoteModal } from "@/components/QuickNoteModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import NotesPage from "@/pages/NotesPage";
 import InsightsPage from "@/pages/InsightsPage";
 import FinancePage from "@/pages/FinancePage";
+import { Settings } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { HabitCard } from "@/components/HabitCard";
+import { HabitWithStats } from "@/types/habit";
 
 const queryClient = new QueryClient();
 
+function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { habitsWithStats, deleteHabit } = useApp();
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Quick Check-in</DialogTitle>
+        </DialogHeader>
+        {habitsWithStats.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No habits yet</p>
+        ) : (
+          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+            {habitsWithStats.map((habit) => (
+              <HabitCard
+                key={habit.id}
+                habit={habit}
+                view="list"
+                onEdit={() => { }}
+                onDelete={deleteHabit}
+                onRecap={() => { }}
+                onNotes={() => { }}
+              />
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [financeModalOpen, setFinanceModalOpen] = useState(false);
+  const [checkinModalOpen, setCheckinModalOpen] = useState(false);
+  const { addNote, addTransaction } = useApp();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-950 transition-colors duration-300">
-      <NavBar onOpenSettings={() => setSettingsOpen(true)} />
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* Top bar — minimal: logo + settings */}
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground text-xs font-bold">D</span>
+            </div>
+            <span className="font-bold text-sm text-gray-800 dark:text-gray-100">Dedi's Tracker</span>
+          </div>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* Page content */}
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/insights" component={InsightsPage} />
@@ -27,7 +87,26 @@ function AppShell() {
         <Route path="/notes" component={NotesPage} />
         <Route component={NotFound} />
       </Switch>
+
+      {/* Bottom navigation */}
+      <BottomNav />
+
+      {/* Multi-action FAB */}
+      <MultiFAB
+        onNewNote={() => setNoteModalOpen(true)}
+        onNewFinance={() => setFinanceModalOpen(true)}
+        onQuickCheckin={() => setCheckinModalOpen(true)}
+      />
+
+      {/* Modals */}
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <QuickNoteModal
+        open={noteModalOpen}
+        onClose={() => setNoteModalOpen(false)}
+        onSubmit={addNote}
+        mode="add"
+      />
+      <QuickCheckinDialog open={checkinModalOpen} onClose={() => setCheckinModalOpen(false)} />
     </div>
   );
 }

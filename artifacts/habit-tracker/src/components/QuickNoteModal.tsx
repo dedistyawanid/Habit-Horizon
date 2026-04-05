@@ -8,62 +8,67 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useApp } from "@/context/AppContext";
+import { Switch } from "@/components/ui/switch";
 import { QuickNote } from "@/types/notes";
-import { Link } from "lucide-react";
 
 const noteSchema = z.object({
   title: z.string().min(1, "Title is required").max(100),
-  category: z.string().min(1, "Category is required"),
-  content: z.string().min(1, "Content is required"),
+  category: z.string().default("General"),
+  content: z.string().max(2000).optional().default(""),
   url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  reminderDate: z.string().optional().default(""),
+  reminderEnabled: z.boolean().optional().default(false),
 });
 
 type NoteFormValues = z.infer<typeof noteSchema>;
 
+const NOTE_CATEGORIES = ["General", "Work", "Personal", "Health", "Finance", "Ideas", "Shopping", "Travel"];
+
 interface QuickNoteModalProps {
   open: boolean;
   onClose: () => void;
-  editNote?: QuickNote | null;
+  onSubmit: (values: Omit<QuickNote, "id" | "createdAt" | "updatedAt">) => void;
+  initialValues?: Partial<QuickNote>;
+  mode?: "add" | "edit";
 }
 
-export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps) {
-  const { settings, addNote, updateNote } = useApp();
-  const isEdit = !!editNote;
-
+export function QuickNoteModal({ open, onClose, onSubmit, initialValues, mode = "add" }: QuickNoteModalProps) {
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteSchema),
     defaultValues: {
       title: "",
-      category: settings.noteCategories[0] || "Ideas",
+      category: "General",
       content: "",
       url: "",
+      reminderDate: "",
+      reminderEnabled: false,
     },
   });
+
+  const reminderEnabled = form.watch("reminderEnabled");
 
   useEffect(() => {
     if (open) {
       form.reset({
-        title: editNote?.title || "",
-        category: editNote?.category || settings.noteCategories[0] || "Ideas",
-        content: editNote?.content || "",
-        url: editNote?.url || "",
+        title: initialValues?.title || "",
+        category: initialValues?.category || "General",
+        content: initialValues?.content || "",
+        url: initialValues?.url || "",
+        reminderDate: initialValues?.reminderDate || "",
+        reminderEnabled: initialValues?.reminderEnabled ?? false,
       });
     }
-  }, [open, editNote, form, settings.noteCategories]);
+  }, [open, initialValues, form]);
 
   function handleSubmit(values: NoteFormValues) {
-    const payload = {
+    onSubmit({
       title: values.title,
       category: values.category,
-      content: values.content,
+      content: values.content || "",
       url: values.url || undefined,
-    };
-    if (isEdit && editNote) {
-      updateNote(editNote.id, payload);
-    } else {
-      addNote(payload);
-    }
+      reminderDate: values.reminderEnabled && values.reminderDate ? values.reminderDate : undefined,
+      reminderEnabled: values.reminderEnabled && !!values.reminderDate,
+    });
     onClose();
   }
 
@@ -72,7 +77,7 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
-            {isEdit ? "Edit Note" : "Quick Note"}
+            {mode === "add" ? "New Note" : "Edit Note"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -84,7 +89,7 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Note title..." {...field} data-testid="input-note-title" autoFocus />
+                    <Input placeholder="Note title..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,12 +104,12 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
                   <FormLabel>Category</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-testid="select-note-category">
-                        <SelectValue placeholder="Select category" />
+                      <SelectTrigger>
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {settings.noteCategories.map((cat) => (
+                      {NOTE_CATEGORIES.map((cat) => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>
@@ -116,19 +121,18 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
 
             <FormField
               control={form.control}
-              name="url"
+              name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1.5">
-                    <Link className="w-3.5 h-3.5 text-primary" />
-                    Media / Reference URL <span className="text-gray-400 font-normal">(optional)</span>
+                  <FormLabel>
+                    Content{" "}
+                    <span className="text-gray-400 font-normal text-xs">(supports **bold**, *italic*, - list)</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="https://youtube.com/watch?v=..."
-                      type="url"
+                    <Textarea
+                      placeholder="Write your note here..."
+                      className="resize-none min-h-[100px] font-mono text-sm"
                       {...field}
-                      data-testid="input-note-url"
                     />
                   </FormControl>
                   <FormMessage />
@@ -138,26 +142,58 @@ export function QuickNoteModal({ open, onClose, editNote }: QuickNoteModalProps)
 
             <FormField
               control={form.control}
-              name="content"
+              name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content</FormLabel>
+                  <FormLabel>
+                    Link / URL{" "}
+                    <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                  </FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Write your note here..."
-                      className="min-h-[120px] resize-none"
-                      {...field}
-                      data-testid="input-note-content"
-                    />
+                    <Input type="url" placeholder="https://..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Reminder</p>
+                <p className="text-xs text-gray-500">Show on dashboard on the chosen date</p>
+              </div>
+              <FormField
+                control={form.control}
+                name="reminderEnabled"
+                render={({ field }) => (
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                )}
+              />
+            </div>
+
+            {reminderEnabled && (
+              <FormField
+                control={form.control}
+                name="reminderDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reminder Date</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        min={new Date().toISOString().split("T")[0]}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <div className="flex gap-2 pt-1">
-              <Button type="submit" className="flex-1" data-testid="btn-save-note">
-                {isEdit ? "Save Changes" : "Add Note"}
+              <Button type="submit" className="flex-1">
+                {mode === "add" ? "Save Note" : "Update Note"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">
                 Cancel

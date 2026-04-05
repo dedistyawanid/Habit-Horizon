@@ -1,0 +1,94 @@
+Please finish the remaining features and apply these specific enhancements
+
+1) Writing Experience (Advanced Notes):
+
+Rich Text Editor: Implement a basic Markdown or Rich Text support (Bold, Italic, Lists) for the Notes content.
+
+Full-Screen Writing Mode: Add a "Expand/Full-Screen" button to the Note modal so I have a large, distraction-free area to write.
+
+Reference Preview: Ensure the "Media/Reference URL" creates a small clickable preview or icon in the note card.
+
+2. Financial Precision & Multi-Action FAB:
+
+The Multi-Action FAB: Replace the current static FAB with an expandable menu showing 3 icons: 📝 (Note), 💸 (Finance), ✅ (Quick Check-in).
+
+Source of Funds: Add a "Account/Source" field to transactions (e.g., Cash, Bank BCA, E-Wallet).
+
+Financial Categories: Ensure I can filter and view reports not just by Income/Expense, but by specific categories (e.g., Food, Client Fee, Equipment).
+
+Editable Targets: Add an option in Settings to change the "Annual Revenue Goal" (e.g., change the 1 Billion target).
+
+3. Analytics & Weight Tracking:
+
+New Timeframes: In the Insights tab, add filtering options for "Last 3 Days" and "Last 7 Days" (Weekly).
+
+Habit Performance: Each habit should have its own detailed "Mini-Chart" or progress breakdown when clicked.
+
+4. Customization & System Check:
+Data Integrity: Verify that LocalStorage saves EVERYTHING (including the new "Source of Funds" and "Weight Log") and ensure the Import/Export works for all these new data points.
+
+Ultra-Minimalist Habit Card (Refined UI):
+
+De-clutter: Remove all percentage text and redundant progress bars.
+
+Main Display: Show only the Habit Icon, Title, and one thin, subtle progress bar.
+
+Target Logic: Use a small 🎯 (Target Icon) followed by the fraction only (e.g., 🎯 1/28). Remove the text "Monthly Goal".
+
+Streak Logic (7-Day Block System):
+
+Show a small 🔥 (Fire Icon). The number represents completed 7-day streaks (e.g., 14 consecutive days = 🔥 2).
+
+Reset Rule: If a habit is missed before reaching the 7-day milestone, the current week's streak resets to zero.
+
+New Field: Add an input for "Weekly Streak Target" (default to 7 days) in the "Add Habit" form.
+
+Action Menu (The Three Dots ⋮): Hide all action icons (Notes, Date, Edit, Delete) from the main card view. Replace them with a single Vertical Three-Dot Menu (⋮) that opens a clean dropdown containing: 📝 Notes, 📅 History, ✏️ Edit, and 🗑️ Delete.
+
+4. UI Refinement:
+
+Primary Palette: Completely remove the old dark/neon purple theme.
+
+Overall Background: Off-White / Very Light Gray (Clean and bright).
+
+Accent Color: Use a #879A77 (Soft Green) for buttons, active states, toggles, and highlights.
+
+Cards & Modals: Use Pure White with very subtle shadows or thin borders.
+
+Text: Dark Gray / Charcoal (comfortable for reading).
+
+Design Style: Minimalist Modern, clean typography, smooth transitions, and subtle glassmorphism on modals.
+
+Make sure the UI remains English and the Minimalist Modern aesthetic is consistent across all new modals and charts.
+
+Mobile UX Optimization (Navigation):
+
+Bottom Navigation Bar: Move the main navigation (Habits, Insights, Finance, Notes) to a sleek Bottom Nav Bar. Persistent Bottom Nav Bar: Implement the main navigation (Habits, Insights, Finance, Notes) at the bottom for ALL screen sizes (Desktop and Mobile).
+
+Swipe Gestures: Implement "Swipe to Change Tab" functionality. I want to be able to swipe left or right on the main content area to switch between the four main sections smoothly.
+
+Haptic Feedback (Visual): Add subtle visual feedback (like a small bounce or highlight) when switching tabs via swipe or tap.
+
+Ergonomics: Ensure the Multi-Action FAB sits slightly above the Bottom Nav Bar so they don't overlap and are both easily reachable with one thumb.
+
+Smart Dashboard Header:
+
+Dynamic Greeting: Include "Hello, Dedi Styawan" and a motivational quote.
+
+Dual Calendar System: Display today's date in both Gregorian (Masehi) and Hijri formats clearly in the header.
+
+Smart Notes & Dashboard Integration:
+
+Date & Reminder: In the "Create/Edit Note" modal, add a Date Picker and a Reminder Toggle.
+
+Dashboard Visibility: If a note has a reminder set for "Today", display it in a clean "Upcoming Task/Reminder" section at the top of the Habits Dashboard.
+
+Minimalist Task Card: This reminder should look like a slim, elegant version of the habit card, showing only the Note Title and the Time/Date.
+
+Action: Tapping the reminder should directly open the full note for quick reading/editing.
+
+Reminder Toggle: Add a "Set Reminder" toggle and a Date Picker inside the Note modal.
+
+Dashboard Integration: Notes with the Reminder Toggle ON must appear in a clean "Today's Tasks" section on the main Dashboard if the date matches today.
+
+Auto-Cleanup: Reminders should automatically disappear from the Dashboard once the date has passed or the toggle is turned OFF.

@@ -10,6 +10,7 @@ export interface Habit {
   createdAt: string;
   color: string;
   monthlyTarget?: number;
+  weeklyStreakTarget?: number;
 }
 
 export interface CheckIn {
@@ -22,6 +23,7 @@ export interface CheckIn {
 
 export interface HabitWithStats extends Habit {
   currentStreak: number;
+  streakBlocks: number;
   completionThisMonth: number;
   totalCompletions: number;
   totalDaysThisMonth: number;

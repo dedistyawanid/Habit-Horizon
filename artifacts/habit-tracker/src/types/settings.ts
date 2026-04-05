@@ -13,8 +13,32 @@ export interface ThemePreset {
 
 export const THEME_PRESETS: ThemePreset[] = [
   {
+    id: "forest",
+    name: "Sage Green",
+    description: "Default — Soft & Natural",
+    previewColor: "#879A77",
+    lightVars: {
+      "--primary": "93 18% 54%",
+      "--primary-foreground": "0 0% 100%",
+      "--accent": "93 15% 92%",
+      "--accent-foreground": "93 25% 30%",
+      "--ring": "93 18% 54%",
+      "--sidebar-primary": "93 18% 54%",
+      "--sidebar-accent": "93 15% 92%",
+    },
+    darkVars: {
+      "--primary": "93 20% 62%",
+      "--primary-foreground": "0 0% 100%",
+      "--accent": "93 15% 20%",
+      "--accent-foreground": "93 20% 72%",
+      "--ring": "93 20% 62%",
+      "--sidebar-primary": "93 20% 62%",
+      "--sidebar-accent": "93 15% 20%",
+    },
+  },
+  {
     id: "classic",
-    name: "Classic",
+    name: "Violet",
     description: "Clean White & Violet",
     previewColor: "#7c3aed",
     lightVars: {
@@ -58,30 +82,6 @@ export const THEME_PRESETS: ThemePreset[] = [
       "--ring": "196 72% 55%",
       "--sidebar-primary": "196 72% 55%",
       "--sidebar-accent": "196 40% 14%",
-    },
-  },
-  {
-    id: "forest",
-    name: "Forest",
-    description: "Dark Charcoal & Sage Green",
-    previewColor: "#4a7c59",
-    lightVars: {
-      "--primary": "148 42% 42%",
-      "--primary-foreground": "0 0% 100%",
-      "--accent": "148 35% 90%",
-      "--accent-foreground": "148 50% 20%",
-      "--ring": "148 42% 42%",
-      "--sidebar-primary": "148 42% 42%",
-      "--sidebar-accent": "148 35% 90%",
-    },
-    darkVars: {
-      "--primary": "148 45% 52%",
-      "--primary-foreground": "0 0% 100%",
-      "--accent": "148 28% 14%",
-      "--accent-foreground": "148 50% 72%",
-      "--ring": "148 45% 52%",
-      "--sidebar-primary": "148 45% 52%",
-      "--sidebar-accent": "148 28% 14%",
     },
   },
   {
@@ -154,7 +154,7 @@ export interface AppSettings {
 
 export const DEFAULT_SETTINGS: AppSettings = {
   theme: "light",
-  accentTheme: "classic",
+  accentTheme: "forest",
   dateFormat: "DD/MM/YYYY",
   profile: {
     fullName: "Dedi Styawan",

@@ -7,6 +7,7 @@ export interface Transaction {
   date: string;
   category: string;
   type: TransactionType;
+  accountSource?: string;
   notes?: string;
   createdAt: string;
 }

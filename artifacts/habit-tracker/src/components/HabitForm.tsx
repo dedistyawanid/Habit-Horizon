@@ -13,16 +13,16 @@ import { HABIT_COLORS } from "@/lib/colors";
 import { useApp } from "@/context/AppContext";
 
 const habitSchema = z.object({
-  name: z.string().min(1, "Name is required").max(60, "Name is too long"),
+  name: z.string().min(1, "Name is required").max(60),
   category: z.string().min(1, "Category is required"),
-  description: z.string().max(200, "Description is too long").optional().default(""),
+  description: z.string().max(200).optional().default(""),
   frequency: z.enum(["Daily", "Weekly", "Monthly"] as const),
-  color: z.string().optional().default("#7C9EBD"),
+  color: z.string().optional().default("#879A77"),
   monthlyTarget: z.string().optional(),
+  weeklyStreakTarget: z.string().optional(),
 });
 
 type HabitFormValues = z.infer<typeof habitSchema>;
-
 const FREQUENCIES: HabitFrequency[] = ["Daily", "Weekly", "Monthly"];
 
 interface HabitFormProps {
@@ -39,12 +39,13 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
   const form = useForm<HabitFormValues>({
     resolver: zodResolver(habitSchema),
     defaultValues: {
-      name: initialValues?.name || "",
-      category: initialValues?.category || settings.habitCategories[0] || "Health",
-      description: initialValues?.description || "",
-      frequency: initialValues?.frequency || "Daily",
-      color: initialValues?.color || "#7C9EBD",
-      monthlyTarget: initialValues?.monthlyTarget?.toString() || "",
+      name: "",
+      category: settings.habitCategories[0] || "Health",
+      description: "",
+      frequency: "Daily",
+      color: "#879A77",
+      monthlyTarget: "",
+      weeklyStreakTarget: "7",
     },
   });
 
@@ -55,21 +56,24 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
         category: initialValues?.category || settings.habitCategories[0] || "Health",
         description: initialValues?.description || "",
         frequency: initialValues?.frequency || "Daily",
-        color: initialValues?.color || "#7C9EBD",
+        color: initialValues?.color || "#879A77",
         monthlyTarget: initialValues?.monthlyTarget?.toString() || "",
+        weeklyStreakTarget: initialValues?.weeklyStreakTarget?.toString() || "7",
       });
     }
   }, [open, initialValues, form, settings.habitCategories]);
 
   function handleSubmit(values: HabitFormValues) {
-    const target = values.monthlyTarget ? parseInt(values.monthlyTarget) : undefined;
+    const monthly = values.monthlyTarget ? parseInt(values.monthlyTarget) : undefined;
+    const weekly = values.weeklyStreakTarget ? parseInt(values.weeklyStreakTarget) : 7;
     onSubmit({
       name: values.name,
       category: values.category as Habit["category"],
       description: values.description || "",
       frequency: values.frequency,
-      color: values.color || "#7C9EBD",
-      monthlyTarget: target && !isNaN(target) && target > 0 ? target : undefined,
+      color: values.color || "#879A77",
+      monthlyTarget: monthly && !isNaN(monthly) && monthly > 0 ? monthly : undefined,
+      weeklyStreakTarget: !isNaN(weekly) && weekly > 0 ? weekly : 7,
     });
     onClose();
   }
@@ -121,7 +125,6 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="frequency"
@@ -131,13 +134,11 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-frequency">
-                          <SelectValue placeholder="Choose frequency" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {FREQUENCIES.map((f) => (
-                          <SelectItem key={f} value={f}>{f}</SelectItem>
-                        ))}
+                        {FREQUENCIES.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -146,44 +147,43 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="monthlyTarget"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Monthly Goal <span className="text-gray-400 font-normal">(optional — e.g. "20 times this month")</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="31"
-                      placeholder="e.g. 20"
-                      {...field}
-                      data-testid="input-habit-target"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="monthlyTarget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monthly Goal <span className="text-gray-400 font-normal text-xs">(optional)</span></FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" max="31" placeholder="e.g. 20" {...field} data-testid="input-habit-target" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="weeklyStreakTarget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Streak Block <span className="text-gray-400 font-normal text-xs">(days)</span></FormLabel>
+                    <FormControl>
+                      <Input type="number" min="1" max="30" placeholder="7" {...field} data-testid="input-streak-target" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Description / Cheat Sheet <span className="text-gray-400 font-normal">(optional)</span>
-                  </FormLabel>
+                  <FormLabel>Description <span className="text-gray-400 font-normal text-xs">(optional)</span></FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="e.g. Push-up 3x12 reps, rest 60 seconds"
-                      className="resize-none min-h-[70px]"
-                      {...field}
-                      data-testid="input-habit-description"
-                    />
+                    <Textarea placeholder="e.g. Push-up 3×12 reps" className="resize-none min-h-[60px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,13 +203,12 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
                           key={color}
                           type="button"
                           onClick={() => field.onChange(color)}
-                          className="w-7 h-7 rounded-full border-2 transition-all"
+                          className="w-6 h-6 rounded-full border-2 transition-all"
                           style={{
                             backgroundColor: color,
                             borderColor: field.value === color ? "#374151" : "transparent",
-                            transform: field.value === color ? "scale(1.2)" : "scale(1)",
+                            transform: field.value === color ? "scale(1.25)" : "scale(1)",
                           }}
-                          data-testid={`color-btn-${color}`}
                         />
                       ))}
                     </div>
@@ -218,13 +217,11 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               )}
             />
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-1">
               <Button type="submit" className="flex-1" data-testid="btn-submit-habit">
                 {mode === "add" ? "Add Habit" : "Save Changes"}
               </Button>
-              <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-                Cancel
-              </Button>
+              <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
             </div>
           </form>
         </Form>
