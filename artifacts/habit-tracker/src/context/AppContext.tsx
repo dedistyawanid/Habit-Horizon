@@ -5,10 +5,12 @@ import { useHabits } from "@/hooks/useHabits";
 import { useFinance } from "@/hooks/useFinance";
 import { useWeightLog } from "@/hooks/useWeightLog";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { useWishlist } from "@/hooks/useWishlist";
 import { AppSettings } from "@/types/settings";
 import { QuickNote } from "@/types/notes";
 import { Habit, CheckIn, HabitWithStats } from "@/types/habit";
 import { Transaction, FinanceSettings } from "@/types/finance";
+import { WishlistItem } from "@/types/wishlist";
 import { WeightEntry } from "@/hooks/useWeightLog";
 import { ActivityEntry } from "@/hooks/useActivityLog";
 
@@ -54,6 +56,12 @@ interface AppContextType {
   totalExpenses: number;
   currentBalance: number;
   currentYearIncome: number;
+  // Wishlist
+  wishlist: WishlistItem[];
+  addWishlistItem: (item: Omit<WishlistItem, "id" | "createdAt">) => void;
+  updateWishlistItem: (id: string, updates: Partial<Omit<WishlistItem, "id" | "createdAt">>) => void;
+  deleteWishlistItem: (id: string) => void;
+  addWishlistSavings: (id: string, amount: number) => void;
   // Weight log
   weightLog: WeightEntry[];
   addWeightEntry: (weight: number, notes?: string, date?: string) => void;
@@ -85,6 +93,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const financeHook = useFinance();
   const weightHook = useWeightLog();
   const activityHook = useActivityLog();
+  const wishlistHook = useWishlist();
 
   function importData(data: {
     habits?: Habit[];
@@ -116,6 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...financeHook,
         ...weightHook,
         ...activityHook,
+        ...wishlistHook,
         importData,
       }}
     >

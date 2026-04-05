@@ -7,6 +7,7 @@ import {
 } from "recharts";
 import {
   DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check, Pencil, Settings2,
+  Star, ImageOff, PiggyBank,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryManager } from "@/components/CategoryManager";
@@ -51,7 +52,8 @@ const EMPTY_FORM = {
 };
 
 export default function FinancePage() {
-  const { transactions, financeSettings, setFinanceSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome } = useApp();
+  const { transactions, financeSettings, setFinanceSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome,
+          wishlist, addWishlistItem, updateWishlistItem, deleteWishlistItem, addWishlistSavings } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -61,6 +63,14 @@ export default function FinancePage() {
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState("");
   const [manageOpen, setManageOpen] = useState<"picker" | "income" | "expense" | "source" | null>(null);
+
+  const EMPTY_WISH = { title: "", targetAmount: "", imageUrl: "" };
+  const [showWishForm, setShowWishForm]       = useState(false);
+  const [editWishId,   setEditWishId]         = useState<string | null>(null);
+  const [wishForm,     setWishForm]           = useState(EMPTY_WISH);
+  const [savingsInput, setSavingsInput]       = useState<Record<string, string>>({});
+  const [showSavings,  setShowSavings]        = useState<string | null>(null);
+  const [confirmDelWish, setConfirmDelWish]   = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -433,6 +443,223 @@ export default function FinancePage() {
           )}
         </div>
       </div>
+
+      {/* ─── Wishlist Section ─────────────────────────────── */}
+      <div className="mx-4 mb-4">
+        <div className="bg-card rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border))]">
+            <div className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-foreground text-sm">Wishlist & Goals</span>
+              {wishlist.length > 0 && (
+                <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">{wishlist.length}</span>
+              )}
+            </div>
+            <button
+              onClick={() => { setWishForm(EMPTY_WISH); setEditWishId(null); setShowWishForm(true); }}
+              className="p-1.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {wishlist.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground text-xs">
+              <PiggyBank className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              No wishlist items yet. Add your first goal!
+            </div>
+          ) : (
+            <div className="p-4 grid gap-3 sm:grid-cols-2">
+              {wishlist.map((item) => {
+                const pct = item.targetAmount > 0 ? Math.min(100, Math.round((item.currentAmount / item.targetAmount) * 100)) : 0;
+                const done = pct >= 100;
+                return (
+                  <div key={item.id} className="bg-accent dark:bg-[#1a1918] rounded-2xl overflow-hidden">
+                    {item.imageUrl ? (
+                      <div className="w-full h-32 overflow-hidden">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="hidden w-full h-32 bg-muted flex items-center justify-center">
+                          <ImageOff className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="p-3 space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold text-sm text-foreground leading-tight">{item.title}</p>
+                          {done && <span className="text-[10px] font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Goal reached!</span>}
+                        </div>
+                        <div className="flex gap-0.5 shrink-0">
+                          <button
+                            onClick={() => { setWishForm({ title: item.title, targetAmount: String(item.targetAmount), imageUrl: item.imageUrl || "" }); setEditWishId(item.id); setShowWishForm(true); }}
+                            className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-primary hover:bg-primary/10 active:text-primary transition-colors"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelWish(item.id)}
+                            className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10 active:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-muted-foreground">{formatShort(item.currentAmount)} / {formatShort(item.targetAmount)}</span>
+                          <span className={cn("font-bold", done ? "text-emerald-500" : "text-primary")}>{pct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className={cn("h-full rounded-full transition-all duration-500", done ? "bg-emerald-500" : "bg-primary")}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          {item.targetAmount > item.currentAmount
+                            ? `${formatShort(item.targetAmount - item.currentAmount)} remaining`
+                            : "Target achieved!"}
+                        </p>
+                      </div>
+
+                      {showSavings === item.id ? (
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={savingsInput[item.id] ? fmtIDRInput(savingsInput[item.id]) : ""}
+                            onChange={(e) => setSavingsInput((s) => ({ ...s, [item.id]: e.target.value.replace(/\D/g, "") }))}
+                            placeholder="Add amount…"
+                            className="flex-1 text-xs px-2.5 py-1.5 rounded-xl border border-[hsl(var(--border))] bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                          <button
+                            onClick={() => {
+                              const amt = Number(savingsInput[item.id] || 0);
+                              if (amt > 0) { addWishlistSavings(item.id, amt); setSavingsInput((s) => ({ ...s, [item.id]: "" })); }
+                              setShowSavings(null);
+                            }}
+                            className="px-2.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => { setShowSavings(null); setSavingsInput((s) => ({ ...s, [item.id]: "" })); }}
+                            className="px-2.5 py-1.5 rounded-xl border border-[hsl(var(--border))] text-xs text-muted-foreground hover:bg-accent active:scale-95 transition-all"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        !done && (
+                          <button
+                            onClick={() => setShowSavings(item.id)}
+                            className="w-full py-1.5 rounded-xl border border-primary/30 text-primary text-xs font-medium hover:bg-primary/10 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                          >
+                            <PiggyBank className="w-3 h-3" />
+                            Add Savings
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Wishlist Add/Edit Modal */}
+      {showWishForm && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={() => setShowWishForm(false)}>
+          <div className="pointer-events-auto w-full max-w-sm bg-card rounded-[24px] p-5 space-y-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-foreground">{editWishId ? "Edit Wishlist Item" : "New Wishlist Item"}</h3>
+              <button onClick={() => setShowWishForm(false)} className="p-1.5 rounded-xl bg-accent text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Title (e.g. New Car)"
+                value={wishForm.title}
+                onChange={(e) => setWishForm((f) => ({ ...f, title: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">Rp</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Target Amount"
+                  value={wishForm.targetAmount ? fmtIDRInput(wishForm.targetAmount) : ""}
+                  onChange={(e) => setWishForm((f) => ({ ...f, targetAmount: e.target.value.replace(/\D/g, "") }))}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <input
+                type="url"
+                placeholder="Image URL (optional)"
+                value={wishForm.imageUrl}
+                onChange={(e) => setWishForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              {wishForm.imageUrl && (
+                <div className="w-full h-28 rounded-xl overflow-hidden bg-muted">
+                  <img src={wishForm.imageUrl} alt="preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setShowWishForm(false)} className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm text-muted-foreground hover:bg-accent transition-colors">Cancel</button>
+              <button
+                onClick={() => {
+                  const title = wishForm.title.trim();
+                  const target = Number(wishForm.targetAmount);
+                  if (!title || !target) return;
+                  if (editWishId) {
+                    updateWishlistItem(editWishId, { title, targetAmount: target, imageUrl: wishForm.imageUrl || undefined });
+                  } else {
+                    addWishlistItem({ title, targetAmount: target, currentAmount: 0, imageUrl: wishForm.imageUrl || undefined });
+                  }
+                  setShowWishForm(false);
+                  setEditWishId(null);
+                  setWishForm(EMPTY_WISH);
+                }}
+                className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                {editWishId ? "Update" : "Add Item"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Wishlist Delete Confirm */}
+      {confirmDelWish && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setConfirmDelWish(null)}>
+          <div className="pointer-events-auto w-full max-w-xs bg-card rounded-[24px] p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <p className="text-foreground font-semibold text-center mb-1">Delete this item?</p>
+            <p className="text-muted-foreground text-xs text-center mb-4">All saved progress will be lost.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmDelWish(null)} className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm text-muted-foreground hover:bg-accent transition-colors">Cancel</button>
+              <button
+                onClick={() => { deleteWishlistItem(confirmDelWish); setConfirmDelWish(null); }}
+                className="flex-1 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit form modal */}
       {showForm && (
