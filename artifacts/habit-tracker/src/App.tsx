@@ -122,11 +122,30 @@ function AuthGate() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F4F0" }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
-            <span className="text-white text-sm font-bold">H</span>
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-14 h-14 rounded-[18px] flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #556B2F 0%, #6B8A3A 100%)" }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
           </div>
-          <p className="text-sm text-gray-400">Loading…</p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-sm font-semibold text-gray-700">Syncing from cloud…</p>
+            <p className="text-xs text-gray-400">Habit Horizon</p>
+          </div>
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-primary"
+                style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+              />
+            ))}
+          </div>
+          <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }`}</style>
         </div>
       </div>
     );

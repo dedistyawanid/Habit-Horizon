@@ -14,6 +14,8 @@ interface SyncContextValue {
   lastSyncedAt: Date | null;
   pendingCount: number;
   triggerSync: () => void;
+  /** Lets external consumers (e.g. AuthContext cloud fetch) push status updates */
+  setStatus: (s: SyncStatus) => void;
 }
 
 const SyncContext = createContext<SyncContextValue>({
@@ -21,11 +23,12 @@ const SyncContext = createContext<SyncContextValue>({
   lastSyncedAt: null,
   pendingCount: 0,
   triggerSync: () => {},
+  setStatus: () => {},
 });
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<SyncStatus>(
-    navigator.onLine ? "idle" : "offline"
+  const [status,       setStatus]       = useState<SyncStatus>(
+    navigator.onLine ? "syncing" : "offline"
   );
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
@@ -48,20 +51,22 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /* network events */
   useEffect(() => {
-    const onOnline = () => { setStatus("idle"); doSync(); };
+    const onOnline  = () => { setStatus("idle"); doSync(); };
     const onOffline = () => setStatus("offline");
-    window.addEventListener("online", onOnline);
+    window.addEventListener("online",  onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
-      window.removeEventListener("online", onOnline);
+      window.removeEventListener("online",  onOnline);
       window.removeEventListener("offline", onOffline);
     };
   }, []);
 
+  /* initial sync on mount (push any queued offline ops) */
   useEffect(() => {
     async function init() {
-      if (!navigator.onLine) return;
+      if (!navigator.onLine) { setStatus("offline"); return; }
       setStatus("syncing");
       try {
         await runMigrationIfNeeded();
@@ -82,9 +87,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SyncContext.Provider
-      value={{ status, lastSyncedAt, pendingCount, triggerSync: doSync }}
-    >
+    <SyncContext.Provider value={{ status, lastSyncedAt, pendingCount, triggerSync: doSync, setStatus }}>
       {children}
     </SyncContext.Provider>
   );
