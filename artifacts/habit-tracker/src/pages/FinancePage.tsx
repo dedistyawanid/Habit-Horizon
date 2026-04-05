@@ -156,7 +156,7 @@ export default function FinancePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 pt-5 pb-36 space-y-5">
+      <div className="max-w-2xl mx-auto px-4 pt-5 pb-40 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Finance</h1>
@@ -444,13 +444,13 @@ export default function FinancePage() {
         </div>
 
         {/* ─── Wishlist & Goals ─────────────────────────────── */}
-        <div className="bg-[#181c1e] rounded-[20px] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
+        <div className="bg-card rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border))]">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-primary" />
-              <span className="font-semibold text-[#f2f0e6] text-sm">Wishlist & Goals</span>
+              <span className="font-semibold text-foreground text-sm">Wishlist & Goals</span>
               {wishlist.length > 0 && (
-                <span className="text-xs bg-primary/20 text-[#f2f0e6] font-medium px-2 py-0.5 rounded-full">{wishlist.length}</span>
+                <span className="text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">{wishlist.length}</span>
               )}
             </div>
             <button
@@ -462,17 +462,17 @@ export default function FinancePage() {
           </div>
 
           {wishlist.length === 0 ? (
-            <div className="text-center py-10 text-[#9C8B7A] text-xs">
+            <div className="text-center py-10 text-muted-foreground text-xs">
               <PiggyBank className="w-8 h-8 mx-auto mb-2 opacity-40" />
               No wishlist items yet. Add your first goal!
             </div>
           ) : (
-            <div className="p-4 grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
+            <div className="p-4 grid grid-cols-1 gap-3 lg:grid-cols-2 items-start">
               {wishlist.map((item) => {
                 const pct = item.targetAmount > 0 ? Math.min(100, Math.round((item.currentAmount / item.targetAmount) * 100)) : 0;
                 const done = pct >= 100;
                 return (
-                  <div key={item.id} className="bg-[#211f1d] rounded-2xl overflow-hidden border border-white/5">
+                  <div key={item.id} className="bg-accent dark:bg-accent rounded-2xl overflow-hidden border border-[hsl(var(--border))]">
                     {item.imageUrl ? (
                       <div className="w-full h-36 overflow-hidden">
                         <img
@@ -487,9 +487,9 @@ export default function FinancePage() {
                     <div className="p-4 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="space-y-0.5">
-                          <p className="font-semibold text-sm text-[#f0ece6] leading-tight">{item.title}</p>
+                          <p className="font-semibold text-sm text-foreground leading-tight">{item.title}</p>
                           {done && (
-                            <span className="inline-block text-[10px] font-medium text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full">
+                            <span className="inline-block text-[10px] font-medium text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
                               Goal reached!
                             </span>
                           )}
@@ -497,13 +497,13 @@ export default function FinancePage() {
                         <div className="flex gap-0.5 shrink-0">
                           <button
                             onClick={() => { setWishForm({ title: item.title, targetAmount: String(item.targetAmount), imageUrl: item.imageUrl || "" }); setEditWishId(item.id); setShowWishForm(true); }}
-                            className="p-1.5 rounded-lg text-[#9C8B7A] hover:text-primary hover:bg-primary/10 active:text-primary transition-colors"
+                            className="p-1.5 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-lg text-muted-foreground/60 hover:text-primary hover:bg-primary/10 active:text-primary transition-colors"
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => setConfirmDelWish(item.id)}
-                            className="p-1.5 rounded-lg text-[#9C8B7A] hover:text-red-400 hover:bg-red-400/10 active:text-red-400 transition-colors"
+                            className="p-1.5 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-lg text-muted-foreground/60 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:text-red-500 transition-colors"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -512,20 +512,20 @@ export default function FinancePage() {
 
                       <div className="space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-[#9C8B7A]">
+                          <span className="text-xs text-muted-foreground">
                             {formatShort(item.currentAmount)} / {formatShort(item.targetAmount)}
                           </span>
-                          <span className={cn("text-xs font-bold", done ? "text-emerald-400" : "text-primary")}>
+                          <span className={cn("text-xs font-bold", done ? "text-emerald-600 dark:text-emerald-400" : "text-primary")}>
                             {pct}%
                           </span>
                         </div>
-                        <div className="w-full h-2 bg-white/8 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                           <div
                             className={cn("h-full rounded-full transition-all duration-500", done ? "bg-emerald-500" : "bg-primary")}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <p className="text-[10px] text-[#9C8B7A]">
+                        <p className="text-[10px] text-muted-foreground">
                           {item.targetAmount > item.currentAmount
                             ? `${formatShort(item.targetAmount - item.currentAmount)} to go`
                             : "Target achieved!"}
@@ -540,7 +540,7 @@ export default function FinancePage() {
                             value={savingsInput[item.id] ? fmtIDRInput(savingsInput[item.id]) : ""}
                             onChange={(e) => setSavingsInput((s) => ({ ...s, [item.id]: e.target.value.replace(/\D/g, "") }))}
                             placeholder="Add amount…"
-                            className="flex-1 text-xs px-2.5 py-1.5 rounded-xl border border-white/10 bg-white/5 text-[#f0ece6] placeholder:text-[#9C8B7A] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="flex-1 text-xs px-2.5 py-1.5 rounded-xl border border-[hsl(var(--border))] bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                           />
                           <button
                             onClick={() => {
@@ -566,7 +566,7 @@ export default function FinancePage() {
                           </button>
                           <button
                             onClick={() => { setShowSavings(null); setSavingsInput((s) => ({ ...s, [item.id]: "" })); }}
-                            className="px-2.5 py-1.5 rounded-xl border border-white/10 text-xs text-[#9C8B7A] hover:bg-white/5 active:scale-95 transition-all"
+                            className="px-2.5 py-1.5 rounded-xl border border-[hsl(var(--border))] text-xs text-muted-foreground hover:bg-card active:scale-95 transition-all"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>

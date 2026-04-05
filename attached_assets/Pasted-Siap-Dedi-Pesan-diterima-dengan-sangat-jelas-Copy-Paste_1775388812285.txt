@@ -1,0 +1,39 @@
+Siap, Dedi! Pesan diterima dengan sangat jelas: "Copy-Paste" semua logic warna dari daftar transaksi di atas ke baris Wishlist di bawahnya.
+
+Sebagai Video Editor, ini seperti kita melakukan "Match Color" antar dua klip yang berbeda biar satu grade. Kalau transaksinya putih, wishlist-nya harus putih. Kalau transaksinya hitam, wishlist-nya harus hitam. Gak boleh ada yang "belang" lagi!
+
+[V76] THE ULTIMATE MATCH COLOR: Global Theme Variables
+1. Match Wishlist to Transaction Styling:
+
+"Agent, di tab Finance, bagian Wishlist & Goals harus SAMA PERSIS warnanya dengan daftar Transactions di atasnya."
+
+"Hapus semua kode warna manual (hardcoded) pada kartu Wishlist. Gunakan variabel tema yang sama dengan kartu transaksi (theme.colors.cardBackground, dll)."
+
+"Jika aplikasi di Light Mode, Wishlist harus Putih/Beige Terang. Jika di Dark Mode, Wishlist harus Deep Charcoal/Ebony."
+
+2. Section Header & Container Fix:
+
+"Hapus background gelap pada kontainer 'Wishlist & Goals'. Buat kontainer tersebut Transparent agar warnanya mengikuti background utama aplikasi, persis seperti area transaksi."
+
+"Pastikan teks judul 'Wishlist & Goals' juga berubah warna secara dinamis (Hitam di Light Mode, Putih di Dark Mode)."
+
+3. Integration & Scroll (Recall V75):
+
+"Pastikan Chart, Transactions, dan Wishlist berada dalam satu Scrollable Container yang sama dengan pb-40 di bawah agar tidak tertutup FAB."
+
+English Prompt for Replit Agent (Paste Ini):
+[V76.1] Final Theme Match: Synchronize Wishlist with Transaction UI
+
+1. Match Card Styling:
+
+In the Finance tab, the Wishlist & Goals cards must look EXACTLY like the Transaction cards.
+
+Action: Remove all hardcoded background colors from the wishlist cards. Use the same dynamic theme variables used for transactions (e.g., theme.colors.cardBackground).
+
+They must switch to Light/White in Light Mode and Deep Charcoal in Dark Mode automatically.
+
+2. Transparent Container:
+
+Remove the dark background from the "Wishlist & Goals" section wrapper. Make it Transparent so it blends perfectly with the main app background, just like the Transactions section.
+
+Ensure the section title and count badge colors switch dynamically (Dark text for Light mode, Light text for Dark mode).
