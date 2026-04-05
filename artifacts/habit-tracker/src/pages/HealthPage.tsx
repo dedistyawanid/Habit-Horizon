@@ -20,7 +20,7 @@ import { useSleepLog } from "@/hooks/useSleepLog";
 
 /* ─── Constants ──────────────────────────────────────── */
 const PRIMARY_TYPES = [
-  { id: "Running",   label: "Running",   icon: Wind,    color: "#556B2F" },
+  { id: "Running",   label: "Running",   icon: Wind,    color: "#5c7c6c" },
   { id: "Badminton", label: "Badminton", icon: Activity, color: "#B8860B" },
   { id: "Workout",   label: "Workout",   icon: Dumbbell, color: "#4A4A4A" },
 ];
@@ -399,9 +399,7 @@ export default function HealthPage() {
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-[11px] font-semibold transition-all border",
                   subTab === id
-                    ? id === "sleep"
-                      ? "bg-[#4A5568] text-white border-[#4A5568]"
-                      : "bg-primary text-primary-foreground border-primary"
+                    ? "bg-primary text-primary-foreground border-primary"
                     : "bg-accent text-accent-foreground border-accent hover:text-primary"
                 )}
               >
@@ -417,39 +415,24 @@ export default function HealthPage() {
               <>
                 <div className="flex justify-end">
                   <div
-                    className="relative flex items-center"
-                    style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 252 }}
+                    className="period-toggle-wrap"
+                    style={{ borderRadius: 28, padding: 3, height: 32, width: 252 }}
                   >
                     <div
+                      className="period-toggle-thumb"
                       style={{
-                        position: "absolute",
                         top: 3, bottom: 3, left: 3,
                         width: "calc(25% - 1.5px)",
-                        borderRadius: 24,
-                        background: "#FFFFFF",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                         transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(actRange)} * 100%))`,
                         transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
-                        pointerEvents: "none",
                       }}
                     />
                     {(["7d","30d","month","custom"] as const).map((r) => (
                       <button
                         key={r}
                         onClick={() => setActRange(r)}
-                        style={{
-                          flex: 1,
-                          position: "relative",
-                          zIndex: 1,
-                          fontSize: 11,
-                          fontWeight: actRange === r ? 600 : 500,
-                          color: actRange === r ? "#2D2D2D" : "#9C8B7A",
-                          transition: "color 0.2s",
-                          background: "none",
-                          border: "none",
-                          outline: "none",
-                          cursor: "pointer",
-                        }}
+                        className={cn("period-toggle-btn", actRange === r && "is-active")}
+                        style={{ fontSize: 11 }}
                       >
                         {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
                       </button>
@@ -462,7 +445,7 @@ export default function HealthPage() {
                       type="date"
                       value={customStart}
                       onChange={(e) => setCustomStart(e.target.value)}
-                      className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                     />
                     <span className="text-xs text-muted-foreground shrink-0">→</span>
                     <input
@@ -470,7 +453,7 @@ export default function HealthPage() {
                       value={customEnd}
                       min={customStart}
                       onChange={(e) => setCustomEnd(e.target.value)}
-                      className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                     />
                   </div>
                 )}
@@ -478,40 +461,24 @@ export default function HealthPage() {
             ) : (
               <div className="flex justify-end">
                 <div
-                  className="relative flex items-center"
-                  style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 192 }}
+                  className="period-toggle-wrap"
+                  style={{ borderRadius: 28, padding: 3, height: 32, width: 192 }}
                 >
                   <div
+                    className="period-toggle-thumb"
                     style={{
-                      position: "absolute",
                       top: 3, bottom: 3, left: 3,
                       width: "calc(33.333% - 2px)",
-                      borderRadius: 24,
-                      background: "#FFFFFF",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.05)",
                       transform: `translateX(calc(${["day","week","month"].indexOf(period)} * 100%))`,
                       transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
-                      pointerEvents: "none",
                     }}
                   />
                   {(["day", "week", "month"] as const).map((p) => (
                     <button
                       key={p}
                       onClick={() => setPeriod(p)}
-                      style={{
-                        flex: 1,
-                        position: "relative",
-                        zIndex: 1,
-                        fontSize: 12,
-                        fontWeight: period === p ? 600 : 500,
-                        color: period === p ? "#2D2D2D" : "#9C8B7A",
-                        transition: "color 0.2s",
-                        background: "none",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                        letterSpacing: 0,
-                      }}
+                      className={cn("period-toggle-btn", period === p && "is-active")}
+                      style={{ fontSize: 12 }}
                     >
                       {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
                     </button>
@@ -568,8 +535,8 @@ export default function HealthPage() {
                     <AreaChart data={actChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                       <defs>
                         <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%"  stopColor="#556B2F" stopOpacity={0.20} />
-                          <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
+                          <stop offset="5%"  stopColor="#5c7c6c" stopOpacity={0.20} />
+                          <stop offset="95%" stopColor="#5c7c6c" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <XAxis
@@ -593,10 +560,10 @@ export default function HealthPage() {
                       <Area
                         type="monotone"
                         dataKey={actChartData[0]?.hasDistance ? "km" : "min"}
-                        stroke="#556B2F" strokeWidth={2}
+                        stroke="#5c7c6c" strokeWidth={2}
                         fill="url(#actGrad)"
-                        dot={{ r: actChartData.length > 15 ? 2 : 3, fill: "#556B2F", strokeWidth: 0 }}
-                        activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }}
+                        dot={{ r: actChartData.length > 15 ? 2 : 3, fill: "#5c7c6c", strokeWidth: 0 }}
+                        activeDot={{ r: 4, fill: "#5c7c6c", strokeWidth: 0 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -609,7 +576,7 @@ export default function HealthPage() {
                       <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                       <YAxis allowDecimals={false} tick={axisTick} tickLine={false} axisLine={false} />
                       <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v, "Sessions"]} labelFormatter={fmtDate} />
-                      <Bar dataKey="count" fill="#556B2F" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="#5c7c6c" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </>
@@ -802,7 +769,7 @@ export default function HealthPage() {
                       entry.location || null,
                     ].filter(Boolean).join(" · ");
                     return (
-                      <div key={entry.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                      <div key={entry.id} className="flex items-center gap-3 bg-white dark:bg-card px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${info.color}1A` }}>
                           <Icon className="w-4 h-4" style={{ color: info.color }} />
                         </div>
@@ -927,8 +894,8 @@ export default function HealthPage() {
                   <ComposedChart data={nutrChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                     <defs>
                       <linearGradient id="calGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#556B2F" stopOpacity={0.15} />
-                        <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
+                        <stop offset="5%"  stopColor="#5c7c6c" stopOpacity={0.15} />
+                        <stop offset="95%" stopColor="#5c7c6c" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
@@ -940,9 +907,9 @@ export default function HealthPage() {
                       }
                       labelFormatter={fmtDate}
                     />
-                    <Area type="monotone" dataKey="caloriesNorm" stroke="#556B2F" strokeWidth={1.5} fill="url(#calGrad)"
-                      dot={{ r: 3, fill: "#556B2F", strokeWidth: 0 }}
-                      activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }}
+                    <Area type="monotone" dataKey="caloriesNorm" stroke="#5c7c6c" strokeWidth={1.5} fill="url(#calGrad)"
+                      dot={{ r: 3, fill: "#5c7c6c", strokeWidth: 0 }}
+                      activeDot={{ r: 4, fill: "#5c7c6c", strokeWidth: 0 }}
                     />
                     <Line type="monotone" dataKey="protein" stroke="#B8860B" strokeWidth={2}
                       dot={{ r: 3, fill: "#B8860B", strokeWidth: 0 }}
@@ -969,7 +936,7 @@ export default function HealthPage() {
                   })
                   .slice(0, 20)
                   .map((meal) => (
-                  <div key={meal.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                  <div key={meal.id} className="flex items-center gap-3 bg-white dark:bg-card px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                     <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
                       <Utensils className="w-4 h-4 text-primary" />
                     </div>
@@ -1073,15 +1040,15 @@ export default function HealthPage() {
                   <ComposedChart data={bodyChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                     <defs>
                       <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#556B2F" stopOpacity={0.18} />
-                        <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
+                        <stop offset="5%"  stopColor="#5c7c6c" stopOpacity={0.18} />
+                        <stop offset="95%" stopColor="#5c7c6c" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                     <YAxis domain={["auto", "auto"]} tick={axisTick} tickLine={false} axisLine={false} />
                     <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => name === "weight" ? [`${v} kg`, "Weight"] : [`${v} kg`, "Goal"]} labelFormatter={fmtDate} />
                     <ReferenceLine y={goalWeight} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: `${goalWeight}kg goal`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }} />
-                    <Area type="monotone" dataKey="weight" stroke="#556B2F" strokeWidth={2} fill="url(#bodyGrad)" dot={false} activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="weight" stroke="#5c7c6c" strokeWidth={2} fill="url(#bodyGrad)" dot={false} activeDot={{ r: 4, fill: "#5c7c6c", strokeWidth: 0 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               ) : (
@@ -1130,7 +1097,7 @@ export default function HealthPage() {
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Weight History</p>
                 {[...weightLog].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10).map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between px-4 py-3 bg-white transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                  <div key={entry.id} className="flex items-center justify-between px-4 py-3 bg-white dark:bg-card transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center">
                         <Scale className="w-3.5 h-3.5 text-primary" />
@@ -1160,7 +1127,7 @@ export default function HealthPage() {
             <div className="bg-white dark:bg-card p-5 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Moon className="w-4 h-4" style={{ color: "#4A5568" }} />
+                  <Moon className="w-4 h-4" style={{ color: "#5c7c6c" }} />
                   <p className="text-sm font-bold text-foreground">Log Sleep</p>
                 </div>
                 <button
@@ -1235,8 +1202,8 @@ export default function HealthPage() {
                       <Star
                         className="w-7 h-7 transition-colors"
                         style={{
-                          fill: s <= sleepQuality ? "#4A5568" : "transparent",
-                          color: s <= sleepQuality ? "#4A5568" : "#D1CBC2",
+                          fill: s <= sleepQuality ? "#5c7c6c" : "transparent",
+                          color: s <= sleepQuality ? "#5c7c6c" : "#D1CBC2",
                           strokeWidth: 1.5,
                         }}
                       />
@@ -1251,13 +1218,13 @@ export default function HealthPage() {
               <Button
                 onClick={handleLogSleep}
                 className="w-full gap-1.5"
-                style={{ background: "#4A5568" }}
+                style={{ background: "#5c7c6c" }}
               >
                 <Moon className="w-4 h-4" /> Log Sleep
               </Button>
               {todaySleep && (
                 <p className="text-[10px] text-muted-foreground text-center -mt-1">
-                  Today already logged: <span className="font-semibold" style={{ color: "#4A5568" }}>{todaySleep.hours}h {todaySleep.minutes > 0 ? `${todaySleep.minutes}m` : ""}</span> — tap Log to overwrite
+                  Today already logged: <span className="font-semibold" style={{ color: "#5c7c6c" }}>{todaySleep.hours}h {todaySleep.minutes > 0 ? `${todaySleep.minutes}m` : ""}</span> — tap Log to overwrite
                 </p>
               )}
             </div>
@@ -1281,7 +1248,7 @@ export default function HealthPage() {
                   </div>
                   <span
                     className="text-xs font-bold"
-                    style={{ color: weekSleepAvg >= sleepTarget ? "#556B2F" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B" }}
+                    style={{ color: weekSleepAvg >= sleepTarget ? "#5c7c6c" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B" }}
                   >
                     avg {weekSleepAvg.toFixed(1)}h / {sleepTarget}h
                   </span>
@@ -1291,7 +1258,7 @@ export default function HealthPage() {
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${Math.min(100, (weekSleepAvg / sleepTarget) * 100)}%`,
-                      background: weekSleepAvg >= sleepTarget ? "#556B2F" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B",
+                      background: weekSleepAvg >= sleepTarget ? "#5c7c6c" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B",
                     }}
                   />
                 </div>
@@ -1309,39 +1276,24 @@ export default function HealthPage() {
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Sleep Trend</p>
                 <div
-                  className="relative flex items-center"
-                  style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 30, width: 220 }}
+                  className="period-toggle-wrap"
+                  style={{ borderRadius: 28, padding: 3, height: 30, width: 220 }}
                 >
                   <div
+                    className="period-toggle-thumb"
                     style={{
-                      position: "absolute",
                       top: 3, bottom: 3, left: 3,
                       width: "calc(25% - 1.5px)",
-                      borderRadius: 24,
-                      background: "#FFFFFF",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                       transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(sleepRange)} * 100%))`,
                       transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
-                      pointerEvents: "none",
                     }}
                   />
                   {(["7d","30d","month","custom"] as const).map((r) => (
                     <button
                       key={r}
                       onClick={() => setSleepRange(r)}
-                      style={{
-                        flex: 1,
-                        position: "relative",
-                        zIndex: 1,
-                        fontSize: 10,
-                        fontWeight: sleepRange === r ? 600 : 500,
-                        color: sleepRange === r ? "#2D2D2D" : "#9C8B7A",
-                        transition: "color 0.2s",
-                        background: "none",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
+                      className={cn("period-toggle-btn", sleepRange === r && "is-active")}
+                      style={{ fontSize: 10 }}
                     >
                       {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
                     </button>
@@ -1356,7 +1308,7 @@ export default function HealthPage() {
                     type="date"
                     value={sleepCustomStart}
                     onChange={(e) => setSleepCustomStart(e.target.value)}
-                    className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                   />
                   <span className="text-xs text-muted-foreground shrink-0">→</span>
                   <input
@@ -1364,7 +1316,7 @@ export default function HealthPage() {
                     value={sleepCustomEnd}
                     min={sleepCustomStart}
                     onChange={(e) => setSleepCustomEnd(e.target.value)}
-                    className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="flex-1 text-xs bg-white border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30 date-range-input"
                   />
                 </div>
               )}
@@ -1375,8 +1327,8 @@ export default function HealthPage() {
                   <AreaChart data={sleepChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                     <defs>
                       <linearGradient id="sleepGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#4A5568" stopOpacity={0.20} />
-                        <stop offset="95%" stopColor="#4A5568" stopOpacity={0} />
+                        <stop offset="5%"  stopColor="#5c7c6c" stopOpacity={0.20} />
+                        <stop offset="95%" stopColor="#5c7c6c" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis
@@ -1415,11 +1367,11 @@ export default function HealthPage() {
                     <Area
                       type="monotone"
                       dataKey="hours"
-                      stroke="#4A5568"
+                      stroke="#5c7c6c"
                       strokeWidth={2}
                       fill="url(#sleepGrad)"
-                      dot={{ r: sleepChartData.length > 15 ? 2 : 3, fill: "#4A5568", strokeWidth: 0 }}
-                      activeDot={{ r: 4, fill: "#4A5568", strokeWidth: 0 }}
+                      dot={{ r: sleepChartData.length > 15 ? 2 : 3, fill: "#5c7c6c", strokeWidth: 0 }}
+                      activeDot={{ r: 4, fill: "#5c7c6c", strokeWidth: 0 }}
                     />
                     <Area
                       type="monotone"
@@ -1443,7 +1395,7 @@ export default function HealthPage() {
               {sleepChartData.length >= 1 && (
                 <div className="flex items-center gap-4 mt-2">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-0.5 rounded" style={{ background: "#4A5568" }} />
+                    <div className="w-3 h-0.5 rounded" style={{ background: "#5c7c6c" }} />
                     <span className="text-[10px] text-muted-foreground">Hours slept</span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -1462,9 +1414,9 @@ export default function HealthPage() {
                   const totalH = entry.hours + entry.minutes / 60;
                   const onTarget = totalH >= sleepTarget;
                   return (
-                    <div key={entry.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#4A556810" }}>
-                        <Moon className="w-4 h-4" style={{ color: "#4A5568" }} />
+                    <div key={entry.id} className="flex items-center gap-3 bg-white dark:bg-card px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#5c7c6c10" }}>
+                        <Moon className="w-4 h-4" style={{ color: "#5c7c6c" }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -1475,7 +1427,7 @@ export default function HealthPage() {
                         </div>
                         <div className="flex items-center gap-1 mt-0.5">
                           {([1,2,3,4,5] as const).map((s) => (
-                            <Star key={s} className="w-3 h-3" style={{ fill: s <= entry.quality ? "#4A5568" : "transparent", color: s <= entry.quality ? "#4A5568" : "#D1CBC2", strokeWidth: 1.5 }} />
+                            <Star key={s} className="w-3 h-3" style={{ fill: s <= entry.quality ? "#5c7c6c" : "transparent", color: s <= entry.quality ? "#5c7c6c" : "#D1CBC2", strokeWidth: 1.5 }} />
                           ))}
                           <span className="text-[10px] text-muted-foreground ml-1">{["","Poor","Fair","OK","Good","Great"][entry.quality]}</span>
                         </div>
@@ -1648,7 +1600,7 @@ export default function HealthPage() {
               <Button variant="outline" onClick={() => setShowSleepTarget(false)} className="flex-1">Cancel</Button>
               <Button
                 className="flex-1 gap-1.5"
-                style={{ background: "#4A5568" }}
+                style={{ background: "#5c7c6c" }}
                 onClick={() => {
                   const v = parseFloat(sleepTargetInput);
                   if (!isNaN(v) && v >= 1 && v <= 24) { setSleepTarget(v); setShowSleepTarget(false); toast({ title: "Target updated", description: `Sleep goal: ${v} hours` }); }

@@ -171,41 +171,41 @@
      Muted text  : #c8c0b0  Muted Beige
      Primary     : #ac6e5c  Muted Terracotta
      ─────────────────────────────────────────────────────── */
-  --background: 205 12% 11%;        /* #181c1e */
-  --foreground: 46 30% 93%;         /* #f2f0e6 */
+  --background: 200 6% 9%;           /* #161819  Very dark warm charcoal */
+  --foreground: 46 30% 93%;          /* #f2f0e6  Off-White Cream          */
 
-  --border: 34 8% 21%;
-  --input: 34 8% 20%;
-  --ring: 13 33% 52%;               /* terracotta focus ring */
+  --border: 34 7% 19%;
+  --input: 34 7% 18%;
+  --ring: 13 33% 52%;                /* terracotta focus ring */
 
-  --card: 34 8% 13%;                /* #24221f */
+  --card: 30 7% 12%;                 /* #211f1d  Warm Ebony               */
   --card-foreground: 46 30% 93%;
-  --card-border: 34 8% 18%;
+  --card-border: 34 7% 17%;
 
-  --sidebar: 34 8% 11%;
+  --sidebar: 30 7% 10%;
   --sidebar-foreground: 40 15% 82%;
-  --sidebar-border: 34 8% 18%;
+  --sidebar-border: 34 7% 17%;
   --sidebar-primary: 13 33% 52%;    /* Muted Terracotta */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 13 12% 20%;
+  --sidebar-accent: 13 12% 18%;
   --sidebar-accent-foreground: 13 12% 70%;
   --sidebar-ring: 13 33% 52%;
 
-  --popover: 34 8% 13%;
+  --popover: 30 7% 12%;
   --popover-foreground: 46 30% 93%;
-  --popover-border: 34 8% 18%;
+  --popover-border: 34 7% 17%;
 
   /* Primary = Muted Terracotta #ac6e5c */
   --primary: 13 33% 52%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 34 8% 18%;
+  --secondary: 34 7% 17%;
   --secondary-foreground: 40 15% 78%;
 
-  --muted: 34 8% 16%;
+  --muted: 30 7% 15%;
   --muted-foreground: 38 16% 70%;   /* #c8c0b0 Muted Beige */
 
-  --accent: 34 10% 18%;
+  --accent: 30 7% 16%;
   --accent-foreground: 38 16% 72%;
 
   --destructive: 0 62% 52%;
@@ -259,7 +259,7 @@
     border-bottom: 1px solid #E5E0D8;
   }
   .dark .glass-header {
-    background: rgba(24, 28, 30, 0.93);      /* #181c1e at 93% */
+    background: rgba(22, 24, 25, 0.94);      /* #161819 at 94% */
     border-bottom: 1px solid hsl(var(--border));
   }
   .habit-progress-track {
@@ -357,12 +357,59 @@
     border-top: 1px solid #E5E0D8;
   }
   .dark .bottom-nav {
-    background: rgba(26, 30, 32, 0.97);      /* #1a1e20 */
+    background: rgba(22, 24, 25, 0.97);      /* #161819 — no blue tint */
     border-top: 1px solid hsl(var(--border));
   }
 
   /* ── Progress ring track: dark-mode tinted warm charcoal ── */
-  .dark .ring-track { stroke: hsl(34 8% 24%); }
+  .dark .ring-track { stroke: hsl(30 7% 22%); }
+
+  /* ── Period / Range toggle pills ─────────────────────── */
+  .period-toggle-wrap {
+    background: #F5F4F0;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .dark .period-toggle-wrap {
+    background: hsl(30 7% 15%);     /* slightly elevated above card */
+  }
+
+  .period-toggle-thumb {
+    position: absolute;
+    border-radius: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0.5px 1px rgba(0,0,0,0.06);
+    pointer-events: none;
+  }
+  .dark .period-toggle-thumb {
+    background: hsl(13 33% 52%);    /* Muted Terracotta — active indicator */
+    box-shadow: none;
+  }
+
+  .period-toggle-btn {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    color: #9C8B7A;
+    font-weight: 500;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+  }
+  .period-toggle-btn.is-active { color: #2D2D2D; font-weight: 600; }
+  .dark .period-toggle-btn           { color: hsl(38 16% 70%); }  /* Muted Beige */
+  .dark .period-toggle-btn.is-active { color: hsl(46 30% 93%); }  /* Off-White/Cream */
+
+  /* ── Date range custom inputs (Health toggles) ─────── */
+  .dark .date-range-input {
+    background-color: hsl(30 7% 15%);
+    color: hsl(46 30% 93%);
+    border-color: hsl(34 7% 22%);
+  }
 
   /* ── Form inputs / selects / textareas in dark mode ──
      Override Tailwind gray classes to use the earth-tone palette. */

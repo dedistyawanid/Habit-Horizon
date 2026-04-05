@@ -234,10 +234,10 @@ export default function FinancePage() {
           </div>
           <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
             <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
+              <TrendingUp className="w-3.5 h-3.5 text-[#5c7c6c]" />
               <span className="text-xs text-gray-500">Revenue</span>
             </div>
-            <p className="text-lg font-bold text-blue-600">{formatShort(totalIncome)}</p>
+            <p className="text-lg font-bold text-[#5c7c6c]">{formatShort(totalIncome)}</p>
           </div>
           <div className="bg-white dark:bg-card rounded-[28px] p-4 border border-[#E5E0D8] dark:border-white/10">
             <div className="flex items-center gap-1.5 mb-1">
