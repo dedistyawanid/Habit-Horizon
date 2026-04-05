@@ -42,7 +42,7 @@ export function useNutritionLog() {
   function addEntry(entry: Omit<NutritionEntry, "id" | "createdAt">) {
     const newEntry: NutritionEntry = {
       ...entry,
-      id: `nutr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
     setEntries((prev) => [newEntry, ...prev]);

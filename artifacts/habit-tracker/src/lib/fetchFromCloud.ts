@@ -94,10 +94,12 @@ export async function fetchAllFromCloud(
     if (health?.length) {
       localStorage.setItem("dedi_activity_log", JSON.stringify(
         health.map((a) => ({
-          id: a.id, date: a.date, type: a.type,
-          durationMin: a.duration_min ?? undefined,
-          distanceKm: a.distance_km ?? undefined,
-          elevationGain: a.elevation_gain ?? undefined,
+          id: a.id,
+          date: a.date,
+          type: a.type ?? "Other",       // null-safe: column may not exist yet
+          durationMin: a.duration_min != null ? Number(a.duration_min) : undefined,
+          distanceKm:  a.distance_km  != null ? Number(a.distance_km)  : undefined,
+          elevationGain: a.elevation_gain != null ? Number(a.elevation_gain) : undefined,
           runType: a.run_type ?? undefined,
           notes: a.notes ?? undefined,
           createdAt: a.created_at,

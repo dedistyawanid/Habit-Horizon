@@ -78,7 +78,7 @@ export default function HealthPage() {
 
   /* UI state */
   const [subTab, setSubTab]       = useState<SubTab>("activity");
-  const [period, setPeriod]       = useState<Period>("week");
+  const [period, setPeriod]       = useState<Period>("month");
   const [fabOpen, setFabOpen]     = useState(false);
   const [showActivity, setShowActivity] = useState(false);
   const [showMeal, setShowMeal]   = useState(false);

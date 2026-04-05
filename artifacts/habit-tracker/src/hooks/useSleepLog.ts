@@ -33,7 +33,7 @@ export function useSleepLog() {
   function addEntry(entry: Omit<SleepEntry, "id" | "createdAt">) {
     const newEntry: SleepEntry = {
       ...entry,
-      id: `slp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
     setEntries((prev) => {
