@@ -45,7 +45,10 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Notes**: Full CRUD, markdown toolbar (Bold, Italic, List), full-screen writing mode, markdown preview in fullscreen, URL reference preview, reminder system (date picker + dashboard reminders section)
 - **Finance Tracker**: Income/expense transactions, BCA/GoPay/etc account source, category filter, annual revenue target (default 1B IDR, editable in Settings > Data), cumulative chart
 - **Insights**: Habit analytics, 3d/7d/30d/12m filters, per-habit breakdown
-- **Health Tab** (`/health`): Weight Log (input + area chart + history), Activity Log (Running/Badminton/Gym with km+min fields), auto-checks matching exercise habits on activity log
+- **Health Tab** (`/health`): 3 sub-tabs (Activity / Nutrition / Body) with sticky blur pill nav.
+  - **Activity**: Day/Week/Month period toggle; 4 stat cards + donut chart filtered by period; Log Activity form (Running/Badminton/Workout/Other, Trail/Road, auto-checks exercise habits); activity history
+  - **Nutrition**: Today's Calorie + Protein progress bars; editable daily targets (pencil icon); "+ Log Meal" bottom-sheet modal (name, kcal, protein); daily food history list. LS keys: `dedi_nutrition_log`, `dedi_nutrition_targets`. Hook: `useNutritionLog`
+  - **Body**: Current weight hero card; weight trend area chart (last 10); log weight input; weight history list (last 10)
 - **Settings**:
   - Profile: name, weight, height, mission, avatar upload
   - Appearance: Light/Dark/System theme, 5 earth-tone accent presets: Sage & Charcoal `#556B2F` (default), Terracotta & Sand `#E2725B`, Deep Forest `#2D3A2D`, Autumn Ochre `#B8860B`, Stone & Slate `#4A4A4A`. Date format (DD/MM/YYYY etc.)

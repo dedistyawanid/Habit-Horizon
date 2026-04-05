@@ -1,0 +1,65 @@
+Periodic Analytics & Nutrition Hub
+1. Periodic Filtering (The "Time Machine"):
+
+Add a small Date Filter at the top right of the Health tab (e.g., Daily, Weekly, Monthly).
+
+Logic: When "Weekly" is selected, the stats (KM Running, Total Hours, Activity Split) should calculate sums for the current week only.
+
+2. Internal Navigation (Sub-Tabs):
+To avoid a long scroll, divide the Health tab into 3 Sub-Tabs at the top (using the minimalist pill style):
+
+Activities: (Running, Workout, Badminton, Stats).
+
+Nutrition: (Calorie & Protein Tracker).
+
+Body: (Weight Log & History Chart).
+
+3. Minimalist Food Tracker (The "Nutri-Pills"):
+In the Nutrition sub-tab, instead of a boring list, use 3 Progress Rings or Thin Bars at the top for today's targets:
+
+Calories (Target vs Current).
+
+Protein (Crucial for your Bulking goal).
+
+Carbs/Fats (Secondary).
+
+Quick Log: A simple "Quick Add" button that opens a modal to input: Meal Name, Calories, and Protein.
+
+4. Visual UI Refinement (Earth Tone):
+
+Keep the Extra Rounded Cards (28px).
+
+Use the Sage Green as the primary color for "Nutrition" bars to keep it organic.
+
+English Prompt for Replit Agent:
+[V10.1] Periodic Health & Nutrition Overhaul
+
+1. Periodic Stats Toggle:
+
+Add a Time Period Selector (Day, Week, Month) at the top of the Health Tab.
+
+Ensure all 4 top stat cards (Distance, Hours, etc.) and the Donut Chart update based on the selected period.
+
+2. Sub-Tab Navigation:
+
+Implement 3 Sub-Tabs inside the Health page: [Activity], [Nutrition], [Body].
+
+[Activity]: Keep current activity logs and stats.
+
+[Body]: Move the Weight Log and Weight Chart here.
+
+[Nutrition]: Create a new section to track Calories and Protein.
+
+3. Nutrition Tracking (Nutrition Sub-tab):
+
+Display 2 main progress bars at the top: Calories (current/target) and Protein (current/target).
+
+Add a "+ Log Meal" button that opens a modal to input: Name, Calories (kcal), and Protein (g).
+
+Show a Daily Food History list below the progress bars.
+
+4. Earth Tone Consistency:
+
+Ensure the new Nutrition bars and period toggles use the Sage Green and Sand Beige color palette.
+
+Keep the backdrop-filter: blur for the sub-tab menu if it’s sticky.
