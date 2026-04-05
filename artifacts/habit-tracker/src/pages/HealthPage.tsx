@@ -366,8 +366,85 @@ export default function HealthPage() {
             )}
 
             {filteredAct.length === 0 && actChartData.length === 0 && (
-              <EmptyState icon={Wind} title={`No activities ${period === "day" ? "today" : period === "week" ? "this week" : "this month"}`} sub="Tap the + button to log an activity" />
+              <EmptyState icon={Wind} title={`No activities ${period === "day" ? "today" : period === "week" ? "this week" : "this month"}`} sub="Use the form below to log your first activity" />
             )}
+
+            {/* ─── Inline Log Activity Form ─── */}
+            <div className="bg-white dark:bg-card p-5 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-primary" />
+                <p className="text-sm font-bold text-foreground">Log Activity</p>
+              </div>
+
+              {/* Type selector */}
+              <div className="flex gap-2">
+                {PRIMARY_TYPES.map(({ id, label, icon: Icon, color }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActType(id)}
+                    className={cn(
+                      "flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-2xl text-xs font-semibold transition-all border-2",
+                      actType === id ? "border-transparent text-white" : "border-transparent text-muted-foreground bg-accent"
+                    )}
+                    style={actType === id ? { backgroundColor: color } : {}}
+                  >
+                    <Icon className="w-4 h-4" />{label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setActType("Other")}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all border",
+                  actType === "Other" ? "bg-primary border-primary text-primary-foreground" : "border-accent text-muted-foreground bg-accent hover:text-primary"
+                )}
+              >
+                <Zap className="w-3.5 h-3.5" /> Other activity
+              </button>
+
+              {/* Trail / Road toggle */}
+              {actType === "Running" && (
+                <div className="flex gap-2">
+                  {(["Road", "Trail"] as const).map((rt) => (
+                    <button
+                      key={rt}
+                      onClick={() => setRunType(rt)}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border transition-all",
+                        runType === rt ? "bg-primary border-primary text-primary-foreground" : "border-accent text-muted-foreground bg-accent"
+                      )}
+                    >
+                      {rt === "Trail" ? <Mountain className="w-3.5 h-3.5" /> : <Navigation2 className="w-3.5 h-3.5" />} {rt}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Input fields */}
+              <div className={cn("grid gap-2", actType === "Running" ? "grid-cols-2" : "grid-cols-1")}>
+                {actType === "Running" && (
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input type="number" placeholder="Distance (km)" value={distance} onChange={(e) => setDistance(e.target.value)} className="pl-9 text-sm" step="0.1" min="0" />
+                  </div>
+                )}
+                <div className="relative">
+                  <Timer className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder="Duration (min)" value={duration} onChange={(e) => setDuration(e.target.value)} className="pl-9 text-sm" min="1" />
+                </div>
+              </div>
+              {actType === "Running" && (
+                <div className="relative">
+                  <Mountain className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder="Elevation gain (m) — optional" value={elevation} onChange={(e) => setElevation(e.target.value)} className="pl-9 text-sm" min="0" />
+                </div>
+              )}
+
+              <Button onClick={handleLogActivity} className="w-full gap-1.5">
+                <Plus className="w-4 h-4" /> Log {actType}
+              </Button>
+              <p className="text-[10px] text-muted-foreground text-center -mt-1">Logging auto-checks exercise habits for today</p>
+            </div>
 
             {/* Activity history */}
             {activityLog.length > 0 && (
@@ -412,6 +489,43 @@ export default function HealthPage() {
         {/* ══════════════ NUTRITION TAB ══════════════ */}
         {subTab === "nutrition" && (
           <div className="space-y-4">
+
+            {/* ─── Inline Log Meal Form ─── */}
+            <div className="bg-white dark:bg-card p-5 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-primary" />
+                <p className="text-sm font-bold text-foreground">Log Meal</p>
+              </div>
+              <div>
+                <Input
+                  placeholder="Meal name (e.g. Chicken rice, Oatmeal…)"
+                  value={mealName} onChange={(e) => setMealName(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="relative">
+                  <Flame className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder="kcal" value={mealCal} onChange={(e) => setMealCal(e.target.value)} className="pl-8 text-sm" min="0" />
+                </div>
+                <div className="relative">
+                  <Beef className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder="protein g" value={mealProt} onChange={(e) => setMealProt(e.target.value)} className="pl-8 text-sm" min="0" />
+                </div>
+                <div className="relative">
+                  <Wheat className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input type="number" placeholder="carbs g" value={mealCarbs} onChange={(e) => setMealCarbs(e.target.value)} className="pl-8 text-sm" min="0" />
+                </div>
+              </div>
+              <div className="flex gap-1 text-[10px] text-muted-foreground">
+                <span className="flex-1 text-center">Calories (kcal)</span>
+                <span className="flex-1 text-center">Protein (g)</span>
+                <span className="flex-1 text-center">Carbs (g)</span>
+              </div>
+              <Button onClick={handleLogMeal} className="w-full gap-1.5">
+                <Plus className="w-4 h-4" /> Add Meal
+              </Button>
+            </div>
 
             {/* 3 Progress Rings */}
             <div className="bg-white dark:bg-card p-5" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
@@ -492,6 +606,38 @@ export default function HealthPage() {
         {/* ══════════════ BODY TAB ══════════════ */}
         {subTab === "body" && (
           <div className="space-y-4">
+
+            {/* ─── Inline Weight Log Form ─── */}
+            <div className="bg-white dark:bg-card p-5 space-y-3" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-primary" />
+                  <p className="text-sm font-bold text-foreground">Log Weight</p>
+                </div>
+                <span className="text-xs text-muted-foreground">Target: {GOAL_WEIGHT} kg</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    type="number" placeholder="Current weight (kg)"
+                    value={weightInput} onChange={(e) => setWeightInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleLogWeight(); }}
+                    className="pl-9 text-sm" step="0.1" min="0"
+                  />
+                </div>
+                <Button onClick={handleLogWeight} size="sm" className="shrink-0 gap-1.5">
+                  <Check className="w-3.5 h-3.5" /> Log
+                </Button>
+              </div>
+              {latestWeight !== null && (
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Current: <span className="font-semibold text-primary">{latestWeight} kg</span>
+                  {" · "}
+                  {latestWeight === GOAL_WEIGHT ? "🎯 Goal reached!" : `${Math.abs(latestWeight - GOAL_WEIGHT).toFixed(1)} kg ${latestWeight > GOAL_WEIGHT ? "to lose" : "to gain"}`}
+                </p>
+              )}
+            </div>
 
             {/* Weight chart with goal line */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
