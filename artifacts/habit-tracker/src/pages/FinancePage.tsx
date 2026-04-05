@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { Transaction } from "@/types/finance";
 import {
@@ -41,6 +41,14 @@ export default function FinancePage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") === "1") {
+      setShowForm(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   const annualTarget = financeSettings.annualTarget;
   const annualProgress = Math.min(100, (currentYearIncome / annualTarget) * 100);

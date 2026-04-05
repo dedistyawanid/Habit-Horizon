@@ -1,0 +1,35 @@
+Please finish the remaining features and apply these specific enhancements
+
+1) Writing Experience (Advanced Notes):
+
+Rich Text Editor: Implement a basic Markdown or Rich Text support (Bold, Italic, Lists) for the Notes content.
+
+Full-Screen Writing Mode: Add a "Expand/Full-Screen" button to the Note modal so I have a large, distraction-free area to write.
+
+Reference Preview: Ensure the "Media/Reference URL" creates a small clickable preview or icon in the note card.
+
+Editable Targets: Add an option in Settings to change the "Annual Revenue Goal" (e.g., change the 1 Billion target).
+
+Habit Performance: Each habit should have its own detailed "Mini-Chart" or progress breakdown when clicked.
+
+Data Integrity: Verify that LocalStorage saves EVERYTHING (including the new "Source of Funds" and "Weight Log") and ensure the Import/Export works for all these new data points.
+
+Action Menu (The Three Dots ⋮): Hide all action icons (Notes, Date, Edit, Delete) from the main card view. Replace them with a single Horizontal Three-Dot Menu (⋮) that opens a clean dropdown containing: 📝 Notes, 📅 History, ✏️ Edit, and 🗑️ Delete.
+
+Primary Palette: Completely remove the old dark/neon purple theme.
+
+Overall Background: Off-White / Very Light Gray (Clean and bright).
+
+Accent Color: Use a #879A77 (Soft Green) for buttons, active states, toggles, and highlights.
+
+Cards & Modals: Use Pure White with very subtle shadows or thin borders.
+
+Text: Dark Gray / Charcoal (comfortable for reading).
+
+Design Style: Minimalist Modern, clean typography, smooth transitions, and subtle glassmorphism on modals.
+
+Make sure the UI remains English and the Minimalist Modern aesthetic is consistent across all new modals and charts.
+
+Swipe Gestures: Implement "Swipe to Change Tab" functionality. I want to be able to swipe left or right on the main content area to switch between the four main sections smoothly.
+
+Haptic Feedback (Visual): Add subtle visual feedback (like a small bounce or highlight) when switching tabs via swipe or tap.

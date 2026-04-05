@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +9,7 @@ import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
 import { QuickNoteModal } from "@/components/QuickNoteModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useSwipeNav } from "@/hooks/useSwipeNav";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import NotesPage from "@/pages/NotesPage";
@@ -17,7 +18,6 @@ import FinancePage from "@/pages/FinancePage";
 import { Settings } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
-import { HabitWithStats } from "@/types/habit";
 
 const queryClient = new QueryClient();
 
@@ -30,18 +30,18 @@ function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => v
           <DialogTitle>Quick Check-in</DialogTitle>
         </DialogHeader>
         {habitsWithStats.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">No habits yet</p>
+          <p className="text-sm text-gray-400 text-center py-4">No habits yet. Add habits from the main screen!</p>
         ) : (
-          <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
             {habitsWithStats.map((habit) => (
               <HabitCard
                 key={habit.id}
                 habit={habit}
                 view="list"
-                onEdit={() => { }}
+                onEdit={() => {}}
                 onDelete={deleteHabit}
-                onRecap={() => { }}
-                onNotes={() => { }}
+                onRecap={() => {}}
+                onNotes={() => {}}
               />
             ))}
           </div>
@@ -54,13 +54,14 @@ function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => v
 function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
-  const [financeModalOpen, setFinanceModalOpen] = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
-  const { addNote, addTransaction } = useApp();
+  const { addNote } = useApp();
+  const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Top bar — minimal: logo + settings */}
+      {/* Minimal top bar */}
       <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -79,22 +80,29 @@ function AppShell() {
         </div>
       </header>
 
-      {/* Page content */}
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/insights" component={InsightsPage} />
-        <Route path="/finance" component={FinancePage} />
-        <Route path="/notes" component={NotesPage} />
-        <Route component={NotFound} />
-      </Switch>
+      {/* Swipeable page content */}
+      <div
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        className="select-none"
+        style={{ touchAction: "pan-y" }}
+      >
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/insights" component={InsightsPage} />
+          <Route path="/finance" component={FinancePage} />
+          <Route path="/notes" component={NotesPage} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
 
-      {/* Bottom navigation */}
-      <BottomNav />
+      {/* Bottom navigation with bounce feedback */}
+      <BottomNav bouncing={bouncingTab} />
 
       {/* Multi-action FAB */}
       <MultiFAB
         onNewNote={() => setNoteModalOpen(true)}
-        onNewFinance={() => setFinanceModalOpen(true)}
+        onNewFinance={() => { setLocation("/finance?new=1"); }}
         onQuickCheckin={() => setCheckinModalOpen(true)}
       />
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette } from "lucide-react";
+import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette, DollarSign } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -114,6 +114,12 @@ function CategoryList({
   );
 }
 
+function formatIDR(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(n % 1_000_000_000 === 0 ? 0 : 2)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  return n.toLocaleString();
+}
+
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { toast } = useToast();
   const {
@@ -121,14 +127,17 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     addHabitCategory, renameHabitCategory, deleteHabitCategory,
     addNoteCategory, renameNoteCategory, deleteNoteCategory,
     habits, checkIns, notes, importData,
+    transactions, financeSettings, setFinanceSettings,
+    weightLog,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [annualTargetInput, setAnnualTargetInput] = useState<string>("");
 
   function handleExportJSON() {
-    exportAsJSON(habits, checkIns, notes, settings);
-    toast({ title: "Export complete", description: "JSON backup downloaded." });
+    exportAsJSON(habits, checkIns, notes, settings, transactions, financeSettings, weightLog);
+    toast({ title: "Export complete", description: "Full backup downloaded (habits, notes, finance, weight, settings)." });
   }
 
   function handleExportCSV() {
@@ -166,6 +175,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   function clearAvatar() {
     updateProfile({ avatarUrl: "", avatarType: "initials" });
+  }
+
+  function handleSetAnnualTarget() {
+    const raw = annualTargetInput.trim().replace(/[,_]/g, "");
+    const num = Number(raw);
+    if (isNaN(num) || num <= 0) {
+      toast({ title: "Invalid target", description: "Please enter a valid positive number.", variant: "destructive" });
+      return;
+    }
+    setFinanceSettings({ ...financeSettings, annualTarget: num });
+    setAnnualTargetInput("");
+    toast({ title: "Annual target updated", description: `New target: IDR ${formatIDR(num)}` });
   }
 
   const initials = (settings.profile.fullName || "DS")
@@ -392,9 +413,51 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
           {/* DATA TAB */}
           <TabsContent value="data" className="space-y-4 pt-4">
+            {/* Annual Revenue Target */}
+            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-primary" />
+                  Annual Revenue Target
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Current target:{" "}
+                  <span className="font-semibold text-primary">
+                    IDR {financeSettings.annualTarget.toLocaleString()}
+                  </span>
+                  {" "}({formatIDR(financeSettings.annualTarget)})
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="e.g. 2000000000"
+                  value={annualTargetInput}
+                  onChange={(e) => setAnnualTargetInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSetAnnualTarget(); }}
+                  className="text-sm flex-1"
+                  data-testid="input-annual-target"
+                />
+                <Button
+                  onClick={handleSetAnnualTarget}
+                  size="sm"
+                  className="shrink-0"
+                  data-testid="btn-set-annual-target"
+                >
+                  <Check className="w-3.5 h-3.5 mr-1" />
+                  Set
+                </Button>
+              </div>
+              <p className="text-[10px] text-gray-400">
+                Quick amounts: 500M = 500000000 &nbsp;·&nbsp; 1B = 1000000000 &nbsp;·&nbsp; 2B = 2000000000
+              </p>
+            </div>
+
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Export Data</p>
-              <p className="text-xs text-gray-400 mb-3">Download a backup of all your habits, check-ins, notes, and settings.</p>
+              <p className="text-xs text-gray-400 mb-3">
+                Downloads a full backup including habits, notes, finance transactions, weight log, and settings.
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <Button onClick={handleExportJSON} className="gap-2" data-testid="btn-export-json">
                   <Download className="w-4 h-4" />
@@ -432,6 +495,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <p><span className="font-semibold">Habits:</span> {habits.length}</p>
               <p><span className="font-semibold">Check-ins:</span> {checkIns.length}</p>
               <p><span className="font-semibold">Notes:</span> {notes.length}</p>
+              <p><span className="font-semibold">Transactions:</span> {transactions.length}</p>
+              <p><span className="font-semibold">Weight entries:</span> {weightLog.length}</p>
             </div>
           </TabsContent>
         </Tabs>
