@@ -20,7 +20,7 @@ import InsightsPage from "@/pages/InsightsPage";
 import FinancePage from "@/pages/FinancePage";
 import HealthPage from "@/pages/HealthPage";
 import LoginPage from "@/pages/LoginPage";
-import { Settings, RefreshCw } from "lucide-react";
+import { Settings, RefreshCw, Rocket } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
 import { useToast } from "@/hooks/use-toast";
@@ -134,7 +134,7 @@ function AppShell() {
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground text-xs font-bold">D</span>
+              <Rocket className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Horizon Hub</span>
             <SyncIndicator />
