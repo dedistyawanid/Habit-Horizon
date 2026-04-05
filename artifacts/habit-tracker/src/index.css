@@ -460,4 +460,8 @@
     transform: translateX(0);
     transition: all 0.2s ease;
   }
+
+  /* Hide scrollbar (used for category tab row in Notes) */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }

@@ -209,46 +209,41 @@ export default function NotesPage() {
           </div>
         </div>
 
-        {/* Search + category manager */}
-        <div className="flex gap-2 items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search notes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 bg-card h-9 text-sm rounded-xl"
-              data-testid="input-note-search"
-            />
-          </div>
+        {/* Search bar — minimal underline style */}
+        <div className="flex gap-3 items-center border-b border-[hsl(var(--border))]/50 pb-1">
+          <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <input
+            placeholder="Search notes…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none border-none"
+            data-testid="input-note-search"
+          />
           <button
             onClick={() => setShowCategoryManager(true)}
             title="Manage note categories"
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-card border border-[hsl(var(--border))] text-muted-foreground hover:text-primary hover:border-primary/40 transition-all shrink-0"
+            className="text-muted-foreground hover:text-primary transition-colors shrink-0"
           >
             <Tag className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Category pills */}
-        <div className="flex gap-1.5 flex-wrap">
-          {categoriesWithNotes.map((cat) => {
-            const count = cat === "All" ? notes.length : notes.filter((n) => n.category === cat).length;
-            return (
-              <button
-                key={cat}
-                onClick={() => setFilterCat(cat)}
-                className={cn(
-                  "px-2.5 py-1 rounded-full text-xs font-medium transition-all border",
-                  filterCat === cat
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-accent text-accent-foreground border-accent hover:bg-accent/70 hover:text-primary"
-                )}
-              >
-                {cat} {cat !== "All" && <span className="opacity-70">({count})</span>}
-              </button>
-            );
-          })}
+        {/* Category tabs — plain text with Terracotta underline */}
+        <div className="flex gap-5 overflow-x-auto pb-1 no-scrollbar" style={{ borderBottom: "1px solid hsl(var(--border) / 0.3)" }}>
+          {categoriesWithNotes.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilterCat(cat)}
+              className={cn(
+                "text-xs font-medium whitespace-nowrap pb-2.5 border-b-2 -mb-px transition-all",
+                filterCat === cat
+                  ? "text-primary border-primary"
+                  : "text-muted-foreground border-transparent hover:text-foreground"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Notes grid / list */}
@@ -271,92 +266,92 @@ export default function NotesPage() {
             )}
           </div>
         ) : (
-          <div className={cn(notesView === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-2.5")}>
+          <div className={cn(notesView === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-2")}>
             {filtered.map((note) => {
               const preview = getPreview(note.content);
               const title = note.title || "Untitled";
               const isList = notesView === "list";
-              return (
+              return isList ? (
+                /* ── List card ── */
                 <div
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className={cn(
-                    "group bg-card border border-[hsl(var(--border))] transition-all duration-150 cursor-pointer relative active:scale-[0.98]",
-                    isList ? "flex items-center gap-3 p-3.5" : "flex flex-col gap-1.5 p-3.5 min-h-[110px]"
-                  )}
-                  style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+                  className="group relative flex items-center gap-3.5 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-all duration-150"
+                  style={{ background: "#211f1d", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.22)" }}
                 >
-                  {/* List view: left icon */}
-                  {isList && (
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-accent">
-                      <BookOpen className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className={cn("flex-1 min-w-0", isList ? "flex items-center gap-3" : "flex flex-col gap-1.5")}>
-                    <div className={cn("min-w-0", isList ? "flex-1" : "")}>
-                      {/* Title */}
-                      <h3 className={cn(
-                        "font-bold text-foreground leading-snug",
-                        isList ? "text-sm truncate" : "text-sm line-clamp-2"
-                      )}>
-                        {title}
-                      </h3>
-
-                      {/* Snippet — hide in list if too many chars */}
-                      {preview && !isList && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-1 mt-0.5">
-                          {preview}
-                        </p>
-                      )}
-                      {preview && isList && (
-                        <p className="text-xs text-muted-foreground truncate leading-relaxed mt-0.5">
-                          {preview}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Footer — timestamp + category pill + icons */}
-                    <div className={cn(
-                      "flex items-center gap-1.5 shrink-0",
-                      isList ? "ml-auto" : "mt-auto pt-1 justify-between"
-                    )}>
-                      {!isList && <span className="text-[10px] text-muted-foreground">{formatDate(note.updatedAt)}</span>}
-                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
-                        {/* Category pill */}
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md leading-none bg-accent text-primary">
-                          {note.category}
-                        </span>
-                        {isList && <span className="text-[10px] text-muted-foreground">{formatDate(note.updatedAt)}</span>}
-                        {note.reminderEnabled && note.reminderDate && (
-                          <Bell className="w-2.5 h-2.5 text-amber-400 shrink-0" />
-                        )}
-                        {note.url && (
-                          <a
-                            href={note.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            title={getHostname(note.url)}
-                          >
-                            <ExternalLink className="w-2.5 h-2.5 text-primary shrink-0" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(172,110,92,0.12)" }}>
+                    <BookOpen className="w-3.5 h-3.5 text-primary" />
                   </div>
-
-                  {/* Delete button — top-right */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold leading-snug truncate" style={{ color: "#f2f0e6" }}>{title}</h3>
+                    {preview && (
+                      <p className="text-xs truncate mt-0.5 leading-relaxed" style={{ color: "#c8c0b0" }}>{preview}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-[10px] font-medium" style={{ color: "#ac6e5c" }}>{note.category}</span>
+                    <span className="text-[10px]" style={{ color: "#c8c0b0", opacity: 0.55 }}>{formatDate(note.updatedAt)}</span>
+                  </div>
+                  {note.reminderEnabled && note.reminderDate && (
+                    <Bell className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
                     data-testid={`delete-note-btn-${note.id}`}
                     className={cn(
                       "absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all",
-                      confirmDelete === note.id
-                        ? "opacity-100 bg-red-50 dark:bg-red-900/20 text-red-500"
-                        : "hover:bg-accent text-muted-foreground"
+                      confirmDelete === note.id ? "opacity-100 text-red-400" : "text-muted-foreground"
+                    )}
+                    title={confirmDelete === note.id ? "Confirm delete" : "Delete"}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                /* ── Grid card ── */
+                <div
+                  key={note.id}
+                  data-testid={`note-card-${note.id}`}
+                  onClick={() => setActiveNoteId(note.id)}
+                  className="group relative flex flex-col p-4 cursor-pointer active:scale-[0.98] transition-all duration-150"
+                  style={{ background: "#211f1d", borderRadius: 20, minHeight: 110, boxShadow: "0 2px 12px rgba(0,0,0,0.24)" }}
+                >
+                  {/* Title */}
+                  <h3 className="text-sm font-semibold leading-snug line-clamp-2 mb-1.5" style={{ color: "#f2f0e6" }}>
+                    {title}
+                  </h3>
+                  {/* Preview */}
+                  {preview && (
+                    <p className="text-xs leading-relaxed line-clamp-3 flex-1" style={{ color: "#c8c0b0" }}>
+                      {preview}
+                    </p>
+                  )}
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-auto pt-2.5">
+                    <span className="text-[10px]" style={{ color: "#c8c0b0", opacity: 0.5 }}>{formatDate(note.updatedAt)}</span>
+                    <div className="flex items-center gap-1.5">
+                      {note.reminderEnabled && note.reminderDate && (
+                        <Bell className="w-2.5 h-2.5 text-amber-400" />
+                      )}
+                      {note.url && (
+                        <a
+                          href={note.url} target="_blank" rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()} title={getHostname(note.url)}
+                        >
+                          <ExternalLink className="w-2.5 h-2.5 text-primary/60" />
+                        </a>
+                      )}
+                      <span className="text-[10px] font-medium" style={{ color: "#ac6e5c" }}>{note.category}</span>
+                    </div>
+                  </div>
+                  {/* Delete */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
+                    data-testid={`delete-note-btn-${note.id}`}
+                    className={cn(
+                      "absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all",
+                      confirmDelete === note.id ? "opacity-100 text-red-400" : "text-muted-foreground"
                     )}
                     title={confirmDelete === note.id ? "Confirm delete" : "Delete"}
                   >
