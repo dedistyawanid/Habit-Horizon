@@ -151,10 +151,9 @@ export function deleteMeal(id: string) { return del("nutrition_logs", id); }
 export function syncSleep(e: { id: string; date: string; hours: number; minutes: number; quality: number; createdAt?: string }) {
   return upsert("sleep_logs", {
     id: e.id, user_id: getUserId(), date: e.date,
-    hours:   num(e.hours)   ?? 0,
-    minutes: num(e.minutes) ?? 0,
-    quality: num(e.quality) ?? 0,
-    created_at: e.createdAt ?? new Date().toISOString(),
+    hours:   Math.round(num(e.hours)   ?? 0),
+    minutes: Math.round(num(e.minutes) ?? 0),
+    quality: Math.round(num(e.quality) ?? 0),
   });
 }
 export function deleteSleep(id: string) { return del("sleep_logs", id); }
@@ -263,10 +262,9 @@ export async function forcePushAll(): Promise<PushResult[]> {
   const sleeps = JSON.parse(localStorage.getItem("dedi_sleep_log") ?? "[]");
   await pushBatch("sleep_logs", sleeps.map((s: Record<string, unknown>) => ({
     id: s.id, user_id: uid, date: s.date,
-    hours:      num(s.hours)   ?? 0,
-    minutes:    num(s.minutes) ?? 0,
-    quality:    num(s.quality) ?? 0,
-    created_at: s.createdAt ?? new Date().toISOString(),
+    hours:   Math.round(num(s.hours)   ?? 0),
+    minutes: Math.round(num(s.minutes) ?? 0),
+    quality: Math.round(num(s.quality) ?? 0),
   })));
 
   /* weight_logs */
