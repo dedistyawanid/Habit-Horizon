@@ -256,16 +256,21 @@ function AuthGate() {
   if (!user) return <LoginPage />;
 
   return (
-    <RefreshProvider value={{ refreshing, refreshFromCloud }}>
-      <AppProvider key={appKey}>
-        <SyncProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+    /*
+     * WouterRouter is intentionally OUTSIDE AppProvider so that when appKey
+     * increments (sync remount), the Router's location state is preserved.
+     * Only the data/context layer remounts — navigation is untouched.
+     */
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <RefreshProvider value={{ refreshing, refreshFromCloud }}>
+        <AppProvider key={appKey}>
+          <SyncProvider>
             <AppShell />
-          </WouterRouter>
-          <Toaster />
-        </SyncProvider>
-      </AppProvider>
-    </RefreshProvider>
+            <Toaster />
+          </SyncProvider>
+        </AppProvider>
+      </RefreshProvider>
+    </WouterRouter>
   );
 }
 

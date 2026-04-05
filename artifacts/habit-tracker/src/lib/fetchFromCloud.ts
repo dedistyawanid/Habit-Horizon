@@ -68,8 +68,14 @@ export async function fetchAllFromCloud(
     const [habits, checkins, health, meals, sleeps, weights, txns, notes] = results;
     let wrote = false;
 
+    /** Write to localStorage AND dispatch a storage event so same-tab listeners pick it up. */
+    function lsSet(key: string, value: string) {
+      localStorage.setItem(key, value);
+      window.dispatchEvent(new StorageEvent("storage", { key, newValue: value }));
+    }
+
     if (habits?.length) {
-      localStorage.setItem("dedi_habits", JSON.stringify(
+      lsSet("dedi_habits", JSON.stringify(
         habits.map((h) => ({
           id: h.id, name: h.name, category: h.category,
           frequency: h.frequency ?? "Daily", color: h.color, icon: h.icon,
@@ -82,7 +88,7 @@ export async function fetchAllFromCloud(
     }
 
     if (checkins?.length) {
-      localStorage.setItem("dedi_checkins", JSON.stringify(
+      lsSet("dedi_checkins", JSON.stringify(
         checkins.map((c) => ({
           id: c.id, habitId: c.habit_id, date: c.date,
           notes: c.notes ?? "", completedAt: c.completed_at,
@@ -92,11 +98,11 @@ export async function fetchAllFromCloud(
     }
 
     if (health?.length) {
-      localStorage.setItem("dedi_activity_log", JSON.stringify(
+      lsSet("dedi_activity_log", JSON.stringify(
         health.map((a) => ({
           id: a.id,
           date: a.date,
-          type: a.type ?? "Other",       // null-safe: column may not exist yet
+          type: a.type ?? "Other",
           durationMin: a.duration_min != null ? Number(a.duration_min) : undefined,
           distanceKm:  a.distance_km  != null ? Number(a.distance_km)  : undefined,
           elevationGain: a.elevation_gain != null ? Number(a.elevation_gain) : undefined,
@@ -110,7 +116,7 @@ export async function fetchAllFromCloud(
     }
 
     if (meals?.length) {
-      localStorage.setItem("dedi_nutrition_log", JSON.stringify(
+      lsSet("dedi_nutrition_log", JSON.stringify(
         meals.map((m) => ({
           id: m.id, date: m.date, name: m.name,
           calories: m.calories, protein: m.protein, carbs: m.carbs ?? 0,
@@ -121,7 +127,7 @@ export async function fetchAllFromCloud(
     }
 
     if (sleeps?.length) {
-      localStorage.setItem("dedi_sleep_log", JSON.stringify(
+      lsSet("dedi_sleep_log", JSON.stringify(
         sleeps.map((s) => ({
           id: s.id, date: s.date,
           hours: s.hours, minutes: s.minutes ?? 0, quality: s.quality,
@@ -132,14 +138,14 @@ export async function fetchAllFromCloud(
     }
 
     if (weights?.length) {
-      localStorage.setItem("dedi_weight_log", JSON.stringify(
+      lsSet("dedi_weight_log", JSON.stringify(
         weights.map((w) => ({ id: w.id, date: w.date, weight: w.weight }))
       ));
       wrote = true;
     }
 
     if (txns?.length) {
-      localStorage.setItem("dedi_transactions", JSON.stringify(
+      lsSet("dedi_transactions", JSON.stringify(
         txns.map((t) => ({
           id: t.id, title: t.note ?? "Transaction",
           amount: t.amount, date: t.date,
@@ -158,13 +164,12 @@ export async function fetchAllFromCloud(
       const reminderMap = new Map(
         localNotes.map((n) => [n.id, { reminderDate: n.reminderDate, reminderEnabled: n.reminderEnabled }])
       );
-      localStorage.setItem("dedi_quick_notes", JSON.stringify(
+      lsSet("dedi_quick_notes", JSON.stringify(
         notes.map((n) => {
           const local = reminderMap.get(n.id);
           return {
             id: n.id, title: n.title, content: n.content ?? "",
             category: n.category, createdAt: n.created_at, updatedAt: n.updated_at,
-            /* Cloud columns (when added) take precedence; fall back to local copy */
             reminderDate:    (n as Record<string, unknown>).reminder_date    ?? local?.reminderDate    ?? undefined,
             reminderEnabled: (n as Record<string, unknown>).reminder_enabled ?? local?.reminderEnabled ?? undefined,
           };
