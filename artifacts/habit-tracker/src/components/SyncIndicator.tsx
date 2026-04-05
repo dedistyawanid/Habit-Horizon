@@ -26,22 +26,40 @@ function StatusIcon({ status }: { status: SyncStatus }) {
         style={{ animation: "spin 1s linear infinite" }}
       />
     );
-  if (status === "synced")  return <CheckCircle2 size={13} color={ACCENT} />;
+  if (status === "synced") return <CheckCircle2 size={13} color={ACCENT} />;
   return <Cloud size={14} color="#9CA3AF" />;
 }
 
 export function SyncIndicator() {
   const { status, lastSyncedAt, pendingCount } = useSyncStatus();
 
+  /* Auto-hide the "Synced ✓" label after 2 s */
+  const [showSynced, setShowSynced] = useState(false);
+  useEffect(() => {
+    if (status === "synced") {
+      setShowSynced(true);
+      const t = setTimeout(() => setShowSynced(false), 2000);
+      return () => clearTimeout(t);
+    } else {
+      setShowSynced(false);
+    }
+  }, [status]);
+
+  const visible =
+    status === "syncing" ||
+    (status === "synced" && showSynced) ||
+    status === "offline" ||
+    status === "error";
+
   const label =
     status === "syncing"
       ? "Syncing…"
-      : status === "synced"
+      : status === "synced" && showSynced
       ? "Synced"
       : status === "offline"
       ? "Offline"
       : status === "error"
-      ? `${pendingCount > 0 ? `${pendingCount} pending` : "Sync error"}`
+      ? (pendingCount > 0 ? `${pendingCount} pending` : "Sync error")
       : "";
 
   const labelColor =
@@ -63,8 +81,9 @@ export function SyncIndicator() {
         fontWeight: 500,
         color: labelColor,
         letterSpacing: "0.02em",
-        opacity: status === "idle" ? 0 : 1,
-        transition: "opacity 0.3s ease",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.4s ease",
+        pointerEvents: "none",
       }}
       title={lastSyncedAt ? `Last synced: ${lastSyncedAt.toLocaleTimeString()}` : undefined}
     >

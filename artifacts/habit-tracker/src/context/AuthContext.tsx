@@ -1,21 +1,21 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase, setCurrentUserId } from "@/lib/supabase";
 import {
   fetchAllFromCloud, fetchProfile, applyProfileToLocalStorage,
 } from "@/lib/fetchFromCloud";
 
-/* sessionStorage key used to pass a toast message to the app shell */
 const SYNC_TOAST_KEY = "dedi_sync_toast";
 
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
-  /**
-   * true only during the very first auth + cloud-hydration phase.
-   * After that the app renders and sync indicators handle status.
-   */
+  /** true only during the brief Supabase session check (< 200ms typically) */
   loading: boolean;
+  /** true while background cloud hydration is in progress */
+  hydrating: boolean;
+  /** bumped each time a hydration cycle completes successfully */
+  hydratedAt: number;
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
@@ -25,30 +25,28 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   session: null,
   loading: true,
+  hydrating: false,
+  hydratedAt: 0,
   signIn: async () => null,
   signUp: async () => null,
   signOut: async () => {},
 });
 
-/** Sets the user ID and fetches cloud data.  Never throws. Returns quickly on timeout/error. */
+/** Fetches cloud data into localStorage in the background. Never throws. */
 async function hydrateFromCloud(userId: string): Promise<void> {
   setCurrentUserId(userId);
   if (!navigator.onLine) return;
-
   try {
     const [syncResult, profile] = await Promise.all([
       fetchAllFromCloud(userId),
       fetchProfile(userId),
     ]);
-
     if (syncResult === "timeout") {
-      /* Flag a toast for the app shell to show once mounted */
       sessionStorage.setItem(
         SYNC_TOAST_KEY,
-        JSON.stringify({ title: "Using local data", description: "Cloud sync timed out — your data will sync when the connection improves.", variant: "default" })
+        JSON.stringify({ title: "Using local data", description: "Cloud sync timed out — your data will sync when the connection improves." })
       );
     }
-
     if (profile) applyProfileToLocalStorage(profile);
   } catch {
     /* Silently fall through — localStorage data will be used */
@@ -56,12 +54,25 @@ async function hydrateFromCloud(userId: string): Promise<void> {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user,    setUser]    = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user,       setUser]       = useState<User | null>(null);
+  const [session,    setSession]    = useState<Session | null>(null);
+  const [loading,    setLoading]    = useState(true);
+  const [hydrating,  setHydrating]  = useState(false);
+  const [hydratedAt, setHydratedAt] = useState(0);
+  const hydratingRef = useRef(false);
 
+  /** Run cloud hydration in the background without blocking the UI. */
   const hydrate = useCallback(async (u: User) => {
-    await hydrateFromCloud(u.id);
+    if (hydratingRef.current) return;
+    hydratingRef.current = true;
+    setHydrating(true);
+    try {
+      await hydrateFromCloud(u.id);
+      setHydratedAt(Date.now());
+    } finally {
+      hydratingRef.current = false;
+      setHydrating(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -74,28 +85,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session);
 
       if (u) {
-        /* Hydrate BEFORE setting user so AppProvider mounts with fresh localStorage */
-        await hydrate(u);
-        if (mounted) setUser(u);
+        setCurrentUserId(u.id);
+        setUser(u);
+        setLoading(false);
+        /* Hydrate in the background — app is already interactive */
+        hydrate(u);
+      } else {
+        setLoading(false);
       }
-
-      if (mounted) setLoading(false);
     });
 
-    /* ── Subsequent auth changes (fresh sign-in / sign-out) ── */
+    /* ── Subsequent auth changes (sign-in / sign-out) ── */
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, sess) => {
       if (!mounted) return;
       const u = sess?.user ?? null;
       setSession(sess);
 
       if (u) {
-        /* Show loading screen again while we re-hydrate for the new user */
-        setLoading(true);
-        await hydrate(u);
-        if (mounted) {
-          setUser(u);
-          setLoading(false);
-        }
+        setCurrentUserId(u.id);
+        setUser(u);
+        /* Hydrate in the background after sign-in */
+        hydrate(u);
       } else {
         setCurrentUserId("dedi");
         setUser(null);
@@ -131,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, hydrating, hydratedAt, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

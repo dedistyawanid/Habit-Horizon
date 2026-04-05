@@ -60,13 +60,43 @@ function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
+/** Thin 2px animated bar at the very top of the viewport while syncing. */
+function SyncProgressBar({ visible }: { visible: boolean }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        height: 2,
+        zIndex: 9999,
+        overflow: "hidden",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.4s ease",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 0, left: "-50%",
+          width: "50%",
+          height: "100%",
+          background: "linear-gradient(90deg, transparent, #556B2F, #6B8A3A, transparent)",
+          animation: visible ? "syncSlide 1.2s ease-in-out infinite" : "none",
+        }}
+      />
+      <style>{`@keyframes syncSlide { 0%{left:-50%} 100%{left:150%} }`}</style>
+    </div>
+  );
+}
+
 function AppShell() {
   const [settingsOpen,     setSettingsOpen]     = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const { triggerSync } = useSyncStatus();
+  const { triggerSync, status: syncStatus } = useSyncStatus();
   const { refreshFromCloud, refreshing } = useRefresh();
 
   /* Show deferred sync toast + immediate queue flush on mount */
@@ -91,8 +121,13 @@ function AppShell() {
     });
   }
 
+  const isSyncing = syncStatus === "syncing" || refreshing;
+
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* Thin top progress bar — replaces any full-screen loading overlay */}
+      <SyncProgressBar visible={isSyncing} />
+
       {/* Top bar */}
       <header className="sticky top-0 z-30 glass-header">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
@@ -105,7 +140,6 @@ function AppShell() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Two-way sync button: push local → pull cloud */}
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}
@@ -162,25 +196,30 @@ function AppShell() {
 
 /* ── AuthGate: owns the appKey and refresh logic ── */
 function AuthGate() {
-  const { user, loading } = useAuth();
+  const { user, loading, hydratedAt } = useAuth();
   const [appKey,     setAppKey]     = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const prevHydratedAt = useState(0);
+
+  /* Bump appKey whenever a background hydration cycle completes */
+  useEffect(() => {
+    if (hydratedAt > 0 && hydratedAt !== prevHydratedAt[0]) {
+      prevHydratedAt[0] = hydratedAt;
+      setAppKey((k) => k + 1);
+    }
+  }, [hydratedAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshFromCloud = useCallback(async () => {
     if (!user || refreshing) return;
     setRefreshing(true);
     try {
-      /* ① Push any locally-queued offline ops first */
       if (navigator.onLine) await flushQueue();
-
-      /* ② Pull everything from Supabase into localStorage */
       const [syncResult, profile] = await Promise.all([
         fetchAllFromCloud(user.id),
         fetchProfile(user.id),
       ]);
       if (profile) applyProfileToLocalStorage(profile);
       if (syncResult !== "offline" && syncResult !== "error") {
-        /* Re-mount AppProvider so all hooks re-init from fresh localStorage */
         setAppKey((k) => k + 1);
       }
     } finally {
@@ -188,33 +227,27 @@ function AuthGate() {
     }
   }, [user, refreshing]);
 
+  /* While Supabase auth check runs (fast, < 200ms) — show a minimal splash */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F4F0" }}>
-        <div className="flex flex-col items-center gap-4">
+      <div
+        className="min-h-screen flex items-end justify-center pb-12"
+        style={{ background: "#F5F4F0" }}
+      >
+        {/* Slim progress bar at the very top */}
+        <SyncProgressBar visible />
+        {/* Minimal brand mark only — no blocking text */}
+        <div className="flex flex-col items-center gap-2 opacity-60">
           <div
-            className="w-14 h-14 rounded-[18px] flex items-center justify-center"
+            className="w-10 h-10 rounded-[14px] flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #556B2F 0%, #6B8A3A 100%)" }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
               <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
             </svg>
           </div>
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-sm font-semibold text-gray-700">Syncing from cloud…</p>
-            <p className="text-xs text-gray-400">Habit Horizon</p>
-          </div>
-          <div className="flex gap-1">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-primary"
-                style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
-              />
-            ))}
-          </div>
-          <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }`}</style>
+          <p className="text-xs text-gray-400 font-medium">Habit Horizon</p>
         </div>
       </div>
     );
