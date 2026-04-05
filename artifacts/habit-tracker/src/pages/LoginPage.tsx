@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, Leaf } from "lucide-react";
+import { Eye, EyeOff, Rocket } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
@@ -33,24 +33,26 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5"
-      style={{ background: "linear-gradient(160deg, #F5F4F0 0%, #EDE9E0 60%, #E4DDD0 100%)" }}
+      style={{ background: "#161819" }}
     >
-      {/* Logo mark */}
+      {/* Brand mark */}
       <div className="mb-8 flex flex-col items-center gap-3">
         <div
-          className="w-16 h-16 rounded-[22px] flex items-center justify-center shadow-md"
-          style={{ background: "linear-gradient(135deg, #556B2F 0%, #6B8A3A 100%)" }}
+          className="w-16 h-16 rounded-[22px] flex items-center justify-center shadow-lg"
+          style={{ background: "#ac6e5c" }}
         >
-          <Leaf className="w-7 h-7 text-white" strokeWidth={1.8} />
+          <Rocket className="w-7 h-7 text-white" strokeWidth={1.8} />
         </div>
         <div className="text-center">
           <h1
-            className="text-4xl font-black tracking-tight text-gray-900"
-            style={{ fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: "-0.03em" }}
+            className="text-3xl font-black tracking-tight"
+            style={{ color: "#f2f0e6", letterSpacing: "-0.03em" }}
           >
-            Habit Horizon
+            Horizon Hub
           </h1>
-          <p className="text-sm text-gray-500 mt-1 tracking-wide">Your personal growth companion</p>
+          <p className="text-sm mt-1 tracking-wide" style={{ color: "#9c8b7a" }}>
+            Your Personal Earth-Tone Journal
+          </p>
         </div>
       </div>
 
@@ -58,16 +60,15 @@ export default function LoginPage() {
       <div
         className="w-full max-w-sm p-7"
         style={{
-          background: "rgba(255,255,255,0.9)",
+          background: "#211f1d",
           borderRadius: 28,
-          border: "1px solid #E5E0D8",
-          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(172,110,92,0.18)",
         }}
       >
         {/* Mode toggle */}
         <div
           className="flex mb-6 p-1"
-          style={{ background: "#F5F4F0", borderRadius: 14 }}
+          style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14 }}
         >
           {(["signin", "signup"] as const).map((m) => (
             <button
@@ -76,9 +77,9 @@ export default function LoginPage() {
               className="flex-1 py-2 text-sm font-semibold transition-all"
               style={{
                 borderRadius: 10,
-                background: mode === m ? "#fff" : "transparent",
-                color:   mode === m ? "#556B2F" : "#9CA3AF",
-                boxShadow: mode === m ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                background: mode === m ? "#ac6e5c" : "transparent",
+                color: mode === m ? "#f2f0e6" : "#9c8b7a",
+                boxShadow: mode === m ? "0 2px 8px rgba(172,110,92,0.35)" : "none",
               }}
             >
               {m === "signin" ? "Sign In" : "Sign Up"}
@@ -89,25 +90,38 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Email</label>
+            <label
+              className="text-xs font-semibold uppercase tracking-wider mb-1.5 block"
+              style={{ color: "#9c8b7a" }}
+            >
+              Email
+            </label>
             <input
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 text-sm text-gray-900 focus:outline-none"
+              className="w-full px-4 py-3 text-sm focus:outline-none transition-all"
               style={{
-                background: "#F5F4F0",
+                background: "#181c1e",
                 borderRadius: 14,
-                border: "1px solid #E5E0D8",
+                border: "1px solid rgba(255,255,255,0.09)",
+                color: "#f2f0e6",
               }}
+              onFocus={(e) => (e.currentTarget.style.border = "1px solid #5c7c6c")}
+              onBlur={(e)  => (e.currentTarget.style.border = "1px solid rgba(255,255,255,0.09)")}
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Password</label>
+            <label
+              className="text-xs font-semibold uppercase tracking-wider mb-1.5 block"
+              style={{ color: "#9c8b7a" }}
+            >
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPwd ? "text" : "password"}
@@ -115,17 +129,21 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 text-sm text-gray-900 focus:outline-none pr-12"
+                className="w-full px-4 py-3 text-sm focus:outline-none pr-12 transition-all"
                 style={{
-                  background: "#F5F4F0",
+                  background: "#181c1e",
                   borderRadius: 14,
-                  border: "1px solid #E5E0D8",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  color: "#f2f0e6",
                 }}
+                onFocus={(e) => (e.currentTarget.style.border = "1px solid #5c7c6c")}
+                onBlur={(e)  => (e.currentTarget.style.border = "1px solid rgba(255,255,255,0.09)")}
               />
               <button
                 type="button"
                 onClick={() => setShowPwd((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: "#9c8b7a" }}
               >
                 {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -133,35 +151,65 @@ export default function LoginPage() {
           </div>
 
           {/* Error / Success */}
-          {error   && <p className="text-xs text-red-500 font-medium bg-red-50 rounded-xl px-3 py-2">{error}</p>}
-          {success && <p className="text-xs text-emerald-600 font-medium bg-emerald-50 rounded-xl px-3 py-2">{success}</p>}
+          {error && (
+            <p className="text-xs font-medium px-3 py-2 rounded-xl"
+              style={{ color: "#f87171", background: "rgba(248,113,113,0.10)" }}>
+              {error}
+            </p>
+          )}
+          {success && (
+            <p className="text-xs font-medium px-3 py-2 rounded-xl"
+              style={{ color: "#6ee7b7", background: "rgba(110,231,183,0.10)" }}>
+              {success}
+            </p>
+          )}
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 text-sm font-bold text-white transition-all mt-1"
+            className="w-full py-3 text-sm font-bold transition-all mt-1"
             style={{
-              background: loading ? "#9CA3AF" : "linear-gradient(135deg, #556B2F 0%, #6B8A3A 100%)",
+              background: loading ? "#6b5047" : "#ac6e5c",
               borderRadius: 14,
+              color: "#f2f0e6",
               cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: loading ? "none" : "0 4px 16px rgba(172,110,92,0.40)",
             }}
           >
             {loading ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
         </form>
 
-        {/* Footer */}
-        <p className="text-xs text-center text-gray-400 mt-5">
+        {/* Footer link */}
+        <p className="text-xs text-center mt-5" style={{ color: "#9c8b7a" }}>
           {mode === "signin" ? (
-            <>No account? <button onClick={() => setMode("signup")} className="text-primary font-semibold hover:underline">Create one</button></>
+            <>No account?{" "}
+              <button
+                onClick={() => setMode("signup")}
+                className="font-semibold hover:underline"
+                style={{ color: "#ac6e5c" }}
+              >
+                Create one
+              </button>
+            </>
           ) : (
-            <>Already have one? <button onClick={() => setMode("signin")} className="text-primary font-semibold hover:underline">Sign in</button></>
+            <>Already have one?{" "}
+              <button
+                onClick={() => setMode("signin")}
+                className="font-semibold hover:underline"
+                style={{ color: "#ac6e5c" }}
+              >
+                Sign in
+              </button>
+            </>
           )}
         </p>
       </div>
 
-      <p className="text-xs text-gray-400 mt-6">Offline-first · Cloud-synced · Private</p>
+      <p className="text-xs mt-6" style={{ color: "#6b5f55" }}>
+        Offline-first · Cloud-synced · Private
+      </p>
     </div>
   );
 }
