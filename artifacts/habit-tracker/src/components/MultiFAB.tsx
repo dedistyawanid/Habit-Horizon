@@ -10,6 +10,7 @@ interface MultiFABProps {
   onNewNote: () => void;
   onNewFinance: () => void;
   onQuickCheckin: () => void;
+  hidden?: boolean;
 }
 
 const ACTIONS = [
@@ -47,7 +48,7 @@ const ACTIONS = [
   },
 ];
 
-export function MultiFAB({ open, onToggle, onClose, onNewNote, onNewFinance, onQuickCheckin }: MultiFABProps) {
+export function MultiFAB({ open, onToggle, onClose, onNewNote, onNewFinance, onQuickCheckin, hidden }: MultiFABProps) {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -123,17 +124,18 @@ export function MultiFAB({ open, onToggle, onClose, onNewNote, onNewFinance, onQ
         </div>
       )}
 
-      {/* FAB trigger button */}
+      {/* FAB trigger button — hidden when Notes selection mode is active */}
       <button
         onClick={onToggle}
+        aria-label="Quick log"
         className={cn(
           "fixed bottom-20 right-4 z-[9999]",
           "w-14 h-14 rounded-2xl bg-primary text-primary-foreground",
           "flex items-center justify-center shadow-xl",
           "transition-all duration-300 hover:scale-110 active:scale-95",
-          open && "rotate-45"
+          open && "rotate-45",
+          hidden ? "opacity-0 pointer-events-none scale-75" : "opacity-100 scale-100"
         )}
-        aria-label="Quick log"
       >
         <Plus className="w-6 h-6" />
       </button>

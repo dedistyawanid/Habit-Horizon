@@ -80,6 +80,22 @@ export default function NotesPage() {
     if (lpTimer.current) { clearTimeout(lpTimer.current); lpTimer.current = null; }
   }
 
+  /* ── Notify App shell when selection mode changes (to hide FAB) ── */
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("notes-selection-change", { detail: { active: selectionMode } })
+    );
+  }, [selectionMode]);
+
+  /* ── Cleanup: exit on unmount ── */
+  useEffect(() => {
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("notes-selection-change", { detail: { active: false } })
+      );
+    };
+  }, []);
+
   /* ── Selection helpers ── */
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -499,8 +515,7 @@ export default function NotesPage() {
       {selectionMode && (
         <div className="fixed bottom-[72px] left-0 right-0 z-40 flex justify-center px-4 pointer-events-none">
           <div
-            className="pointer-events-auto w-full max-w-sm flex items-center gap-2 px-3 py-2.5 rounded-2xl shadow-2xl"
-            style={{ background: "#211f1d", border: "1px solid rgba(172,110,92,0.28)" }}
+            className="pointer-events-auto w-full max-w-sm flex items-center gap-2 px-3 py-2.5 rounded-2xl shadow-2xl bg-card border border-[hsl(var(--border))]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cancel */}

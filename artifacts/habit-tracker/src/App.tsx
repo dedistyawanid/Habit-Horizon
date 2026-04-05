@@ -94,6 +94,16 @@ function AppShell() {
   const [settingsOpen,     setSettingsOpen]     = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
   const [fabOpen,          setFabOpen]          = useState(false);
+  const [notesSelecting,   setNotesSelecting]   = useState(false);
+
+  /* Listen for Notes selection mode changes to hide/show FAB */
+  useEffect(() => {
+    function handler(e: Event) {
+      setNotesSelecting((e as CustomEvent<{ active: boolean }>).detail.active);
+    }
+    window.addEventListener("notes-selection-change", handler);
+    return () => window.removeEventListener("notes-selection-change", handler);
+  }, []);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
@@ -188,6 +198,7 @@ function AppShell() {
         onNewNote={() => { setFabOpen(false); setLocation("/notes?new=1"); }}
         onNewFinance={() => { setFabOpen(false); setLocation("/finance?new=1"); }}
         onQuickCheckin={() => { setFabOpen(false); setCheckinModalOpen(true); }}
+        hidden={notesSelecting}
       />
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
