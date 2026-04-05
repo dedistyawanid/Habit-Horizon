@@ -228,17 +228,17 @@ export default function NotesPage() {
           </button>
         </div>
 
-        {/* Category tabs — plain text with Terracotta underline */}
-        <div className="flex gap-5 overflow-x-auto pb-1 no-scrollbar" style={{ borderBottom: "1px solid hsl(var(--border) / 0.3)" }}>
+        {/* Category pills — rounded minimalist */}
+        <div className="flex gap-2 flex-wrap">
           {categoriesWithNotes.map((cat) => (
             <button
               key={cat}
               onClick={() => setFilterCat(cat)}
               className={cn(
-                "text-xs font-medium whitespace-nowrap pb-2.5 border-b-2 -mb-px transition-all",
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all",
                 filterCat === cat
-                  ? "text-primary border-primary"
-                  : "text-muted-foreground border-transparent hover:text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-[hsl(var(--border))] text-muted-foreground hover:text-foreground hover:border-primary/40"
               )}
             >
               {cat}
@@ -277,21 +277,21 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group relative flex items-center gap-3.5 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-all duration-150"
-                  style={{ background: "#211f1d", borderRadius: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.22)" }}
+                  className="group relative flex items-center gap-3.5 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-all duration-150 bg-accent dark:bg-card"
+                  style={{ borderRadius: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.10)" }}
                 >
-                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(172,110,92,0.12)" }}>
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
                     <BookOpen className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold leading-snug truncate" style={{ color: "#f2f0e6" }}>{title}</h3>
+                    <h3 className="text-sm font-semibold leading-snug truncate text-foreground">{title}</h3>
                     {preview && (
-                      <p className="text-xs truncate mt-0.5 leading-relaxed" style={{ color: "#c8c0b0" }}>{preview}</p>
+                      <p className="text-xs truncate mt-0.5 leading-relaxed text-muted-foreground">{preview}</p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-[10px] font-medium" style={{ color: "#ac6e5c" }}>{note.category}</span>
-                    <span className="text-[10px]" style={{ color: "#c8c0b0", opacity: 0.55 }}>{formatDate(note.updatedAt)}</span>
+                    <span className="text-[10px] font-medium text-primary">{note.category}</span>
+                    <span className="text-[10px] text-muted-foreground/55">{formatDate(note.updatedAt)}</span>
                   </div>
                   {note.reminderEnabled && note.reminderDate && (
                     <Bell className="w-2.5 h-2.5 text-amber-400 shrink-0" />
@@ -314,22 +314,22 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group relative flex flex-col p-4 cursor-pointer active:scale-[0.98] transition-all duration-150"
-                  style={{ background: "#211f1d", borderRadius: 20, minHeight: 110, boxShadow: "0 2px 12px rgba(0,0,0,0.24)" }}
+                  className="group relative flex flex-col p-4 cursor-pointer active:scale-[0.98] transition-all duration-150 bg-accent dark:bg-card"
+                  style={{ borderRadius: 20, minHeight: 110, boxShadow: "0 1px 8px rgba(0,0,0,0.10)" }}
                 >
                   {/* Title */}
-                  <h3 className="text-sm font-semibold leading-snug line-clamp-2 mb-1.5" style={{ color: "#f2f0e6" }}>
+                  <h3 className="text-sm font-semibold leading-snug line-clamp-2 mb-1.5 text-foreground">
                     {title}
                   </h3>
                   {/* Preview */}
                   {preview && (
-                    <p className="text-xs leading-relaxed line-clamp-3 flex-1" style={{ color: "#c8c0b0" }}>
+                    <p className="text-xs leading-relaxed line-clamp-3 flex-1 text-muted-foreground">
                       {preview}
                     </p>
                   )}
                   {/* Footer */}
                   <div className="flex items-center justify-between mt-auto pt-2.5">
-                    <span className="text-[10px]" style={{ color: "#c8c0b0", opacity: 0.5 }}>{formatDate(note.updatedAt)}</span>
+                    <span className="text-[10px] text-muted-foreground/50">{formatDate(note.updatedAt)}</span>
                     <div className="flex items-center gap-1.5">
                       {note.reminderEnabled && note.reminderDate && (
                         <Bell className="w-2.5 h-2.5 text-amber-400" />
@@ -342,7 +342,7 @@ export default function NotesPage() {
                           <ExternalLink className="w-2.5 h-2.5 text-primary/60" />
                         </a>
                       )}
-                      <span className="text-[10px] font-medium" style={{ color: "#ac6e5c" }}>{note.category}</span>
+                      <span className="text-[10px] font-medium text-primary">{note.category}</span>
                     </div>
                   </div>
                   {/* Delete */}
