@@ -6,6 +6,8 @@ export interface ActivityEntry {
   type: string;
   durationMin?: number;
   distanceKm?: number;
+  elevationGain?: number;
+  runType?: "Trail" | "Road";
   notes?: string;
   createdAt: string;
 }
