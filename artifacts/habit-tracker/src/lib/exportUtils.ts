@@ -62,6 +62,7 @@ export type ImportResult = {
     notes?: QuickNote[];
     settings?: AppSettings;
     transactions?: Transaction[];
+    financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
   };
 };
@@ -81,6 +82,7 @@ export function parseImportFile(json: string): ImportResult {
         notes: Array.isArray(parsed.notes) ? parsed.notes : undefined,
         settings: parsed.settings || undefined,
         transactions: Array.isArray(parsed.transactions) ? parsed.transactions : undefined,
+        financeSettings: parsed.financeSettings || undefined,
         weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : undefined,
       },
     };

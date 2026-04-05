@@ -117,7 +117,6 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
             <p className="text-2xl font-extrabold text-gray-800 dark:text-gray-100" data-testid="today-stats">
               {todayDone}<span className="text-sm font-normal text-gray-400">/{totalToday}</span>
             </p>
-            <p className="text-xs text-gray-400">done today</p>
           </div>
         </div>
 

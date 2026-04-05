@@ -64,6 +64,7 @@ interface AppContextType {
     notes?: QuickNote[];
     settings?: AppSettings;
     transactions?: Transaction[];
+    financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
   }) => void;
 }
@@ -83,6 +84,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     notes?: QuickNote[];
     settings?: AppSettings;
     transactions?: Transaction[];
+    financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
   }) {
     if (data.habits) localStorage.setItem("dedi_habits", JSON.stringify(data.habits));
@@ -90,6 +92,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (data.notes) localStorage.setItem("dedi_quick_notes", JSON.stringify(data.notes));
     if (data.settings) localStorage.setItem("dedi_app_settings", JSON.stringify(data.settings));
     if (data.transactions) localStorage.setItem("dedi_transactions", JSON.stringify(data.transactions));
+    if (data.financeSettings) localStorage.setItem("dedi_finance_settings", JSON.stringify(data.financeSettings));
     if (data.weightLog) localStorage.setItem("dedi_weight_log", JSON.stringify(data.weightLog));
     window.location.reload();
   }

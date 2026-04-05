@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Trash2, BookOpen, Filter, ExternalLink, Bell, FilePlus } from "lucide-react";
+import { Plus, Search, Trash2, BookOpen, ExternalLink, Bell, FilePlus, ArrowUpDown } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { QuickNote } from "@/types/notes";
 import { NoteEditor } from "@/components/NoteEditor";
@@ -22,7 +22,7 @@ function stripHtml(html: string): string {
 }
 
 function getPreview(content: string): string {
-  return stripHtml(content).slice(0, 140);
+  return stripHtml(content).slice(0, 100);
 }
 
 function formatDate(dateStr: string): string {
@@ -41,14 +41,23 @@ function getHostname(url: string): string {
   catch { return url; }
 }
 
+type SortMode = "latest" | "alpha" | "reminder";
+
+const SORT_LABELS: Record<SortMode, string> = {
+  latest: "Latest Edit",
+  alpha: "A → Z",
+  reminder: "Reminder Active",
+};
+
 export default function NotesPage() {
   const { notes, addNote, updateNote, deleteNote, settings } = useApp();
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState("All");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>("latest");
+  const [sortOpen, setSortOpen] = useState(false);
 
-  // Handle ?new=1 from FAB navigation or ?open=<id>
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("new") === "1") {
@@ -62,11 +71,7 @@ export default function NotesPage() {
   }, []);
 
   function handleCreateNote() {
-    const newNote = addNote({
-      title: "",
-      category: "General",
-      content: "",
-    });
+    const newNote = addNote({ title: "", category: "General", content: "" });
     setActiveNoteId(newNote.id);
   }
 
@@ -104,7 +109,6 @@ export default function NotesPage() {
         />
       );
     }
-    // Note was deleted or not found
     setActiveNoteId(null);
   }
 
@@ -121,18 +125,30 @@ export default function NotesPage() {
     return notes.some((n) => n.category === cat);
   });
 
-  const filtered = notes
+  const searchLower = search.toLowerCase();
+  const baseFiltered = notes
     .filter((n) => filterCat === "All" || n.category === filterCat)
     .filter(
       (n) =>
         !search ||
-        n.title.toLowerCase().includes(search.toLowerCase()) ||
-        getPreview(n.content).toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        n.title.toLowerCase().includes(searchLower) ||
+        getPreview(n.content).toLowerCase().includes(searchLower)
+    );
+
+  const filtered = [...baseFiltered].sort((a, b) => {
+    if (sortMode === "alpha") {
+      return (a.title || "Untitled").localeCompare(b.title || "Untitled");
+    }
+    if (sortMode === "reminder") {
+      const aR = a.reminderEnabled && a.reminderDate ? 1 : 0;
+      const bR = b.reminderEnabled && b.reminderDate ? 1 : 0;
+      return bR - aR || new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    }
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" onClick={() => sortOpen && setSortOpen(false)}>
       <div className="max-w-2xl mx-auto px-4 pt-5 pb-28 space-y-4">
 
         {/* Header */}
@@ -141,14 +157,45 @@ export default function NotesPage() {
             <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Notes</h1>
             <p className="text-xs text-gray-400 mt-0.5">{notes.length} {notes.length === 1 ? "doc" : "docs"}</p>
           </div>
-          <button
-            onClick={handleCreateNote}
-            data-testid="btn-add-note"
-            className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm"
-          >
-            <FilePlus className="w-3.5 h-3.5" />
-            New Note
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Sort dropdown */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setSortOpen((v) => !v); }}
+                className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+              >
+                <ArrowUpDown className="w-3 h-3" />
+                {SORT_LABELS[sortMode]}
+              </button>
+              {sortOpen && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg overflow-hidden min-w-[140px]">
+                  {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={(e) => { e.stopPropagation(); setSortMode(mode); setSortOpen(false); }}
+                      className={cn(
+                        "w-full text-left px-3 py-2.5 text-xs transition-colors",
+                        sortMode === mode
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      )}
+                    >
+                      {SORT_LABELS[mode]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleCreateNote}
+              data-testid="btn-add-note"
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              <FilePlus className="w-3.5 h-3.5" />
+              New Note
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -186,7 +233,7 @@ export default function NotesPage() {
           })}
         </div>
 
-        {/* Notes list */}
+        {/* Notes grid */}
         {filtered.length === 0 ? (
           <div className="text-center py-16 space-y-3">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
@@ -206,7 +253,7 @@ export default function NotesPage() {
             )}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map((note) => {
               const color = getCatColor(note.category);
               const preview = getPreview(note.content);
@@ -216,76 +263,63 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 px-4 py-3.5 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 cursor-pointer flex gap-3"
+                  className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 cursor-pointer flex flex-col gap-2 relative min-h-[110px]"
                 >
-                  {/* Color indicator */}
+                  {/* Color accent bar */}
                   <div
-                    className="w-1 rounded-full shrink-0 my-0.5"
+                    className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
                     style={{ backgroundColor: color }}
                   />
 
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    {/* Title row */}
-                    <div className="flex items-start gap-2">
-                      <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-100 leading-snug flex-1 min-w-0">
-                        {title}
-                      </h3>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {note.reminderEnabled && note.reminderDate && (
-                          <Bell className="w-3 h-3 text-amber-400" title={`Reminder: ${note.reminderDate}`} />
-                        )}
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] py-0 px-1.5 font-medium border-0"
-                          style={{ backgroundColor: color + "20", color }}
-                        >
-                          {note.category}
-                        </Badge>
-                      </div>
-                    </div>
+                  <div className="pl-3 flex-1 flex flex-col gap-1.5 min-w-0">
+                    {/* Title */}
+                    <h3 className="font-bold text-sm text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">
+                      {title}
+                    </h3>
 
-                    {/* Content preview */}
+                    {/* Snippet */}
                     {preview && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1">
                         {preview}
                       </p>
                     )}
 
-                    {/* Footer row */}
-                    <div className="flex items-center justify-between">
+                    {/* Footer */}
+                    <div className="flex items-center justify-between mt-auto pt-1">
                       <span className="text-[10px] text-gray-400">{formatDate(note.updatedAt)}</span>
                       <div className="flex items-center gap-1">
+                        {note.reminderEnabled && note.reminderDate && (
+                          <Bell className="w-2.5 h-2.5 text-amber-400" />
+                        )}
                         {note.url && (
                           <a
                             href={note.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title={getHostname(note.url)}
                           >
                             <ExternalLink className="w-2.5 h-2.5 text-primary" />
-                            <span className="text-[10px] text-gray-500">{getHostname(note.url)}</span>
                           </a>
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNote(note.id);
-                          }}
-                          data-testid={`delete-note-btn-${note.id}`}
-                          className={cn(
-                            "p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all",
-                            confirmDelete === note.id
-                              ? "opacity-100 bg-red-50 dark:bg-red-900/20 text-red-500"
-                              : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"
-                          )}
-                          title={confirmDelete === note.id ? "Confirm delete" : "Delete"}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
                       </div>
                     </div>
                   </div>
+
+                  {/* Delete button — top-right */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
+                    data-testid={`delete-note-btn-${note.id}`}
+                    className={cn(
+                      "absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all",
+                      confirmDelete === note.id
+                        ? "opacity-100 bg-red-50 dark:bg-red-900/20 text-red-500"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"
+                    )}
+                    title={confirmDelete === note.id ? "Confirm delete" : "Delete"}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                 </div>
               );
             })}

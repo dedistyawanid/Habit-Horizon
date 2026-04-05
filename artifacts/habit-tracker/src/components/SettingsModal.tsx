@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette, DollarSign } from "lucide-react";
+import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette, DollarSign, TrendingDown } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -128,12 +129,24 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     addNoteCategory, renameNoteCategory, deleteNoteCategory,
     habits, checkIns, notes, importData,
     transactions, financeSettings, setFinanceSettings,
-    weightLog,
+    weightLog, addWeightEntry, deleteWeightEntry,
   } = useApp();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [annualTargetInput, setAnnualTargetInput] = useState<string>("");
+  const [weightInput, setWeightInput] = useState<string>("");
+
+  function handleLogWeight() {
+    const val = parseFloat(weightInput.trim());
+    if (isNaN(val) || val <= 0 || val > 500) {
+      toast({ title: "Invalid weight", description: "Enter a weight in kg (e.g. 72.5).", variant: "destructive" });
+      return;
+    }
+    addWeightEntry(val);
+    setWeightInput("");
+    toast({ title: "Weight logged", description: `${val} kg recorded for today.` });
+  }
 
   function handleExportJSON() {
     exportAsJSON(habits, checkIns, notes, settings, transactions, financeSettings, weightLog);
@@ -307,6 +320,111 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   data-testid="input-mission"
                 />
               </div>
+            </div>
+
+            {/* Weight Log */}
+            <div className="border-t border-gray-100 dark:border-gray-800 pt-4 space-y-3">
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5 text-primary" />
+                Weight Log
+                {weightLog.length > 0 && (
+                  <span className="ml-auto text-xs font-normal text-gray-400">
+                    Latest: <span className="font-semibold text-gray-600 dark:text-gray-300">{weightLog[weightLog.length - 1].weight} kg</span>
+                  </span>
+                )}
+              </p>
+
+              {/* Mini line chart of last 5 entries */}
+              {weightLog.length >= 2 && (
+                <div className="h-20 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={[...weightLog].slice(-5)} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(d) => {
+                          const dt = new Date(d);
+                          return `${dt.getMonth() + 1}/${dt.getDate()}`;
+                        }}
+                        tick={{ fontSize: 9 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        domain={["auto", "auto"]}
+                        tick={{ fontSize: 9 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{ fontSize: 11, padding: "4px 8px", borderRadius: 8 }}
+                        formatter={(v: number) => [`${v} kg`, "Weight"]}
+                        labelFormatter={(l) => new Date(l).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="weight"
+                        stroke="var(--color-primary)"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: "var(--color-primary)" }}
+                        activeDot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Log new weight */}
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Current weight (kg)"
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleLogWeight(); }}
+                  className="text-sm flex-1"
+                  data-testid="input-weight-log"
+                  step="0.1"
+                  min="0"
+                />
+                <Button onClick={handleLogWeight} size="sm" className="shrink-0" data-testid="btn-log-weight">
+                  <Check className="w-3.5 h-3.5 mr-1" />
+                  Log
+                </Button>
+              </div>
+
+              {/* Last 5 entries list */}
+              {weightLog.length > 0 && (
+                <div className="space-y-1">
+                  {[...weightLog].reverse().slice(0, 5).map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/60 rounded-xl group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm text-gray-800 dark:text-gray-100">{entry.weight} kg</span>
+                        {entry.notes && (
+                          <span className="text-xs text-gray-400 truncate max-w-[100px]">{entry.notes}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">
+                          {new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </span>
+                        <button
+                          onClick={() => deleteWeightEntry(entry.id)}
+                          className="p-1 rounded text-gray-300 dark:text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {weightLog.length === 0 && (
+                <p className="text-xs text-gray-400 text-center py-1">No entries yet. Log your first weight above.</p>
+              )}
             </div>
           </TabsContent>
 
