@@ -175,7 +175,7 @@ export default function HealthPage() {
             </div>
 
             {/* Donut — Activity Split */}
-            <div className="bg-white dark:bg-gray-900 p-4 flex items-center gap-5" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+            <div className="bg-[#F4F5F3] dark:bg-card p-4 flex items-center gap-5" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
               {/* Donut */}
               <div className="relative shrink-0 w-[88px] h-[88px]">
                 <PieChart width={88} height={88}>
@@ -226,7 +226,7 @@ export default function HealthPage() {
         )}
 
         {/* ─── WEIGHT HUB ─── */}
-        <div className="bg-white dark:bg-gray-900 p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-[#F4F5F3] dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Scale className="w-4 h-4 text-primary" />
@@ -307,7 +307,7 @@ export default function HealthPage() {
         </div>
 
         {/* ─── LOG ACTIVITY ─── */}
-        <div className="bg-white dark:bg-gray-900 p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+        <div className="bg-[#F4F5F3] dark:bg-card p-4 space-y-3" style={{ borderRadius: 28, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center gap-2">
             <Dumbbell className="w-4 h-4 text-primary" />
             <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Log Activity</p>
@@ -496,7 +496,7 @@ function StatCard({
 }) {
   return (
     <div
-      className="bg-white dark:bg-gray-900 p-4 flex flex-col gap-2"
+      className="bg-[#F4F5F3] dark:bg-card p-4 flex flex-col gap-2"
       style={{ borderRadius: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
     >
       <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}18` }}>

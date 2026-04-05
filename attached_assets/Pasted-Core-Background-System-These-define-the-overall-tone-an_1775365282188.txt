@@ -1,0 +1,103 @@
+Core Background System
+
+These define the overall tone and layering hierarchy:
+
+Role	Color	Hex	Notes
+Primary background	Soft sage green	#A8C0B2	Page-level gradient base
+Secondary background	Pale mint gray	#DCE6E1	Cards / panels
+Surface (cards)	Off-white gray	#F4F5F3	Main UI containers
+
+👉 Use a subtle gradient:
+
+background: linear-gradient(135deg, #A8C0B2, #DCE6E1);
+2. Neutral UI Colors (Typography & Structure)
+Role	Color	Hex
+Primary text	Charcoal	#1F1F1F
+Secondary text	Muted gray	#6F767E
+Divider / border	Light gray	#E6E8EC
+Disabled / inactive	Soft gray	#C7CDD4
+3. Accent Colors (Functional Highlights)
+Blue (Data / progress)
+Role	Hex
+Primary blue	#8FA7E8
+Light blue	#C9D5F5
+Pink (Secondary metrics)
+Role	Hex
+Primary pink	#E7B8C4
+Light pink	#F3D6DE
+Muted teal/gray (data blocks)
+Role	Hex
+Teal gray	#AEBCC4
+4. UI Element Colors
+Element	Color	Hex
+Primary button	Dark charcoal	#1F1F1F
+Button text	White	#FFFFFF
+Pills / tags (active)	Black	#111111
+Pills (inactive)	Light gray	#E9ECEF
+5. Shadows & Depth (Important for this style)
+
+This UI relies heavily on soft shadows instead of strong borders:
+
+box-shadow: 
+  0 4px 12px rgba(0, 0, 0, 0.05),
+  inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+For neumorphic feel:
+
+box-shadow: 
+  6px 6px 12px rgba(0,0,0,0.08),
+  -6px -6px 12px rgba(255,255,255,0.7);
+🧱 Suggested CSS Variables (Production-Ready)
+:root {
+  /* Backgrounds */
+  --bg-primary: #A8C0B2;
+  --bg-secondary: #DCE6E1;
+  --surface: #F4F5F3;
+
+  /* Text */
+  --text-primary: #1F1F1F;
+  --text-secondary: #6F767E;
+
+  /* Borders */
+  --border: #E6E8EC;
+
+  /* Accents */
+  --blue: #8FA7E8;
+  --blue-light: #C9D5F5;
+
+  --pink: #E7B8C4;
+  --pink-light: #F3D6DE;
+
+  --teal-gray: #AEBCC4;
+
+  /* UI */
+  --button-primary: #1F1F1F;
+  --button-text: #FFFFFF;
+}
+🧠 Design Interpretation (Why this works)
+
+This palette follows three key principles:
+
+1. Low saturation = reduced cognitive load
+
+Common in modern SaaS dashboards → minimizes visual fatigue.
+
+2. Pastel accents = non-threatening data visualization
+
+Useful for analytics interfaces where aggressive colors (e.g., red) may bias interpretation.
+
+3. High luminance contrast (not color contrast)
+
+Contrast is achieved via light/dark surfaces, not vivid hues → more accessible and elegant.
+
+⚠️ Critical Adjustments for Web Accessibility
+
+This palette is aesthetically strong but not fully WCAG-compliant by default.
+
+You should:
+
+Darken text slightly:
+#1F1F1F → #121212
+Increase contrast for secondary text:
+#6F767E → #4F5660
+Avoid pink-on-white for small text

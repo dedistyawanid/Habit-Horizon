@@ -1,6 +1,6 @@
 export type DateFormat = "DD/MM/YYYY" | "MM/DD/YYYY" | "YYYY-MM-DD";
 export type Theme = "light" | "dark" | "system";
-export type AccentTheme = "classic" | "ocean" | "forest" | "sunset" | "midnight";
+export type AccentTheme = "sage" | "classic" | "ocean" | "forest" | "sunset" | "midnight";
 
 export interface ThemePreset {
   id: AccentTheme;
@@ -13,9 +13,33 @@ export interface ThemePreset {
 
 export const THEME_PRESETS: ThemePreset[] = [
   {
+    id: "sage",
+    name: "Sage & Charcoal",
+    description: "Default — Natural & Bold",
+    previewColor: "#1F1F1F",
+    lightVars: {
+      "--primary": "0 0% 12%",
+      "--primary-foreground": "0 0% 100%",
+      "--accent": "222 55% 88%",
+      "--accent-foreground": "0 0% 12%",
+      "--ring": "222 50% 74%",
+      "--sidebar-primary": "0 0% 12%",
+      "--sidebar-accent": "150 14% 87%",
+    },
+    darkVars: {
+      "--primary": "0 0% 90%",
+      "--primary-foreground": "0 0% 8%",
+      "--accent": "222 30% 22%",
+      "--accent-foreground": "222 60% 80%",
+      "--ring": "222 50% 65%",
+      "--sidebar-primary": "0 0% 90%",
+      "--sidebar-accent": "150 15% 20%",
+    },
+  },
+  {
     id: "forest",
     name: "Sage Green",
-    description: "Default — Soft & Natural",
+    description: "Soft & Natural",
     previewColor: "#879A77",
     lightVars: {
       "--primary": "93 18% 54%",
@@ -154,7 +178,7 @@ export interface AppSettings {
 
 export const DEFAULT_SETTINGS: AppSettings = {
   theme: "light",
-  accentTheme: "forest",
+  accentTheme: "sage",
   dateFormat: "DD/MM/YYYY",
   profile: {
     fullName: "Dedi Styawan",

@@ -33,7 +33,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Preview path**: `/`
 - **Purpose**: Personal minimalist habit tracker for Dedi Styawan
 - **Data storage**: Browser LocalStorage only (no backend required)
-- **Default theme**: Sage Green (#879A77), light mode
+- **Default theme**: Sage & Charcoal — dark charcoal primary (#1F1F1F), off-white card surface (#F4F5F3), sage-to-mint gradient background (#A8C0B2→#DCE6E1), blue accent (#C9D5F5). Light mode default.
 
 #### Features
 - **Dashboard**: Personalized greeting, Hijri+Gregorian date display, today's reminders, habit list, performance stats

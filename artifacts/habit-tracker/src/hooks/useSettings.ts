@@ -8,9 +8,14 @@ function loadSettings(): AppSettings {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
+    const accentTheme: AccentTheme =
+      parsed.accentTheme === "forest"
+        ? "sage"
+        : (parsed.accentTheme as AccentTheme) || DEFAULT_SETTINGS.accentTheme;
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
+      accentTheme,
       profile: { ...DEFAULT_SETTINGS.profile, ...(parsed.profile || {}) },
       habitCategories: parsed.habitCategories?.length
         ? parsed.habitCategories
