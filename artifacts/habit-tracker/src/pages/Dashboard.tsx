@@ -65,7 +65,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
   const gregorianStr = today.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   // Today's reminders from notes
-  const todayKey = today.toISOString().split("T")[0];
+  const todayKey = today.toLocaleDateString("en-CA"); // local date YYYY-MM-DD, avoids UTC offset for WIB
   const todayReminders = notes.filter(
     (n) => n.reminderEnabled && n.reminderDate === todayKey
   );

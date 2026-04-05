@@ -42,6 +42,11 @@ const SLEEP_KEYWORDS = [
 
 function getTypeInfo(type: string) { return ALL_TYPES.find((t) => t.id === type) ?? OTHER_TYPE; }
 
+/** Returns current date as YYYY-MM-DD in the **local** timezone (not UTC). */
+function localToday(): string {
+  return new Date().toLocaleDateString("en-CA"); // en-CA always gives YYYY-MM-DD
+}
+
 /* ─── Period helpers ─────────────────────────────────── */
 function getPeriodRange(period: Period) {
   const today  = new Date();
@@ -115,22 +120,22 @@ export default function HealthPage() {
   const [elevation, setElevation] = useState("");
   const [runType, setRunType]     = useState<"Trail"|"Road">("Road");
   const [actLocation, setActLocation] = useState("");
-  const [actDate,     setActDate]     = useState(() => new Date().toISOString().split("T")[0]);
+  const [actDate,     setActDate]     = useState(() => localToday());
 
   /* Meal form */
   const [mealName,  setMealName]  = useState("");
   const [mealCal,   setMealCal]   = useState("");
   const [mealProt,  setMealProt]  = useState("");
   const [mealCarbs, setMealCarbs] = useState("");
-  const [mealDate,  setMealDate]  = useState(() => new Date().toISOString().split("T")[0]);
+  const [mealDate,  setMealDate]  = useState(() => localToday());
 
   /* Weight form */
   const [weightInput, setWeightInput] = useState("");
-  const [weightDate,  setWeightDate]  = useState(() => new Date().toISOString().split("T")[0]);
+  const [weightDate,  setWeightDate]  = useState(() => localToday());
 
   /* Sleep form */
   const [sleepHoursInput, setSleepHoursInput]   = useState("");
-  const [sleepDate,       setSleepDate]         = useState(() => new Date().toISOString().split("T")[0]);
+  const [sleepDate,       setSleepDate]         = useState(() => localToday());
   const [sleepMinsInput,  setSleepMinsInput]    = useState("");
   const [sleepQuality, setSleepQuality]         = useState<1|2|3|4|5>(3);
   const [showSleepTarget, setShowSleepTarget]   = useState(false);
@@ -158,7 +163,7 @@ export default function HealthPage() {
   const [nutrProtGoal, setNutrProtGoal]         = useState("");
   const [nutrCarbsGoal, setNutrCarbsGoal]       = useState("");
 
-  const todayKey = new Date().toISOString().split("T")[0];
+  const todayKey = localToday();
 
   /* ── Derived: Activity ── */
   const filteredAct = useMemo(() => {

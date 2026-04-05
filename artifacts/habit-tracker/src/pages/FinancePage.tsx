@@ -41,6 +41,7 @@ export default function FinancePage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState("");
 
@@ -56,11 +57,18 @@ export default function FinancePage() {
   const annualProgress = Math.min(100, (currentYearIncome / annualTarget) * 100);
 
   const filteredTx = useMemo(() => {
-    return transactions
+    const list = transactions
       .filter((t) => filterType === "all" || t.type === filterType)
-      .filter((t) => filterCategory === "all" || t.category === filterCategory)
-      .sort((a, b) => b.date.localeCompare(a.date));
-  }, [transactions, filterType, filterCategory]);
+      .filter((t) => filterCategory === "all" || t.category === filterCategory);
+
+    return list.sort((a, b) => {
+      if (sortOrder === "newest")  return b.date.localeCompare(a.date);
+      if (sortOrder === "oldest")  return a.date.localeCompare(b.date);
+      if (sortOrder === "highest") return b.amount - a.amount;
+      if (sortOrder === "lowest")  return a.amount - b.amount;
+      return 0;
+    });
+  }, [transactions, filterType, filterCategory, sortOrder]);
 
   const availableCategories = useMemo(() => {
     const cats = new Set(transactions.map((t) => t.category));
@@ -275,6 +283,16 @@ export default function FinancePage() {
                 ))}
               </select>
             )}
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="highest">Highest amount</option>
+              <option value="lowest">Lowest amount</option>
+            </select>
           </div>
           {filteredTx.length === 0 ? (
             <div className="text-center py-10 text-gray-400 text-xs">
