@@ -277,7 +277,7 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group relative flex items-center gap-3.5 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-all duration-150 bg-accent dark:bg-card"
+                  className="group relative flex items-center gap-3.5 px-4 py-3.5 cursor-pointer active:scale-[0.99] transition-all duration-150 bg-white dark:bg-card"
                   style={{ borderRadius: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.10)" }}
                 >
                   <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
@@ -314,7 +314,7 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group relative flex flex-col p-4 cursor-pointer active:scale-[0.98] transition-all duration-150 bg-accent dark:bg-card"
+                  className="group relative flex flex-col p-4 cursor-pointer active:scale-[0.98] transition-all duration-150 bg-white dark:bg-card"
                   style={{ borderRadius: 20, minHeight: 110, boxShadow: "0 1px 8px rgba(0,0,0,0.10)" }}
                 >
                   {/* Title */}
