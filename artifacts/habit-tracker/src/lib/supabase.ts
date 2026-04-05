@@ -11,4 +11,6 @@ export const supabase = createClient(
   supabaseAnonKey || PLACEHOLDER_KEY,
 );
 
-export const USER_ID = "dedi";
+let _currentUserId = "dedi";
+export function setCurrentUserId(id: string) { _currentUserId = id; }
+export function getUserId(): string { return _currentUserId; }

@@ -4,9 +4,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { SyncProvider } from "@/context/SyncContext";
 import { BottomNav } from "@/components/BottomNav";
 import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
+import { SyncIndicator } from "@/components/SyncIndicator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSwipeNav } from "@/hooks/useSwipeNav";
 import NotFound from "@/pages/not-found";
@@ -15,11 +18,10 @@ import NotesPage from "@/pages/NotesPage";
 import InsightsPage from "@/pages/InsightsPage";
 import FinancePage from "@/pages/FinancePage";
 import HealthPage from "@/pages/HealthPage";
+import LoginPage from "@/pages/LoginPage";
 import { Settings } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
-import { SyncProvider } from "@/context/SyncContext";
-import { SyncIndicator } from "@/components/SyncIndicator";
 
 const queryClient = new QueryClient();
 
@@ -98,10 +100,8 @@ function AppShell() {
         </Switch>
       </div>
 
-      {/* Bottom navigation with bounce feedback */}
       <BottomNav bouncing={bouncingTab} />
 
-      {/* Multi-action FAB — hidden on /health (health has its own FAB) */}
       {location !== "/health" && (
         <MultiFAB
           onNewNote={() => setLocation("/notes?new=1")}
@@ -110,10 +110,39 @@ function AppShell() {
         />
       )}
 
-      {/* Modals */}
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <QuickCheckinDialog open={checkinModalOpen} onClose={() => setCheckinModalOpen(false)} />
     </div>
+  );
+}
+
+function AuthGate() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F4F0" }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
+            <span className="text-white text-sm font-bold">H</span>
+          </div>
+          <p className="text-sm text-gray-400">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <LoginPage />;
+
+  return (
+    <AppProvider>
+      <SyncProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AppShell />
+        </WouterRouter>
+        <Toaster />
+      </SyncProvider>
+    </AppProvider>
   );
 }
 
@@ -121,14 +150,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppProvider>
-          <SyncProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <AppShell />
-            </WouterRouter>
-            <Toaster />
-          </SyncProvider>
-        </AppProvider>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
