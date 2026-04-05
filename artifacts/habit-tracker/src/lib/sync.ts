@@ -180,6 +180,19 @@ export function syncTransaction(t: { id: string; type: string; amount: number; c
 }
 export function deleteTransaction(id: string) { return del("finance_logs", id); }
 
+/* ─── Wishlist ───────────────────────────────────────────── */
+export function syncWishlistItem(w: { id: string; title: string; targetAmount: number; currentAmount: number; imageUrl?: string; createdAt?: string }) {
+  return upsert("wishlist_items", {
+    id: w.id, user_id: getUserId(),
+    title:           w.title,
+    target_amount:   w.targetAmount,
+    current_savings: w.currentAmount,
+    image_url:       w.imageUrl ?? null,
+    created_at:      w.createdAt ?? new Date().toISOString(),
+  });
+}
+export function deleteWishlistItem(id: string) { return del("wishlist_items", id); }
+
 /* ─── Notes ──────────────────────────────────────────────── */
 export function syncNote(n: { id: string; title: string; content?: string; category?: string; createdAt?: string; updatedAt?: string; reminderDate?: string; reminderEnabled?: boolean }) {
   return upsert("notes", {
@@ -297,6 +310,17 @@ export async function forcePushAll(): Promise<PushResult[]> {
     category:   n.category ?? null,
     created_at: n.createdAt ?? new Date().toISOString(),
     updated_at: n.updatedAt ?? new Date().toISOString(),
+  })));
+
+  /* wishlist_items */
+  const wishlist = JSON.parse(localStorage.getItem("dedi_wishlist") ?? "[]");
+  await pushBatch("wishlist_items", wishlist.map((w: Record<string, unknown>) => ({
+    id: w.id, user_id: uid,
+    title:           w.title,
+    target_amount:   num(w.targetAmount) ?? 0,
+    current_savings: num(w.currentAmount) ?? 0,
+    image_url:       w.imageUrl ?? null,
+    created_at:      w.createdAt ?? new Date().toISOString(),
   })));
 
   return results;

@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const keysToRemove = [
       "dedi_habits", "dedi_checkins", "dedi_activity_log",
       "dedi_nutrition_log", "dedi_sleep_log", "dedi_weight_log",
-      "dedi_transactions", "dedi_quick_notes",
+      "dedi_transactions", "dedi_quick_notes", "dedi_wishlist",
       "dedi_sync_queue", "dedi_supabase_migrated_v1",
     ];
     keysToRemove.forEach((k) => localStorage.removeItem(k));

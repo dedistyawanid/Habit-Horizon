@@ -50,22 +50,23 @@ export async function fetchAllFromCloud(
 ): Promise<"synced" | "no_data" | "timeout" | "offline" | "error"> {
   if (!navigator.onLine) return "offline";
   try {
-    /* Run all 8 table fetches in parallel, capped at 4 s total */
+    /* Run all 9 table fetches in parallel, capped at 4 s total */
     const overall = Promise.all([
-      fetchTable("habits",         userId),
-      fetchTable("checkins",       userId),
-      fetchTable("health_logs",    userId),   // ← was activity_logs
-      fetchTable("nutrition_logs", userId),
-      fetchTable("sleep_logs",     userId),
-      fetchTable("weight_logs",    userId),
-      fetchTable("finance_logs",   userId),
-      fetchTable("notes",          userId),
+      fetchTable("habits",          userId),
+      fetchTable("checkins",        userId),
+      fetchTable("health_logs",     userId),   // ← was activity_logs
+      fetchTable("nutrition_logs",  userId),
+      fetchTable("sleep_logs",      userId),
+      fetchTable("weight_logs",     userId),
+      fetchTable("finance_logs",    userId),
+      fetchTable("notes",           userId),
+      fetchTable("wishlist_items",  userId),
     ]);
 
     const results = await withTimeout(overall, 4000);
     if (!results) return "timeout";
 
-    const [habits, checkins, health, meals, sleeps, weights, txns, notes] = results;
+    const [habits, checkins, health, meals, sleeps, weights, txns, notes, wishlistRows] = results;
     let wrote = false;
 
     /** Write to localStorage AND dispatch a storage event so same-tab listeners pick it up. */
@@ -174,6 +175,20 @@ export async function fetchAllFromCloud(
             reminderEnabled: (n as Record<string, unknown>).reminder_enabled ?? local?.reminderEnabled ?? undefined,
           };
         })
+      ));
+      wrote = true;
+    }
+
+    if (wishlistRows?.length) {
+      lsSet("dedi_wishlist", JSON.stringify(
+        wishlistRows.map((w) => ({
+          id:            w.id,
+          title:         w.title,
+          targetAmount:  w.target_amount,
+          currentAmount: w.current_savings ?? 0,
+          imageUrl:      w.image_url ?? undefined,
+          createdAt:     w.created_at,
+        }))
       ));
       wrote = true;
     }
