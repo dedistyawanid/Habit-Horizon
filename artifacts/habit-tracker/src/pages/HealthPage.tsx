@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Scale, Dumbbell, Activity, Trash2, Check, Plus, MapPin, Timer,
   Wind, Heart, Zap, TrendingUp, Mountain, Navigation2, Utensils,
-  Flame, X, Beef, Wheat, Target, Pencil, Settings2,
+  Flame, X, Beef, Wheat, Target, Pencil, Settings2, Moon, Star,
+  AlarmClock, BedDouble, TrendingDown,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, ComposedChart, Line, ReferenceLine,
+  BarChart, Bar,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNutritionLog } from "@/hooks/useNutritionLog";
+import { useSleepLog } from "@/hooks/useSleepLog";
 
 /* ─── Constants ──────────────────────────────────────── */
 const PRIMARY_TYPES = [
@@ -29,8 +32,12 @@ const EXERCISE_KEYWORDS = [
   "fitness","badminton","olahraga","lari","training","activity",
 ];
 
-type SubTab = "activity" | "nutrition" | "body";
+type SubTab = "activity" | "nutrition" | "body" | "sleep";
 type Period  = "day" | "week" | "month";
+
+const SLEEP_KEYWORDS = [
+  "sleep","tidur","rest","istirahat","malam","night","bed",
+];
 
 function getTypeInfo(type: string) { return ALL_TYPES.find((t) => t.id === type) ?? OTHER_TYPE; }
 
@@ -66,6 +73,7 @@ export default function HealthPage() {
     habitsWithStats, isCheckedInToday, toggleCheckIn,
   } = useApp();
   const { entries: nutritionLog, targets, addEntry: addMeal, deleteEntry: deleteMeal, updateTargets } = useNutritionLog();
+  const { entries: sleepLog, targetHours: sleepTarget, addEntry: addSleep, deleteEntry: deleteSleep, setTargetHours: setSleepTarget } = useSleepLog();
   const { toast } = useToast();
 
   /* UI state */
@@ -91,6 +99,13 @@ export default function HealthPage() {
 
   /* Weight form */
   const [weightInput, setWeightInput] = useState("");
+
+  /* Sleep form */
+  const [sleepHoursInput, setSleepHoursInput]   = useState("");
+  const [sleepMinsInput,  setSleepMinsInput]    = useState("");
+  const [sleepQuality, setSleepQuality]         = useState<1|2|3|4|5>(3);
+  const [showSleepTarget, setShowSleepTarget]   = useState(false);
+  const [sleepTargetInput, setSleepTargetInput] = useState("");
 
   /* Goal weight — localStorage-persisted */
   const [goalWeight, setGoalWeight] = useState<number>(() => {
@@ -173,7 +188,41 @@ export default function HealthPage() {
     return Math.min(100, Math.max(0, Math.round((done / total) * 100)));
   }, [latestWeight, firstWeight, goalWeight]);
 
+  /* ── Derived: Sleep ── */
+  const sleepChartData = useMemo(() => {
+    const filtered = filterByPeriod(sleepLog, period === "day" ? "week" : period);
+    const map: Record<string, number> = {};
+    filtered.forEach((e) => {
+      const h = e.hours + e.minutes / 60;
+      map[e.date] = +(((map[e.date] ?? 0) + h)).toFixed(2);
+    });
+    return Object.entries(map).sort().map(([date, totalH]) => ({ date, hours: totalH }));
+  }, [sleepLog, period]);
+
+  const todaySleep   = useMemo(() => sleepLog.find((e) => e.date === todayKey) ?? null, [sleepLog, todayKey]);
+  const weekSleepAvg = useMemo(() => {
+    const weekRange = getPeriodRange("week");
+    const weekEntries = sleepLog.filter((e) => e.date >= weekRange.start && e.date <= weekRange.end);
+    if (weekEntries.length === 0) return null;
+    const total = weekEntries.reduce((s, e) => s + e.hours + e.minutes / 60, 0);
+    return +(total / weekEntries.length).toFixed(2);
+  }, [sleepLog]);
+
   /* ─── Handlers ─── */
+  function handleLogSleep() {
+    const h = parseInt(sleepHoursInput) || 0;
+    const m = parseInt(sleepMinsInput)  || 0;
+    if (h === 0 && m === 0) {
+      toast({ title: "Duration required", variant: "destructive" }); return;
+    }
+    addSleep({ date: todayKey, hours: h, minutes: m, quality: sleepQuality });
+    const hits = habitsWithStats.filter((hab) => SLEEP_KEYWORDS.some((kw) => hab.name.toLowerCase().includes(kw)));
+    let auto = 0;
+    hits.forEach((hab) => { if (!isCheckedInToday(hab.id)) { toggleCheckIn(hab.id); auto++; } });
+    setSleepHoursInput(""); setSleepMinsInput(""); setSleepQuality(3);
+    toast({ title: "Sleep logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${h}h ${m > 0 ? m + "m" : ""} recorded.` });
+  }
+
   function handleLogActivity() {
     const dur = parseFloat(duration);
     if (!duration || isNaN(dur) || dur <= 0) {
@@ -243,7 +292,7 @@ export default function HealthPage() {
         <div className="flex items-center justify-between pt-1">
           <div>
             <h1 className="text-3xl font-black text-foreground leading-tight">Health</h1>
-            <p className="text-xs text-muted-foreground mt-1">Activity · Nutrition · Body</p>
+            <p className="text-xs text-muted-foreground mt-1">Activity · Nutrition · Body · Sleep</p>
           </div>
           <div className="w-11 h-11 rounded-2xl bg-accent flex items-center justify-center">
             <Heart className="w-5 h-5 text-primary" />
@@ -255,23 +304,26 @@ export default function HealthPage() {
           className="sticky top-16 z-20 py-2 -mx-4 px-4"
           style={{ backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", background: "rgba(250,249,246,0.90)" }}
         >
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {([
               { id: "activity",  label: "Activity",  icon: Activity  },
               { id: "nutrition", label: "Nutrition",  icon: Utensils  },
               { id: "body",      label: "Body",       icon: Scale     },
+              { id: "sleep",     label: "Sleep",      icon: Moon      },
             ] as const).map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setSubTab(id)}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-xs font-semibold transition-all border",
+                  "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-[11px] font-semibold transition-all border",
                   subTab === id
-                    ? "bg-primary text-primary-foreground border-primary"
+                    ? id === "sleep"
+                      ? "bg-[#4A5568] text-white border-[#4A5568]"
+                      : "bg-primary text-primary-foreground border-primary"
                     : "bg-accent text-accent-foreground border-accent hover:text-primary"
                 )}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3 h-3" />
                 {label}
               </button>
             ))}
@@ -765,6 +817,213 @@ export default function HealthPage() {
           </div>
         )}
 
+        {/* ══════════════ SLEEP TAB ══════════════ */}
+        {subTab === "sleep" && (
+          <div className="space-y-4">
+
+            {/* ─── Quick Log Form ─── */}
+            <div className="bg-white dark:bg-card p-5 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Moon className="w-4 h-4" style={{ color: "#4A5568" }} />
+                  <p className="text-sm font-bold text-foreground">Log Sleep</p>
+                </div>
+                <button
+                  onClick={() => { setSleepTargetInput(String(sleepTarget)); setShowSleepTarget(true); }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-all"
+                >
+                  Target: {sleepTarget}h <Pencil className="w-3 h-3" />
+                </button>
+              </div>
+
+              {/* Duration inputs */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Duration</p>
+                <div className="flex gap-2 items-center">
+                  <div className="relative flex-1">
+                    <BedDouble className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      type="number" placeholder="Hours" value={sleepHoursInput}
+                      onChange={(e) => setSleepHoursInput(e.target.value)}
+                      className="pl-9 text-sm" min="0" max="24"
+                    />
+                  </div>
+                  <span className="text-muted-foreground text-sm font-medium">:</span>
+                  <div className="relative flex-1">
+                    <AlarmClock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      type="number" placeholder="Min" value={sleepMinsInput}
+                      onChange={(e) => setSleepMinsInput(e.target.value)}
+                      className="pl-9 text-sm" min="0" max="59"
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {(() => {
+                      const h = parseInt(sleepHoursInput) || 0;
+                      const m = parseInt(sleepMinsInput)  || 0;
+                      return h || m ? `= ${h}h ${m}m` : "";
+                    })()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quality stars */}
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Quality</p>
+                <div className="flex items-center gap-1">
+                  {([1,2,3,4,5] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSleepQuality(s)}
+                      className="transition-transform active:scale-90"
+                    >
+                      <Star
+                        className="w-7 h-7 transition-colors"
+                        style={{
+                          fill: s <= sleepQuality ? "#4A5568" : "transparent",
+                          color: s <= sleepQuality ? "#4A5568" : "#D1CBC2",
+                          strokeWidth: 1.5,
+                        }}
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    {["", "Poor", "Fair", "OK", "Good", "Great"][sleepQuality]}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleLogSleep}
+                className="w-full gap-1.5"
+                style={{ background: "#4A5568" }}
+              >
+                <Moon className="w-4 h-4" /> Log Sleep
+              </Button>
+              {todaySleep && (
+                <p className="text-[10px] text-muted-foreground text-center -mt-1">
+                  Today already logged: <span className="font-semibold" style={{ color: "#4A5568" }}>{todaySleep.hours}h {todaySleep.minutes > 0 ? `${todaySleep.minutes}m` : ""}</span> — tap Log to overwrite
+                </p>
+              )}
+            </div>
+
+            {/* ─── Sleep Debt Card ─── */}
+            {weekSleepAvg !== null && (
+              <div
+                className="p-4 space-y-2"
+                style={{
+                  borderRadius: 28, border: "1px solid #E5E0D8",
+                  background: weekSleepAvg >= sleepTarget ? "#F0F4EC" : weekSleepAvg >= sleepTarget * 0.8 ? "#FDF8E8" : "#FDF2F0",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {weekSleepAvg >= sleepTarget
+                      ? <Check className="w-4 h-4 text-primary" />
+                      : <TrendingDown className="w-4 h-4" style={{ color: weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B" }} />
+                    }
+                    <p className="text-sm font-bold text-foreground">Weekly Sleep Debt</p>
+                  </div>
+                  <span
+                    className="text-xs font-bold"
+                    style={{ color: weekSleepAvg >= sleepTarget ? "#556B2F" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B" }}
+                  >
+                    avg {weekSleepAvg.toFixed(1)}h / {sleepTarget}h
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#E5E0D8" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${Math.min(100, (weekSleepAvg / sleepTarget) * 100)}%`,
+                      background: weekSleepAvg >= sleepTarget ? "#556B2F" : weekSleepAvg >= sleepTarget * 0.8 ? "#B8860B" : "#E2725B",
+                    }}
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  {weekSleepAvg >= sleepTarget
+                    ? "You're hitting your sleep target this week 🎉"
+                    : `You're averaging ${(sleepTarget - weekSleepAvg).toFixed(1)}h short of your ${sleepTarget}h target`}
+                </p>
+              </div>
+            )}
+
+            {/* ─── Sleep Bar Chart ─── */}
+            <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Sleep Consistency</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "#7B8FA1" }} />
+                  <span className="text-[10px] text-muted-foreground">Hours slept</span>
+                </div>
+              </div>
+              {sleepChartData.length >= 1 ? (
+                <ResponsiveContainer width="100%" height={140}>
+                  <BarChart data={sleepChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                    <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
+                    <YAxis domain={[0, Math.max(10, sleepTarget + 2)]} tick={axisTick} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(v: number) => [`${v.toFixed(1)}h`, "Sleep"]}
+                      labelFormatter={fmtDate}
+                    />
+                    <ReferenceLine
+                      y={sleepTarget} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5}
+                      label={{ value: `${sleepTarget}h target`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }}
+                    />
+                    <Bar dataKey="hours" fill="#7B8FA1" radius={[6, 6, 0, 0]} maxBarSize={32} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[140px] flex items-center justify-center">
+                  <p className="text-xs text-muted-foreground">Log sleep to see your consistency chart</p>
+                </div>
+              )}
+            </div>
+
+            {/* ─── Sleep History ─── */}
+            {sleepLog.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Sleep History</p>
+                {sleepLog.slice(0, 14).map((entry) => {
+                  const totalH = entry.hours + entry.minutes / 60;
+                  const onTarget = totalH >= sleepTarget;
+                  return (
+                    <div key={entry.id} className="group flex items-center gap-3 bg-white px-4 py-3" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#4A556810" }}>
+                        <Moon className="w-4 h-4" style={{ color: "#4A5568" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-foreground">{entry.hours}h {entry.minutes > 0 ? `${entry.minutes}m` : ""}</p>
+                          <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded-md", onTarget ? "bg-primary/10 text-primary" : "bg-accent text-muted-foreground")}>
+                            {onTarget ? "On target" : `${(sleepTarget - totalH).toFixed(1)}h short`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {([1,2,3,4,5] as const).map((s) => (
+                            <Star key={s} className="w-3 h-3" style={{ fill: s <= entry.quality ? "#4A5568" : "transparent", color: s <= entry.quality ? "#4A5568" : "#D1CBC2", strokeWidth: 1.5 }} />
+                          ))}
+                          <span className="text-[10px] text-muted-foreground ml-1">{["","Poor","Fair","OK","Good","Great"][entry.quality]}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                        <button onClick={() => deleteSleep(entry.id)} className="p-1 rounded text-muted-foreground/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState icon={Moon} title="No sleep logged yet" sub="Use the form above to log your first night" />
+            )}
+
+          </div>
+        )}
+
       </div>
 
       {/* ══════════════ MODALS ══════════════ */}
@@ -885,6 +1144,49 @@ export default function HealthPage() {
           <Button onClick={handleLogWeight} className="flex-1 gap-1.5"><Check className="w-4 h-4" />Log Weight</Button>
         </div>
       </BottomModal>
+
+      {/* Sleep Target Modal */}
+      {showSleepTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowSleepTarget(false)}
+        >
+          <div className="w-full max-w-sm bg-white p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <p className="text-base font-bold text-foreground">Sleep Target</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Set your nightly sleep goal (default: 8h)</p>
+            </div>
+            <div className="relative">
+              <Moon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="number" placeholder={`Current target: ${sleepTarget}h`}
+                value={sleepTargetInput} onChange={(e) => setSleepTargetInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const v = parseFloat(sleepTargetInput);
+                    if (!isNaN(v) && v >= 1 && v <= 24) { setSleepTarget(v); setShowSleepTarget(false); toast({ title: "Target updated", description: `Sleep goal: ${v} hours` }); }
+                  }
+                }}
+                className="pl-10 text-sm" step="0.5" min="1" max="24" autoFocus
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowSleepTarget(false)} className="flex-1">Cancel</Button>
+              <Button
+                className="flex-1 gap-1.5"
+                style={{ background: "#4A5568" }}
+                onClick={() => {
+                  const v = parseFloat(sleepTargetInput);
+                  if (!isNaN(v) && v >= 1 && v <= 24) { setSleepTarget(v); setShowSleepTarget(false); toast({ title: "Target updated", description: `Sleep goal: ${v} hours` }); }
+                }}
+              >
+                <Check className="w-4 h-4" /> Save Target
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Goal Weight Modal */}
       {showGoalModal && (
