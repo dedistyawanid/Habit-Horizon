@@ -30,6 +30,8 @@ interface AppContextType {
   addNote: (note: Omit<QuickNote, "id" | "createdAt" | "updatedAt">) => QuickNote;
   updateNote: (id: string, updates: Partial<Omit<QuickNote, "id" | "createdAt">>) => void;
   deleteNote: (id: string) => void;
+  bulkDeleteNotes: (ids: string[]) => void;
+  bulkUpdateNotes: (ids: string[], updates: Partial<Omit<QuickNote, "id" | "createdAt">>) => void;
   // Habits
   habits: Habit[];
   checkIns: CheckIn[];

@@ -8,6 +8,7 @@ export interface QuickNote {
   url?: string;
   reminderDate?: string;
   reminderEnabled?: boolean;
+  pinned?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -58,5 +58,25 @@ export function useNotes() {
     dbDeleteNote(id);
   }, []);
 
-  return { notes, addNote, updateNote, deleteNote };
+  const bulkDeleteNotes = useCallback((ids: string[]) => {
+    const idSet = new Set(ids);
+    setNotes((prev) => prev.filter((n) => !idSet.has(n.id)));
+    ids.forEach((id) => dbDeleteNote(id));
+  }, []);
+
+  const bulkUpdateNotes = useCallback(
+    (ids: string[], updates: Partial<Omit<QuickNote, "id" | "createdAt">>) => {
+      setNotes((prev) => {
+        const now = new Date().toISOString();
+        const updated = prev.map((n) =>
+          ids.includes(n.id) ? { ...n, ...updates, updatedAt: now } : n
+        );
+        updated.filter((n) => ids.includes(n.id)).forEach((n) => syncNote(n));
+        return updated;
+      });
+    },
+    []
+  );
+
+  return { notes, addNote, updateNote, deleteNote, bulkDeleteNotes, bulkUpdateNotes };
 }
