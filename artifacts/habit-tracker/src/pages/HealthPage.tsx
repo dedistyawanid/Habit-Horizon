@@ -34,6 +34,7 @@ const EXERCISE_KEYWORDS = [
 
 type SubTab = "activity" | "nutrition" | "body" | "sleep";
 type Period  = "day" | "week" | "month";
+type ActRange = "7d" | "30d" | "month" | "custom";
 
 const SLEEP_KEYWORDS = [
   "sleep","tidur","rest","istirahat","malam","night","bed",
@@ -60,6 +61,26 @@ function filterByPeriod<T extends { date: string }>(items: T[], period: Period) 
   const { start, end } = getPeriodRange(period);
   return items.filter((e) => e.date >= start && e.date <= end);
 }
+
+function getActivityRange(range: ActRange, customStart: string, customEnd: string): { start: string; end: string } {
+  const today = new Date();
+  const todayK = today.toISOString().split("T")[0];
+  if (range === "7d") {
+    const s = new Date(today); s.setDate(today.getDate() - 6);
+    return { start: s.toISOString().split("T")[0], end: todayK };
+  }
+  if (range === "30d") {
+    const s = new Date(today); s.setDate(today.getDate() - 29);
+    return { start: s.toISOString().split("T")[0], end: todayK };
+  }
+  if (range === "month") {
+    const s = new Date(today.getFullYear(), today.getMonth(), 1);
+    const e = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    return { start: s.toISOString().split("T")[0], end: e.toISOString().split("T")[0] };
+  }
+  return { start: customStart || todayK, end: customEnd || todayK };
+}
+
 function fmtDate(d: string) {
   const dt = new Date(d);
   return `${dt.getMonth() + 1}/${dt.getDate()}`;
@@ -79,6 +100,9 @@ export default function HealthPage() {
   /* UI state */
   const [subTab, setSubTab]       = useState<SubTab>("activity");
   const [period, setPeriod]       = useState<Period>("month");
+  const [actRange, setActRange]   = useState<ActRange>("30d");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd,   setCustomEnd]   = useState("");
   const [fabOpen, setFabOpen]     = useState(false);
   const [showActivity, setShowActivity] = useState(false);
   const [showMeal, setShowMeal]   = useState(false);
@@ -90,6 +114,7 @@ export default function HealthPage() {
   const [distance, setDistance]   = useState("");
   const [elevation, setElevation] = useState("");
   const [runType, setRunType]     = useState<"Trail"|"Road">("Road");
+  const [actLocation, setActLocation] = useState("");
 
   /* Meal form */
   const [mealName, setMealName]   = useState("");
@@ -127,12 +152,16 @@ export default function HealthPage() {
   const todayKey = new Date().toISOString().split("T")[0];
 
   /* ── Derived: Activity ── */
-  const filteredAct = useMemo(() => filterByPeriod(activityLog, period), [activityLog, period]);
+  const filteredAct = useMemo(() => {
+    const { start, end } = getActivityRange(actRange, customStart, customEnd);
+    return activityLog.filter((e) => e.date >= start && e.date <= end);
+  }, [activityLog, actRange, customStart, customEnd]);
 
   const stats = useMemo(() => ({
     sessions:     filteredAct.length,
     distance:     filteredAct.reduce((s, e) => s + (e.distanceKm ?? 0), 0),
     minutes:      filteredAct.reduce((s, e) => s + (e.durationMin ?? 0), 0),
+    elevation:    filteredAct.reduce((s, e) => s + (e.elevationGain ?? 0), 0),
     longestRun:   filteredAct.filter((e) => e.type === "Running" && e.distanceKm != null).reduce((m, e) => Math.max(m, e.distanceKm!), 0),
   }), [filteredAct]);
 
@@ -256,11 +285,12 @@ export default function HealthPage() {
       distanceKm:    actType === "Running" ? parseFloat(distance)  : undefined,
       elevationGain: actType === "Running" && elevation ? parseFloat(elevation) : undefined,
       runType:       actType === "Running" ? runType : undefined,
+      location:      actLocation.trim() || undefined,
     });
     const hits = habitsWithStats.filter((h) => EXERCISE_KEYWORDS.some((kw) => h.name.toLowerCase().includes(kw)));
     let auto = 0;
     hits.forEach((h) => { if (!isCheckedInToday(h.id)) { toggleCheckIn(h.id); auto++; } });
-    setDuration(""); setDistance(""); setElevation("");
+    setDuration(""); setDistance(""); setElevation(""); setActLocation("");
     setShowActivity(false);
     toast({ title: "Activity logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${actType} saved.` });
   }
@@ -346,56 +376,151 @@ export default function HealthPage() {
             ))}
           </div>
 
-          {/* Period filter — sliding pill segmented control */}
-          <div className="flex justify-end" style={{ marginTop: 20 }}>
-            <div
-              className="relative flex items-center"
-              style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 192 }}
-            >
-              {/* Sliding white pill */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 3, bottom: 3,
-                  left: 3,
-                  width: "calc(33.333% - 2px)",
-                  borderRadius: 24,
-                  background: "#FFFFFF",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.05)",
-                  transform: `translateX(calc(${["day","week","month"].indexOf(period)} * 100%))`,
-                  transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
-                  pointerEvents: "none",
-                }}
-              />
-              {(["day", "week", "month"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
-                  style={{
-                    flex: 1,
-                    position: "relative",
-                    zIndex: 1,
-                    fontSize: 12,
-                    fontWeight: period === p ? 600 : 500,
-                    color: period === p ? "#2D2D2D" : "#9C8B7A",
-                    transition: "color 0.2s",
-                    background: "none",
-                    border: "none",
-                    outline: "none",
-                    cursor: "pointer",
-                    letterSpacing: 0,
-                  }}
+          {/* Period filter — actRange for Activity tab, shared period for others */}
+          <div style={{ marginTop: 20 }}>
+            {subTab === "activity" ? (
+              <>
+                <div className="flex justify-end">
+                  <div
+                    className="relative flex items-center"
+                    style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 252 }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 3, bottom: 3, left: 3,
+                        width: "calc(25% - 1.5px)",
+                        borderRadius: 24,
+                        background: "#FFFFFF",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                        transform: `translateX(calc(${["7d","30d","month","custom"].indexOf(actRange)} * 100%))`,
+                        transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                        pointerEvents: "none",
+                      }}
+                    />
+                    {(["7d","30d","month","custom"] as const).map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setActRange(r)}
+                        style={{
+                          flex: 1,
+                          position: "relative",
+                          zIndex: 1,
+                          fontSize: 11,
+                          fontWeight: actRange === r ? 600 : 500,
+                          color: actRange === r ? "#2D2D2D" : "#9C8B7A",
+                          transition: "color 0.2s",
+                          background: "none",
+                          border: "none",
+                          outline: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {r === "7d" ? "7D" : r === "30d" ? "30D" : r === "month" ? "Month" : "Custom"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {actRange === "custom" && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="date"
+                      value={customStart}
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <span className="text-xs text-muted-foreground shrink-0">→</span>
+                    <input
+                      type="date"
+                      value={customEnd}
+                      min={customStart}
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      className="flex-1 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex justify-end">
+                <div
+                  className="relative flex items-center"
+                  style={{ background: "#F5F4F0", borderRadius: 28, padding: 3, height: 32, width: 192 }}
                 >
-                  {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
-                </button>
-              ))}
-            </div>
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 3, bottom: 3, left: 3,
+                      width: "calc(33.333% - 2px)",
+                      borderRadius: 24,
+                      background: "#FFFFFF",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.05)",
+                      transform: `translateX(calc(${["day","week","month"].indexOf(period)} * 100%))`,
+                      transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {(["day", "week", "month"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPeriod(p)}
+                      style={{
+                        flex: 1,
+                        position: "relative",
+                        zIndex: 1,
+                        fontSize: 12,
+                        fontWeight: period === p ? 600 : 500,
+                        color: period === p ? "#2D2D2D" : "#9C8B7A",
+                        transition: "color 0.2s",
+                        background: "none",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                        letterSpacing: 0,
+                      }}
+                    >
+                      {p === "day" ? "Today" : p === "week" ? "Week" : "Month"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* ══════════════ ACTIVITY TAB ══════════════ */}
         {subTab === "activity" && (
           <div className="space-y-4">
+
+            {/* Summary stats row — shown in 30D / Month view */}
+            {(actRange === "30d" || actRange === "month") && filteredAct.length > 0 && (
+              <div className="flex items-center gap-4 px-1">
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                  <div>
+                    <p className="text-xs font-black text-foreground">{stats.distance.toFixed(1)} km</p>
+                    <p className="text-[9px] text-muted-foreground">Total distance</p>
+                  </div>
+                </div>
+                {stats.elevation > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Mountain className="w-3.5 h-3.5 text-primary" />
+                    <div>
+                      <p className="text-xs font-black text-foreground">{Math.round(stats.elevation)} m</p>
+                      <p className="text-[9px] text-muted-foreground">Elevation gain</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <Timer className="w-3.5 h-3.5 text-primary" />
+                  <div>
+                    <p className="text-xs font-black text-foreground">
+                      {stats.minutes >= 60 ? `${(stats.minutes / 60).toFixed(1)}h` : `${stats.minutes}m`}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground">Active time</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Activity trend chart */}
             <div className="bg-white dark:bg-card p-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}>
@@ -404,7 +529,7 @@ export default function HealthPage() {
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">
                     {actChartData[0]?.hasDistance ? "Running Distance (km)" : "Running Duration (min)"}
                   </p>
-                  <ResponsiveContainer width="100%" height={130}>
+                  <ResponsiveContainer width="100%" height={140}>
                     <AreaChart data={actChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                       <defs>
                         <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
@@ -412,7 +537,14 @@ export default function HealthPage() {
                           <stop offset="95%" stopColor="#556B2F" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={fmtDate}
+                        tick={axisTick}
+                        tickLine={false}
+                        axisLine={false}
+                        interval={Math.max(0, Math.ceil(actChartData.length / 6) - 1)}
+                      />
                       <YAxis tick={axisTick} tickLine={false} axisLine={false} />
                       <Tooltip
                         contentStyle={tooltipStyle}
@@ -428,7 +560,7 @@ export default function HealthPage() {
                         dataKey={actChartData[0]?.hasDistance ? "km" : "min"}
                         stroke="#556B2F" strokeWidth={2}
                         fill="url(#actGrad)"
-                        dot={{ r: 3, fill: "#556B2F", strokeWidth: 0 }}
+                        dot={{ r: actChartData.length > 15 ? 2 : 3, fill: "#556B2F", strokeWidth: 0 }}
                         activeDot={{ r: 4, fill: "#556B2F", strokeWidth: 0 }}
                       />
                     </AreaChart>
@@ -582,6 +714,17 @@ export default function HealthPage() {
                 </div>
               )}
 
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Location (e.g. Jakarta, Sentul) — optional"
+                  value={actLocation}
+                  onChange={(e) => setActLocation(e.target.value)}
+                  className="pl-9 text-sm"
+                />
+              </div>
+
               <Button onClick={handleLogActivity} className="w-full gap-1.5">
                 <Plus className="w-4 h-4" /> Log {actType}
               </Button>
@@ -599,7 +742,9 @@ export default function HealthPage() {
                     const metricPrimary   = entry.type === "Running" && entry.distanceKm != null ? `${entry.distanceKm} km` : `${entry.durationMin ?? "—"} min`;
                     const metricSecondary = [
                       entry.type === "Running" && entry.durationMin ? `${entry.durationMin} min` : null,
-                      entry.runType, entry.elevationGain ? `↑${entry.elevationGain}m` : null,
+                      entry.runType,
+                      entry.elevationGain ? `↑${entry.elevationGain}m` : null,
+                      entry.location || null,
                     ].filter(Boolean).join(" · ");
                     return (
                       <div key={entry.id} className="group flex items-center gap-3 bg-white px-4 py-3" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>

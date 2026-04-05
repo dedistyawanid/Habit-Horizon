@@ -101,6 +101,7 @@ export async function fetchAllFromCloud(
           distanceKm:  a.distance_km  != null ? Number(a.distance_km)  : undefined,
           elevationGain: a.elevation_gain != null ? Number(a.elevation_gain) : undefined,
           runType: a.run_type ?? undefined,
+          location: a.location ?? undefined,
           notes: a.notes ?? undefined,
           createdAt: a.created_at,
         }))

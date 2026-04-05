@@ -122,13 +122,14 @@ export function syncCheckIn(c: { id: string; habitId: string; date: string; note
 export function deleteCheckIn(id: string) { return del("checkins", id); }
 
 /* ─── Activity → health_logs ─────────────────────────────── */
-export function syncActivity(e: { id: string; date: string; type: string; durationMin?: number; distanceKm?: number; elevationGain?: number; runType?: string; notes?: string; createdAt?: string }) {
+export function syncActivity(e: { id: string; date: string; type: string; durationMin?: number; distanceKm?: number; elevationGain?: number; runType?: string; location?: string; notes?: string; createdAt?: string }) {
   return upsert("health_logs", {
     id: e.id, user_id: getUserId(), date: e.date, type: e.type,
     duration_min:   num(e.durationMin),
     distance_km:    num(e.distanceKm),
     elevation_gain: num(e.elevationGain),
     run_type:       e.runType ?? null,
+    location:       e.location ?? null,
     notes:          e.notes ?? null,
     created_at:     e.createdAt ?? new Date().toISOString(),
   });
