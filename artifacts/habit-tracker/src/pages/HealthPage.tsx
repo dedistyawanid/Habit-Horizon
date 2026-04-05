@@ -686,7 +686,7 @@ export default function HealthPage() {
               </div>
 
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -839,7 +839,7 @@ export default function HealthPage() {
                 <p className="text-sm font-bold text-foreground">Log Meal</p>
               </div>
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -904,9 +904,9 @@ export default function HealthPage() {
                 </button>
               </div>
               <div className="flex justify-around items-start">
-                <ProgressRing pct={calPct}   color="#556B2F" label="Calories" value={todayCal.toString()}   unit="kcal" size={96} />
-                <ProgressRing pct={protPct}  color="#B8860B" label="Protein"  value={`${todayProt}g`}       unit={`/ ${targets.protein}g`} size={96} />
-                <ProgressRing pct={carbsPct} color="#9C8B7A" label="Carbs"    value={`${todayCarbs}g`}      unit={`/ ${targets.carbs}g`}   size={96} />
+                <ProgressRing pct={calPct}   color="hsl(var(--primary))" label="Calories" value={todayCal.toString()}   unit="kcal" size={96} />
+                <ProgressRing pct={protPct}  color="#c49a3c"              label="Protein"  value={`${todayProt}g`}       unit={`/ ${targets.protein}g`} size={96} />
+                <ProgressRing pct={carbsPct} color="#7a9e8e"              label="Carbs"    value={`${todayCarbs}g`}      unit={`/ ${targets.carbs}g`}   size={96} />
               </div>
               <div className="mt-3 flex justify-end">
                 <span className="text-[10px] text-muted-foreground">{calPct}% of {targets.calories} kcal target</span>
@@ -1015,7 +1015,7 @@ export default function HealthPage() {
                 </button>
               </div>
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -1172,7 +1172,7 @@ export default function HealthPage() {
               </div>
 
               {/* Date selector */}
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-3 py-2 border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-[hsl(34_8%_16%)] rounded-xl px-3 py-2 border border-gray-100 dark:border-[hsl(34_8%_22%)]">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <input
                   type="date"
@@ -1832,17 +1832,20 @@ function ProgressRing({ pct, color, label, value, unit, size = 88 }: {
     <div className="flex flex-col items-center gap-1.5">
       <div style={{ position: "relative", width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#F0EDE7" strokeWidth={7}
-            style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
+          {/* Track — uses .ring-track class so dark mode can override via CSS */}
+          <circle className="ring-track" cx={size / 2} cy={size / 2} r={r} fill="none"
+            strokeWidth={7}
+            style={{ stroke: "#F0EDE7", transform: "rotate(-90deg)", transformOrigin: "center" }}
           />
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={7}
-            strokeDasharray={circ} strokeDashoffset={dash} strokeLinecap="round"
-            style={{ transform: "rotate(-90deg)", transformOrigin: "center", transition: "stroke-dashoffset 0.6s ease" }}
+          {/* Progress arc — stroke set via style so CSS custom properties resolve */}
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none"
+            strokeWidth={7} strokeDasharray={circ} strokeDashoffset={dash} strokeLinecap="round"
+            style={{ stroke: color, transform: "rotate(-90deg)", transformOrigin: "center", transition: "stroke-dashoffset 0.6s ease" }}
           />
         </svg>
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1 }}>
           <p style={{ fontSize: 15, fontWeight: 900, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</p>
-          <p style={{ fontSize: 8.5, color: "#9C8B7A", lineHeight: 1 }}>{unit}</p>
+          <p style={{ fontSize: 8.5, color: "hsl(var(--muted-foreground))", lineHeight: 1 }}>{unit}</p>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>

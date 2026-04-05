@@ -158,68 +158,75 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .08);
+  --button-outline: rgba(255,255,255, .07);
   --badge-outline: rgba(255,255,255, .04);
   --opaque-button-border-intensity: 8;
   --elevate-1: rgba(255,255,255, .03);
-  --elevate-2: rgba(255,255,255, .07);
+  --elevate-2: rgba(255,255,255, .06);
 
-  --background: 40 5% 8%;
-  --foreground: 40 10% 88%;
+  /* ── Earth Tone Dark Palette ─────────────────────────────
+     Background  : #181c1e  Deep Charcoal Forest
+     Card        : #24221f  Warm Charcoal Brown
+     Foreground  : #f2f0e6  Off-White Cream
+     Muted text  : #c8c0b0  Muted Beige
+     Primary     : #ac6e5c  Muted Terracotta
+     ─────────────────────────────────────────────────────── */
+  --background: 205 12% 11%;        /* #181c1e */
+  --foreground: 46 30% 93%;         /* #f2f0e6 */
 
-  --border: 30 8% 22%;
-  --input: 30 8% 26%;
-  --ring: 83 35% 55%;
+  --border: 34 8% 21%;
+  --input: 34 8% 20%;
+  --ring: 13 33% 52%;               /* terracotta focus ring */
 
-  --card: 40 5% 11%;
-  --card-foreground: 40 10% 88%;
-  --card-border: 30 8% 20%;
+  --card: 34 8% 13%;                /* #24221f */
+  --card-foreground: 46 30% 93%;
+  --card-border: 34 8% 18%;
 
-  --sidebar: 40 5% 9%;
-  --sidebar-foreground: 40 8% 84%;
-  --sidebar-border: 30 8% 22%;
-  --sidebar-primary: 83 35% 55%;
+  --sidebar: 34 8% 11%;
+  --sidebar-foreground: 40 15% 82%;
+  --sidebar-border: 34 8% 18%;
+  --sidebar-primary: 13 33% 52%;    /* Muted Terracotta */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 83 20% 18%;
-  --sidebar-accent-foreground: 83 20% 72%;
-  --sidebar-ring: 83 35% 55%;
+  --sidebar-accent: 13 12% 20%;
+  --sidebar-accent-foreground: 13 12% 70%;
+  --sidebar-ring: 13 33% 52%;
 
-  --popover: 40 5% 11%;
-  --popover-foreground: 40 10% 88%;
-  --popover-border: 30 8% 22%;
+  --popover: 34 8% 13%;
+  --popover-foreground: 46 30% 93%;
+  --popover-border: 34 8% 18%;
 
-  --primary: 83 35% 55%;
+  /* Primary = Muted Terracotta #ac6e5c */
+  --primary: 13 33% 52%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 40 5% 16%;
-  --secondary-foreground: 40 8% 72%;
+  --secondary: 34 8% 18%;
+  --secondary-foreground: 40 15% 78%;
 
-  --muted: 40 5% 16%;
-  --muted-foreground: 40 5% 52%;
+  --muted: 34 8% 16%;
+  --muted-foreground: 38 16% 70%;   /* #c8c0b0 Muted Beige */
 
-  --accent: 83 20% 18%;
-  --accent-foreground: 83 25% 72%;
+  --accent: 34 10% 18%;
+  --accent-foreground: 38 16% 72%;
 
   --destructive: 0 62% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 83 35% 55%;
+  --chart-1: 13 33% 52%;            /* Terracotta */
   --chart-2: 10 55% 62%;
-  --chart-3: 42 70% 52%;
-  --chart-4: 120 15% 45%;
+  --chart-3: 42 68% 52%;
+  --chart-4: 157 14% 42%;           /* Dark Sage #5c7c6c */
   --chart-5: 0 0% 55%;
 
-  /* Dark: per-theme background (overridden by accentTheme) */
-  --bg-gradient: #0d1408;
+  --bg-gradient: #181c1e;
 
-  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.25);
-  --shadow-xs: 0px 2px 4px 0px rgba(0,0,0,0.30);
-  --shadow-sm: 0px 2px 8px -1px rgba(0,0,0,0.35);
-  --shadow: 0px 4px 12px -2px rgba(0,0,0,0.40);
-  --shadow-md: 0px 6px 16px -3px rgba(0,0,0,0.45);
-  --shadow-lg: 0px 10px 24px -4px rgba(0,0,0,0.50);
-  --shadow-xl: 0px 16px 32px -6px rgba(0,0,0,0.55);
-  --shadow-2xl: 0px 24px 48px -8px rgba(0,0,0,0.60);
+  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.30);
+  --shadow-xs: 0px 2px 4px 0px rgba(0,0,0,0.35);
+  --shadow-sm: 0px 2px 8px -1px rgba(0,0,0,0.40);
+  --shadow: 0px 4px 12px -2px rgba(0,0,0,0.45);
+  --shadow-md: 0px 6px 16px -3px rgba(0,0,0,0.50);
+  --shadow-lg: 0px 10px 24px -4px rgba(0,0,0,0.55);
+  --shadow-xl: 0px 16px 32px -6px rgba(0,0,0,0.60);
+  --shadow-2xl: 0px 24px 48px -8px rgba(0,0,0,0.65);
 }
 
 @layer base {
@@ -252,7 +259,7 @@
     border-bottom: 1px solid #E5E0D8;
   }
   .dark .glass-header {
-    background: rgba(20, 18, 16, 0.90);
+    background: rgba(24, 28, 30, 0.93);      /* #181c1e at 93% */
     border-bottom: 1px solid hsl(var(--border));
   }
   .habit-progress-track {
@@ -350,9 +357,22 @@
     border-top: 1px solid #E5E0D8;
   }
   .dark .bottom-nav {
-    background: rgba(18, 16, 14, 0.95);
+    background: rgba(26, 30, 32, 0.97);      /* #1a1e20 */
     border-top: 1px solid hsl(var(--border));
   }
+
+  /* ── Progress ring track: dark-mode tinted warm charcoal ── */
+  .dark .ring-track { stroke: hsl(34 8% 24%); }
+
+  /* ── Form inputs / selects / textareas in dark mode ──
+     Override Tailwind gray classes to use the earth-tone palette. */
+  .dark .field-dark {
+    background-color: hsl(34 8% 16%);        /* warm charcoal input */
+    color: hsl(46 30% 93%);                  /* cream text */
+    border-color: hsl(34 8% 22%);
+  }
+  .dark .field-dark::placeholder { color: hsl(38 16% 50%); }
+  .dark .field-dark option        { background: hsl(34 8% 16%); }
 
   /* ── Global: dark-mode card border override ──
      Any element that carries the light-mode beige border color via inline style
