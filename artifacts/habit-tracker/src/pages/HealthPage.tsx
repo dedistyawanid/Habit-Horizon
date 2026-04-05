@@ -924,11 +924,18 @@ export default function HealthPage() {
               )}
             </div>
 
-            {/* Today's meals */}
-            {todayMeals.length > 0 ? (
+            {/* All meals — sorted newest first */}
+            {nutritionLog.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Today's Meals</p>
-                {[...todayMeals].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).map((meal) => (
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">All Meals</p>
+                {[...nutritionLog]
+                  .sort((a, b) => {
+                    const dateDiff = b.date.localeCompare(a.date);
+                    if (dateDiff !== 0) return dateDiff;
+                    return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+                  })
+                  .slice(0, 20)
+                  .map((meal) => (
                   <div key={meal.id} className="flex items-center gap-3 bg-white px-4 py-3 transition-transform active:scale-[0.98]" style={{ borderRadius: 20, border: "1px solid #E5E0D8" }}>
                     <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center shrink-0">
                       <Utensils className="w-4 h-4 text-primary" />
@@ -941,14 +948,17 @@ export default function HealthPage() {
                         {meal.carbs   > 0  && <span className="text-xs text-muted-foreground">{meal.carbs}g carbs</span>}
                       </div>
                     </div>
-                    <button onClick={() => deleteMeal(meal.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs text-muted-foreground">{new Date(meal.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      <button onClick={() => deleteMeal(meal.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <EmptyState icon={Utensils} title="No meals logged today" sub="Tap the + button to log a meal" />
+              <EmptyState icon={Utensils} title="No meals logged yet" sub="Use the form above to log your first meal" />
             )}
           </div>
         )}

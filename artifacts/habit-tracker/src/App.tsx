@@ -93,6 +93,7 @@ function SyncProgressBar({ visible }: { visible: boolean }) {
 function AppShell() {
   const [settingsOpen,     setSettingsOpen]     = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
+  const [fabOpen,          setFabOpen]          = useState(false);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
@@ -180,13 +181,14 @@ function AppShell() {
 
       <BottomNav bouncing={bouncingTab} />
 
-      {location !== "/health" && (
-        <MultiFAB
-          onNewNote={() => setLocation("/notes?new=1")}
-          onNewFinance={() => setLocation("/finance?new=1")}
-          onQuickCheckin={() => setCheckinModalOpen(true)}
-        />
-      )}
+      <MultiFAB
+        open={fabOpen}
+        onToggle={() => setFabOpen((v) => !v)}
+        onClose={() => setFabOpen(false)}
+        onNewNote={() => { setFabOpen(false); setLocation("/notes?new=1"); }}
+        onNewFinance={() => { setFabOpen(false); setLocation("/finance?new=1"); }}
+        onQuickCheckin={() => { setFabOpen(false); setCheckinModalOpen(true); }}
+      />
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <QuickCheckinDialog open={checkinModalOpen} onClose={() => setCheckinModalOpen(false)} />
