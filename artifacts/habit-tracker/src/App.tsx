@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { SyncProvider } from "@/context/SyncContext";
+import { SyncProvider, useSyncStatus } from "@/context/SyncContext";
 import { BottomNav } from "@/components/BottomNav";
 import { MultiFAB } from "@/components/MultiFAB";
 import { SettingsModal } from "@/components/SettingsModal";
@@ -22,8 +22,10 @@ import LoginPage from "@/pages/LoginPage";
 import { Settings } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
+import { useToast } from "@/hooks/use-toast";
 
 const queryClient = new QueryClient();
+const SYNC_TOAST_KEY = "dedi_sync_toast";
 
 function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { habitsWithStats, deleteHabit } = useApp();
@@ -56,10 +58,27 @@ function QuickCheckinDialog({ open, onClose }: { open: boolean; onClose: () => v
 }
 
 function AppShell() {
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsOpen,     setSettingsOpen]     = useState(false);
   const [checkinModalOpen, setCheckinModalOpen] = useState(false);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const { triggerSync } = useSyncStatus();
+
+  /* Show any deferred sync toast (e.g. "timeout – using local data") and flush queue */
+  useEffect(() => {
+    /* Deferred toast from cloud hydration phase */
+    const pending = sessionStorage.getItem(SYNC_TOAST_KEY);
+    if (pending) {
+      sessionStorage.removeItem(SYNC_TOAST_KEY);
+      try {
+        const { title, description } = JSON.parse(pending);
+        setTimeout(() => toast({ title, description }), 600);
+      } catch { /* ignore malformed message */ }
+    }
+    /* Immediately push any offline-queued mutations to Supabase */
+    if (navigator.onLine) triggerSync();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">

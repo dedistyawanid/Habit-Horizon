@@ -1,6 +1,7 @@
 /**
  * fetchFromCloud — pulls all user data from Supabase and writes it to localStorage.
  * Called on every login/session restore so Cloud always wins.
+ * Has a hard 4-second timeout — falls back to localStorage silently on failure.
  */
 import { supabase } from "./supabase";
 
@@ -21,14 +22,48 @@ function safeJson<T>(raw: string | null, fallback: T): T {
   catch { return fallback; }
 }
 
+/** Races a promise against a timeout. Returns null if the timeout wins. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
+/** Fetches a single table with a per-table timeout, returning null on any error/timeout. */
+async function fetchTable(table: string, userId: string) {
+  const result = await withTimeout(
+    supabase.from(table).select("*").eq("user_id", userId),
+    3500,
+  );
+  if (!result || result.error) return null;
+  return result.data;
+}
+
 /* ── full pull: Supabase → localStorage ── */
-export async function fetchAllFromCloud(userId: string): Promise<boolean> {
-  if (!navigator.onLine) return false;
-  let wrote = false;
+export async function fetchAllFromCloud(userId: string): Promise<"synced" | "no_data" | "timeout" | "offline" | "error"> {
+  if (!navigator.onLine) return "offline";
 
   try {
-    /* habits */
-    const { data: habits } = await supabase.from("habits").select("*").eq("user_id", userId);
+    let wrote = false;
+
+    /* Run all table fetches in parallel with a 4-second overall budget */
+    const overall = Promise.all([
+      fetchTable("habits",         userId),
+      fetchTable("checkins",       userId),
+      fetchTable("activity_logs",  userId),
+      fetchTable("nutrition_logs", userId),
+      fetchTable("sleep_logs",     userId),
+      fetchTable("weight_logs",    userId),
+      fetchTable("finance_logs",   userId),
+      fetchTable("notes",          userId),
+    ]);
+
+    const results = await withTimeout(overall, 4000);
+    if (!results) return "timeout";   // overall timeout
+
+    const [habits, checkins, acts, meals, sleeps, weights, txns, notes] = results;
+
     if (habits?.length) {
       localStorage.setItem("dedi_habits", JSON.stringify(
         habits.map((h) => ({
@@ -36,16 +71,12 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
           frequency: h.frequency ?? "Daily", color: h.color, icon: h.icon,
           createdAt: h.created_at,
           weeklyStreakTarget: h.weekly_streak_target ?? undefined,
-          targetDays: h.target_days
-            ? safeJson<number[] | undefined>(h.target_days, undefined)
-            : undefined,
+          targetDays: h.target_days ? safeJson<number[] | undefined>(h.target_days, undefined) : undefined,
         }))
       ));
       wrote = true;
     }
 
-    /* checkins */
-    const { data: checkins } = await supabase.from("checkins").select("*").eq("user_id", userId);
     if (checkins?.length) {
       localStorage.setItem("dedi_checkins", JSON.stringify(
         checkins.map((c) => ({
@@ -56,8 +87,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* activity_logs */
-    const { data: acts } = await supabase.from("activity_logs").select("*").eq("user_id", userId);
     if (acts?.length) {
       localStorage.setItem("dedi_activity_log", JSON.stringify(
         acts.map((a) => ({
@@ -73,8 +102,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* nutrition_logs */
-    const { data: meals } = await supabase.from("nutrition_logs").select("*").eq("user_id", userId);
     if (meals?.length) {
       localStorage.setItem("dedi_nutrition_log", JSON.stringify(
         meals.map((m) => ({
@@ -86,8 +113,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* sleep_logs */
-    const { data: sleeps } = await supabase.from("sleep_logs").select("*").eq("user_id", userId);
     if (sleeps?.length) {
       localStorage.setItem("dedi_sleep_log", JSON.stringify(
         sleeps.map((s) => ({
@@ -99,8 +124,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* weight_logs */
-    const { data: weights } = await supabase.from("weight_logs").select("*").eq("user_id", userId);
     if (weights?.length) {
       localStorage.setItem("dedi_weight_log", JSON.stringify(
         weights.map((w) => ({ id: w.id, date: w.date, weight: w.weight }))
@@ -108,8 +131,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* finance_logs */
-    const { data: txns } = await supabase.from("finance_logs").select("*").eq("user_id", userId);
     if (txns?.length) {
       localStorage.setItem("dedi_transactions", JSON.stringify(
         txns.map((t) => ({
@@ -122,8 +143,6 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    /* notes */
-    const { data: notes } = await supabase.from("notes").select("*").eq("user_id", userId);
     if (notes?.length) {
       localStorage.setItem("dedi_quick_notes", JSON.stringify(
         notes.map((n) => ({
@@ -134,20 +153,22 @@ export async function fetchAllFromCloud(userId: string): Promise<boolean> {
       wrote = true;
     }
 
-    return wrote;
+    return wrote ? "synced" : "no_data";
   } catch (e) {
     console.warn("fetchAllFromCloud error:", e);
-    return false;
+    return "error";
   }
 }
 
 /* ── profile ── */
 export async function fetchProfile(userId: string): Promise<CloudProfile | null> {
   try {
-    const { data, error } = await supabase
-      .from("profiles").select("*").eq("user_id", userId).maybeSingle();
-    if (error) return null;
-    return data as CloudProfile | null;
+    const result = await withTimeout(
+      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+      3000,
+    );
+    if (!result || result.error) return null;
+    return result.data as CloudProfile | null;
   } catch { return null; }
 }
 
@@ -164,7 +185,6 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
   if (profile.target_weight != null) {
     localStorage.setItem("dedi_goal_weight", String(profile.target_weight));
   }
-
   if (profile.calorie_goal != null || profile.protein_goal != null || profile.carbs_goal != null) {
     const existing = safeJson<Record<string, number>>(
       localStorage.getItem("dedi_nutrition_targets"), {}
@@ -173,13 +193,12 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
       calories: existing.calories ?? 2500,
       protein:  existing.protein  ?? 150,
       carbs:    existing.carbs    ?? 300,
-      ...(profile.calorie_goal  != null ? { calories: profile.calorie_goal }  : {}),
-      ...(profile.protein_goal  != null ? { protein:  profile.protein_goal }  : {}),
-      ...(profile.carbs_goal    != null ? { carbs:    profile.carbs_goal }    : {}),
+      ...(profile.calorie_goal != null ? { calories: profile.calorie_goal } : {}),
+      ...(profile.protein_goal != null ? { protein:  profile.protein_goal } : {}),
+      ...(profile.carbs_goal   != null ? { carbs:    profile.carbs_goal }   : {}),
     };
     localStorage.setItem("dedi_nutrition_targets", JSON.stringify(merged));
   }
-
   if (profile.theme_selection) {
     const themeData = safeJson<Record<string, string>>(profile.theme_selection, {});
     const existing  = safeJson<Record<string, unknown>>(
@@ -189,7 +208,6 @@ export function applyProfileToLocalStorage(profile: CloudProfile) {
     if (themeData.accentTheme) existing.accentTheme = themeData.accentTheme;
     localStorage.setItem("dedi_app_settings", JSON.stringify(existing));
   }
-
   if (profile.display_name) {
     const existing = safeJson<Record<string, unknown>>(
       localStorage.getItem("dedi_app_settings"), {}
