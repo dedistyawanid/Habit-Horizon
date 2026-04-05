@@ -91,37 +91,50 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 pt-5 pb-24 space-y-5">
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          {profile.avatarUrl ? (
-            <img
-              src={profile.avatarUrl}
-              alt={profile.fullName}
-              className="w-11 h-11 rounded-2xl object-cover shrink-0"
-              data-testid="avatar-img"
-            />
-          ) : (
-            <div
-              className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0"
-              data-testid="avatar-initials"
-            >
-              {initials}
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-400 font-medium">{greeting}, {firstName}</p>
-            <p className="text-xs text-gray-400 truncate">{gregorianStr}</p>
-            <p className="text-xs text-primary/70 font-medium truncate">{hijriStr}</p>
-          </div>
-          <div className="text-right shrink-0">
-            <p className="text-2xl font-extrabold text-gray-800 dark:text-gray-100" data-testid="today-stats">
-              {todayDone}<span className="text-sm font-normal text-gray-400">/{totalToday}</span>
+        {/* Big greeting header — reference style */}
+        <div className="flex items-start justify-between pt-1">
+          <div>
+            <h1 className="text-4xl font-black text-gray-900 dark:text-white leading-none tracking-tight">
+              {greeting.split(" ")[0]}
+            </h1>
+            <p className="text-3xl font-light text-gray-400 dark:text-gray-500 leading-tight mt-0.5">
+              {greeting.split(" ").slice(1).join(" ") || "there"}
             </p>
+            <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+              {gregorianStr}
+              <span className="mx-1.5 text-gray-300">·</span>
+              <span className="text-primary/70 font-medium">{hijriStr}</span>
+            </p>
+          </div>
+          <div className="shrink-0 flex flex-col items-end gap-2 mt-1">
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt={profile.fullName}
+                className="w-12 h-12 rounded-full object-cover shadow-md"
+                data-testid="avatar-img"
+              />
+            ) : (
+              <div
+                className="w-12 h-12 rounded-full bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-sm font-bold text-white dark:text-gray-900 shadow-md"
+                data-testid="avatar-initials"
+              >
+                {initials}
+              </div>
+            )}
+            {totalToday > 0 && (
+              <div className="text-right">
+                <span className="text-xl font-black text-gray-800 dark:text-gray-100" data-testid="today-stats">
+                  {todayDone}
+                </span>
+                <span className="text-sm text-gray-400">/{totalToday}</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Mission + Quote */}
-        <div className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-4 border border-primary/10 space-y-2">
+        <div className="bg-white dark:bg-gray-900 p-4 space-y-2" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
           {profile.mission && (
             <div className="flex gap-2 items-center">
               <Target className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -179,7 +192,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         {habitsWithStats.length > 0 && (topPerforming || needsAttention) && (
           <div className="grid grid-cols-2 gap-3">
             {topPerforming && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 p-3">
+              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Top Habit</p>
@@ -191,7 +204,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
               </div>
             )}
             {needsAttention && needsAttention.id !== topPerforming?.id && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-amber-100 dark:border-amber-900/30 p-3">
+              <div className="bg-white dark:bg-gray-900 p-3" style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                   <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Needs Work</p>

@@ -59,17 +59,17 @@ function AppShell() {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Minimal top bar */}
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-30 glass-header">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center">
+            <div className="w-7 h-7 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
               <span className="text-primary-foreground text-xs font-bold">D</span>
             </div>
-            <span className="font-bold text-sm text-gray-800 dark:text-gray-100">Dedi's Tracker</span>
+            <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Dedi's Tracker</span>
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="w-9 h-9 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shadow-sm hover:shadow-md transition-all"
             aria-label="Settings"
           >
             <Settings className="w-4 h-4" />

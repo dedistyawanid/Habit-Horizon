@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Moon, Sun, Monitor, Upload, Download, Trash2, Plus, Pencil, Check, X, User, Scale, Ruler, Target, Image, Palette, DollarSign, TrendingDown } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -334,41 +334,48 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 )}
               </p>
 
-              {/* Mini line chart of last 5 entries */}
+              {/* Temperature-style area chart of last 5 entries */}
               {weightLog.length >= 2 && (
-                <div className="h-20 w-full">
+                <div className="h-28 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={[...weightLog].slice(-5)} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                    <AreaChart data={[...weightLog].slice(-5)} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.18} />
+                          <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
                       <XAxis
                         dataKey="date"
                         tickFormatter={(d) => {
                           const dt = new Date(d);
                           return `${dt.getMonth() + 1}/${dt.getDate()}`;
                         }}
-                        tick={{ fontSize: 9 }}
+                        tick={{ fontSize: 9, fill: "#9ca3af" }}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
                         domain={["auto", "auto"]}
-                        tick={{ fontSize: 9 }}
+                        tick={{ fontSize: 9, fill: "#9ca3af" }}
                         tickLine={false}
                         axisLine={false}
                       />
                       <Tooltip
-                        contentStyle={{ fontSize: 11, padding: "4px 8px", borderRadius: 8 }}
+                        contentStyle={{ fontSize: 11, padding: "6px 10px", borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.10)" }}
                         formatter={(v: number) => [`${v} kg`, "Weight"]}
                         labelFormatter={(l) => new Date(l).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       />
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="weight"
                         stroke="var(--color-primary)"
-                        strokeWidth={2}
-                        dot={{ r: 3, fill: "var(--color-primary)" }}
-                        activeDot={{ r: 4 }}
+                        strokeWidth={2.5}
+                        fill="url(#weightGrad)"
+                        dot={{ r: 3.5, fill: "var(--color-primary)", strokeWidth: 0 }}
+                        activeDot={{ r: 5, fill: "var(--color-primary)", strokeWidth: 2, stroke: "#fff" }}
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
               )}

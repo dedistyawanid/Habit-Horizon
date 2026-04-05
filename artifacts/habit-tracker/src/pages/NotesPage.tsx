@@ -263,7 +263,8 @@ export default function NotesPage() {
                   key={note.id}
                   data-testid={`note-card-${note.id}`}
                   onClick={() => setActiveNoteId(note.id)}
-                  className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-200 cursor-pointer flex flex-col gap-2 relative min-h-[110px]"
+                  className="group bg-white dark:bg-gray-900 p-3.5 transition-all duration-200 cursor-pointer flex flex-col gap-2 relative min-h-[110px]"
+                  style={{ borderRadius: 24, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}
                 >
                   {/* Color accent bar */}
                   <div

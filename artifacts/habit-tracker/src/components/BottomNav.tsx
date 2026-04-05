@@ -19,7 +19,7 @@ export function BottomNav({ bouncing }: BottomNavProps) {
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 safe-area-inset-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl safe-area-inset-bottom" style={{ boxShadow: "0 -4px 24px rgba(0,0,0,0.07)" }}>
       <div className="flex items-stretch max-w-lg mx-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = location === href;

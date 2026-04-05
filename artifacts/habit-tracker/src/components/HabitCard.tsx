@@ -117,7 +117,8 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
         )}
         <div
           data-testid={`habit-card-${habit.id}`}
-          className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-all duration-200"
+          className="bg-white dark:bg-gray-900 px-4 py-3 flex items-center gap-3 transition-all duration-200"
+          style={{ borderRadius: 20, boxShadow: "0 2px 14px rgba(0,0,0,0.06)" }}
         >
           <button
             data-testid={`checkin-btn-${habit.id}`}
@@ -178,7 +179,8 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
       )}
       <div
         data-testid={`habit-card-${habit.id}`}
-        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 hover:shadow-md transition-all duration-200"
+        className="bg-white dark:bg-gray-900 p-4 transition-all duration-200"
+        style={{ borderRadius: 24, boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}
       >
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2.5 flex-1 min-w-0">

@@ -75,8 +75,8 @@
   --elevate-1: rgba(0,0,0, .02);
   --elevate-2: rgba(0,0,0, .06);
 
-  /* Off-white / very light gray background */
-  --background: 60 10% 97%;
+  /* #F2F2F7 — very light cool gray */
+  --background: 240 14% 96%;
   --foreground: 220 20% 18%;
 
   --border: 120 8% 88%;
@@ -125,7 +125,7 @@
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
-  --radius: .75rem;
+  --radius: 1.25rem;
 
   --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.04);
   --shadow-xs: 0px 2px 4px 0px rgba(0,0,0,0.05);
@@ -218,10 +218,29 @@
 
 @layer base {
   * {
-    @apply border-border;
+    box-sizing: border-box;
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .app-card {
+    @apply bg-white dark:bg-gray-900;
+    border-radius: 24px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .app-card:hover {
+    box-shadow: 0 6px 28px rgba(0,0,0,0.10);
+  }
+  .glass-header {
+    background: rgba(242, 242, 247, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .dark .glass-header {
+    background: rgba(15, 15, 20, 0.85);
   }
 }
 
