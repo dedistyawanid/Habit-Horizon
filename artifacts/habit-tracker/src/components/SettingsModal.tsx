@@ -228,7 +228,10 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-xl w-full max-h-[90vh] overflow-y-auto border-0 bg-white/[0.92] dark:bg-[#1c1a18]/[0.92] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
+        style={{ borderRadius: 28, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 0 0 0px transparent" }}
+      >
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Settings</DialogTitle>
         </DialogHeader>
