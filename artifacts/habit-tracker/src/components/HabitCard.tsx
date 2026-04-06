@@ -60,11 +60,11 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
   function handleDeleteClick() {
     if (confirmDelete) {
       onDelete(habit.id);
+      setMenuOpen(false);
     } else {
       setConfirmDelete(true);
-      setTimeout(() => setConfirmDelete(false), 3000);
+      setTimeout(() => setConfirmDelete(false), 4000);
     }
-    setMenuOpen(false);
   }
 
   useEffect(() => {
@@ -80,29 +80,36 @@ export function HabitCard({ habit, view, onEdit, onDelete, onRecap, onNotes }: H
   const MenuDropdown = () => (
     <div
       ref={menuRef}
-      className={cn(
-        "absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-1 min-w-[140px]",
-        view === "list" ? "right-0" : "right-0"
-      )}
+      className="absolute right-0 bottom-full mb-1 z-[60] bg-white dark:bg-[#211f1d] rounded-2xl shadow-xl border border-gray-100 dark:border-white/10 py-1.5 min-w-[152px]"
+      style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)" }}
     >
       {[
-        { icon: StickyNote, label: "Notes", action: () => { onNotes(habit); setMenuOpen(false); }, className: "text-gray-700 dark:text-gray-300" },
-        { icon: CalendarDays, label: "History", action: () => { onRecap(habit); setMenuOpen(false); }, className: "text-gray-700 dark:text-gray-300" },
-        { icon: Pencil, label: "Edit", action: () => { onEdit(habit); setMenuOpen(false); }, className: "text-gray-700 dark:text-gray-300" },
-        { icon: Trash2, label: confirmDelete ? "Confirm?" : "Delete", action: handleDeleteClick, className: confirmDelete ? "text-red-500" : "text-gray-700 dark:text-gray-300" },
+        { icon: StickyNote,  label: "Notes",   action: () => { onNotes(habit); setMenuOpen(false); },   className: "text-gray-700 dark:text-gray-300" },
+        { icon: CalendarDays, label: "History", action: () => { onRecap(habit); setMenuOpen(false); },   className: "text-gray-700 dark:text-gray-300" },
+        { icon: Pencil,      label: "Edit",    action: () => { onEdit(habit); setMenuOpen(false); },     className: "text-gray-700 dark:text-gray-300" },
       ].map(({ icon: Icon, label, action, className }) => (
         <button
           key={label}
           onClick={action}
-          className={cn(
-            "w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
-            className
-          )}
+          className={cn("w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors", className)}
         >
           <Icon className="w-3.5 h-3.5 shrink-0" />
           {label}
         </button>
       ))}
+      <div className="mx-2 my-1 h-px bg-gray-100 dark:bg-white/8" />
+      <button
+        onClick={handleDeleteClick}
+        className={cn(
+          "w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors rounded-b-xl",
+          confirmDelete
+            ? "bg-[#ac6e5c]/10 text-[#ac6e5c] font-semibold"
+            : "text-[#ac6e5c] hover:bg-[#ac6e5c]/8"
+        )}
+      >
+        <Trash2 className="w-3.5 h-3.5 shrink-0" />
+        {confirmDelete ? "Tap again to confirm" : "Delete"}
+      </button>
     </div>
   );
 
