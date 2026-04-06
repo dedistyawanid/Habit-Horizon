@@ -62,7 +62,7 @@ export function exportAsCSV(
     for (const c of checkIns) {
       const habit = habits.find((h) => h.id === c.habitId);
       if (!habit) continue;
-      rows.push([c.habitId, q(habit.name), habit.category, habit.frequency, c.date, q(c.notes), c.completedAt].join(","));
+      rows.push([c.habitId, q(habit.name), habit.category, habit.frequency, c.date, q(c.notes), formatLocalTs(c.completedAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -71,7 +71,7 @@ export function exportAsCSV(
   if (transactions.length > 0) {
     const rows = ["FINANCE TRANSACTIONS", "id,title,type,amount,category,account_source,date,notes,created_at"];
     for (const t of transactions) {
-      rows.push([t.id, q(t.title), t.type, t.amount, q(t.category), q(t.accountSource), t.date, q(t.notes), t.createdAt].join(","));
+      rows.push([t.id, q(t.title), t.type, t.amount, q(t.category), q(t.accountSource), t.date, q(t.notes), formatLocalTs(t.createdAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -98,7 +98,7 @@ export function exportAsCSV(
   if (nutritionLog.length > 0) {
     const rows = ["NUTRITION LOG", "id,date,name,calories,protein_g,carbs_g,created_at"];
     for (const n of nutritionLog) {
-      rows.push([n.id, n.date, q(n.name), n.calories, n.protein, n.carbs, n.createdAt].join(","));
+      rows.push([n.id, n.date, q(n.name), n.calories, n.protein, n.carbs, formatLocalTs(n.createdAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -107,7 +107,7 @@ export function exportAsCSV(
   if (sleepLog.length > 0) {
     const rows = ["SLEEP LOG", "id,date,hours,minutes,quality_1_to_5,created_at"];
     for (const s of sleepLog) {
-      rows.push([s.id, s.date, s.hours, s.minutes, s.quality, s.createdAt].join(","));
+      rows.push([s.id, s.date, s.hours, s.minutes, s.quality, formatLocalTs(s.createdAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -116,7 +116,7 @@ export function exportAsCSV(
   if (notes.length > 0) {
     const rows = ["NOTES", "id,title,category,content,url,pinned,reminder_date,created_at,updated_at"];
     for (const n of notes) {
-      rows.push([n.id, q(n.title), n.category, q(n.content), q(n.url), n.pinned ? "true" : "false", n.reminderDate ?? "", n.createdAt, n.updatedAt].join(","));
+      rows.push([n.id, q(n.title), n.category, q(n.content), q(n.url), n.pinned ? "true" : "false", n.reminderDate ?? "", formatLocalTs(n.createdAt), formatLocalTs(n.updatedAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -125,7 +125,7 @@ export function exportAsCSV(
   if (wishlist.length > 0) {
     const rows = ["WISHLIST", "id,title,target_amount,current_amount,created_at"];
     for (const w of wishlist) {
-      rows.push([w.id, q(w.title), w.targetAmount, w.currentAmount, w.createdAt].join(","));
+      rows.push([w.id, q(w.title), w.targetAmount, w.currentAmount, formatLocalTs(w.createdAt)].join(","));
     }
     sections.push(rows.join("\n"));
   }
@@ -178,6 +178,21 @@ export function parseImportFile(json: string): ImportResult {
     };
   } catch {
     return { success: false, message: "Failed to parse file. Please use a valid JSON backup." };
+  }
+}
+
+/** Convert a UTC ISO timestamp to a readable local datetime string, e.g. "2026-04-05 15:25:17" */
+function formatLocalTs(iso: string | undefined | null): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return (
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+      `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    );
+  } catch {
+    return iso ?? "";
   }
 }
 
