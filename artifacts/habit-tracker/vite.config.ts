@@ -118,6 +118,26 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    target: "esnext",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react":    ["react", "react-dom"],
+          "vendor-recharts": ["recharts"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-radix": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-label",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-switch",
+          ],
+        },
+      },
+    },
   },
   server: {
     port,

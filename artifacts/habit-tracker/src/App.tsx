@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,12 +14,13 @@ import { SyncIndicator } from "@/components/SyncIndicator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useSwipeNav } from "@/hooks/useSwipeNav";
 import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/Dashboard";
-import NotesPage from "@/pages/NotesPage";
-import InsightsPage from "@/pages/InsightsPage";
-import FinancePage from "@/pages/FinancePage";
-import HealthPage from "@/pages/HealthPage";
-import LoginPage from "@/pages/LoginPage";
+
+const Dashboard    = lazy(() => import("@/pages/Dashboard"));
+const NotesPage    = lazy(() => import("@/pages/NotesPage"));
+const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
+const FinancePage  = lazy(() => import("@/pages/FinancePage"));
+const HealthPage   = lazy(() => import("@/pages/HealthPage"));
+const LoginPage    = lazy(() => import("@/pages/LoginPage"));
 import { Settings, RefreshCw, Rocket } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
@@ -90,6 +91,14 @@ function SyncProgressBar({ visible }: { visible: boolean }) {
   );
 }
 
+const PAGE_TITLES: Record<string, string> = {
+  "/":         "Dashboard | Horizon Hub",
+  "/insights": "Insights | Horizon Hub",
+  "/finance":  "Finance | Horizon Hub",
+  "/health":   "Health | Horizon Hub",
+  "/notes":    "Notes | Horizon Hub",
+};
+
 function AppShell() {
   const [settingsOpen,       setSettingsOpen]       = useState(false);
   const [checkinModalOpen,   setCheckinModalOpen]   = useState(false);
@@ -116,6 +125,13 @@ function AppShell() {
   }, []);
   const { onTouchStart, onTouchEnd, bouncingTab } = useSwipeNav();
   const [location, setLocation] = useLocation();
+
+  /* Update document title on every route change */
+  useEffect(() => {
+    const path = location.split("?")[0];
+    document.title = PAGE_TITLES[path] ?? "Horizon Hub | Your Minimalist Life OS";
+  }, [location]);
+
   const { toast } = useToast();
   const { triggerSync, status: syncStatus } = useSyncStatus();
   const { refreshFromCloud, refreshing } = useRefresh();
@@ -153,7 +169,7 @@ function AppShell() {
       <header className="sticky top-0 z-30 glass-header">
         <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
+            <div className="w-7 h-7 rounded-2xl bg-primary flex items-center justify-center shadow-sm" aria-hidden="true">
               <Rocket className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="font-bold text-sm text-gray-800 dark:text-gray-100 tracking-tight">Horizon Hub</span>
@@ -183,21 +199,30 @@ function AppShell() {
       </header>
 
       {/* Page content */}
-      <div
+      <main
+        id="page-content"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
         className="select-none"
         style={{ touchAction: "pan-y" }}
       >
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/insights" component={InsightsPage} />
-          <Route path="/finance" component={FinancePage} />
-          <Route path="/health" component={HealthPage} />
-          <Route path="/notes" component={NotesPage} />
-          <Route component={NotFound} />
-        </Switch>
-      </div>
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-20" aria-live="polite" aria-busy="true">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" role="status">
+              <span className="sr-only">Loading page…</span>
+            </div>
+          </div>
+        }>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/insights" component={InsightsPage} />
+            <Route path="/finance" component={FinancePage} />
+            <Route path="/health" component={HealthPage} />
+            <Route path="/notes" component={NotesPage} />
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
+      </main>
 
       <BottomNav bouncing={bouncingTab} />
 

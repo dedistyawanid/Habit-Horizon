@@ -609,6 +609,7 @@ export default function FinancePage() {
                         <img
                           src={item.imageUrl}
                           alt={item.title}
+                          loading="lazy"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                           className="w-full h-full object-cover"
                         />
@@ -760,7 +761,7 @@ export default function FinancePage() {
               />
               {wishForm.imageUrl && (
                 <div className="w-full h-28 rounded-xl overflow-hidden bg-muted">
-                  <img src={wishForm.imageUrl} alt="preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  <img src={wishForm.imageUrl} alt="Wishlist item preview" loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
               )}
             </div>

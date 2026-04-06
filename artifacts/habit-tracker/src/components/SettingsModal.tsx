@@ -249,7 +249,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             <div className="flex flex-col items-center gap-3">
               <div className="relative">
                 {settings.profile.avatarUrl ? (
-                  <img src={settings.profile.avatarUrl} alt="Avatar" className="w-20 h-20 rounded-2xl object-cover" />
+                  <img src={settings.profile.avatarUrl} alt={`Profile photo for ${settings.profile.fullName || "user"}`} className="w-20 h-20 rounded-2xl object-cover" loading="lazy" />
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
                     {initials}
