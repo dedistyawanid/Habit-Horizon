@@ -104,12 +104,12 @@ function fmtDate(d: string) {
 export default function HealthPage() {
   const {
     settings,
-    weightLog, addWeightEntry, deleteWeightEntry, latestWeight,
-    activityLog, addActivityEntry, deleteActivityEntry,
+    weightLog, addWeightEntry, deleteWeightEntry, updateWeightEntry, latestWeight,
+    activityLog, addActivityEntry, deleteActivityEntry, updateActivityEntry,
     habitsWithStats, isCheckedInToday, toggleCheckIn,
   } = useApp();
-  const { entries: nutritionLog, targets, addEntry: addMeal, deleteEntry: deleteMeal, updateTargets } = useNutritionLog();
-  const { entries: sleepLog, targetHours: sleepTarget, addEntry: addSleep, deleteEntry: deleteSleep, setTargetHours: setSleepTarget } = useSleepLog();
+  const { entries: nutritionLog, targets, addEntry: addMeal, deleteEntry: deleteMeal, updateEntry: updateMeal, updateTargets } = useNutritionLog();
+  const { entries: sleepLog, targetHours: sleepTarget, addEntry: addSleep, deleteEntry: deleteSleep, updateEntry: updateSleepEntry, setTargetHours: setSleepTarget } = useSleepLog();
   const { toast } = useToast();
 
   /* UI state — subTab persisted across bottom-nav switches */
@@ -172,6 +172,12 @@ export default function HealthPage() {
   const [nutrCalGoal,  setNutrCalGoal]          = useState("");
   const [nutrProtGoal, setNutrProtGoal]         = useState("");
   const [nutrCarbsGoal, setNutrCarbsGoal]       = useState("");
+
+  /* Edit state — id of entry being edited (null = add mode) */
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [editingMealId,     setEditingMealId]     = useState<string | null>(null);
+  const [editingWeightId,   setEditingWeightId]   = useState<string | null>(null);
+  const [editingSleepId,    setEditingSleepId]    = useState<string | null>(null);
 
   const todayKey = localToday();
 
@@ -290,6 +296,44 @@ export default function HealthPage() {
     return +(total / weekEntries.length).toFixed(2);
   }, [sleepLog]);
 
+  /* ─── Edit openers ─── */
+  function openEditActivity(entry: typeof activityLog[0]) {
+    setEditingActivityId(entry.id);
+    setActType(entry.type);
+    setDuration(String(entry.durationMin ?? ""));
+    setDistance(String(entry.distanceKm ?? ""));
+    setElevation(String(entry.elevationGain ?? ""));
+    setRunType((entry.runType as "Trail" | "Road") ?? "Road");
+    setActLocation(entry.location ?? "");
+    setActDate(entry.date);
+    setShowActivity(true);
+  }
+
+  function openEditMeal(meal: typeof nutritionLog[0]) {
+    setEditingMealId(meal.id);
+    setMealName(meal.name);
+    setMealCal(String(meal.calories));
+    setMealProt(String(meal.protein));
+    setMealCarbs(String(meal.carbs));
+    setMealDate(meal.date);
+    setShowMeal(true);
+  }
+
+  function openEditWeight(entry: typeof weightLog[0]) {
+    setEditingWeightId(entry.id);
+    setWeightInput(String(entry.weight));
+    setWeightDate(entry.date);
+    setShowWeight(true);
+  }
+
+  function openEditSleep(entry: typeof sleepLog[0]) {
+    setEditingSleepId(entry.id);
+    setSleepHoursInput(String(entry.hours));
+    setSleepMinsInput(String(entry.minutes));
+    setSleepQuality(entry.quality);
+    setSleepDate(entry.date);
+  }
+
   /* ─── Handlers ─── */
   function handleLogSleep() {
     const h = parseInt(sleepHoursInput) || 0;
@@ -297,12 +341,18 @@ export default function HealthPage() {
     if (h === 0 && m === 0) {
       toast({ title: "Duration required", variant: "destructive" }); return;
     }
-    addSleep({ date: sleepDate, hours: h, minutes: m, quality: sleepQuality });
-    const hits = habitsWithStats.filter((hab) => SLEEP_KEYWORDS.some((kw) => hab.name.toLowerCase().includes(kw)));
-    let auto = 0;
-    hits.forEach((hab) => { if (!isCheckedInToday(hab.id)) { toggleCheckIn(hab.id); auto++; } });
+    if (editingSleepId) {
+      updateSleepEntry(editingSleepId, { hours: h, minutes: m, quality: sleepQuality, date: sleepDate });
+      setEditingSleepId(null);
+      toast({ title: "Sleep updated", description: `${h}h ${m > 0 ? m + "m" : ""} saved.` });
+    } else {
+      addSleep({ date: sleepDate, hours: h, minutes: m, quality: sleepQuality });
+      const hits = habitsWithStats.filter((hab) => SLEEP_KEYWORDS.some((kw) => hab.name.toLowerCase().includes(kw)));
+      let auto = 0;
+      hits.forEach((hab) => { if (!isCheckedInToday(hab.id)) { toggleCheckIn(hab.id); auto++; } });
+      toast({ title: "Sleep logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${h}h ${m > 0 ? m + "m" : ""} recorded.` });
+    }
     setSleepHoursInput(""); setSleepMinsInput(""); setSleepQuality(3);
-    toast({ title: "Sleep logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${h}h ${m > 0 ? m + "m" : ""} recorded.` });
   }
 
   function handleLogActivity() {
@@ -316,32 +366,45 @@ export default function HealthPage() {
         toast({ title: "Distance required", variant: "destructive" }); return;
       }
     }
-    addActivityEntry({
+    const updates = {
       date: actDate, type: actType, durationMin: dur,
       distanceKm:    actType === "Running" ? parseFloat(distance)  : undefined,
       elevationGain: actType === "Running" && elevation ? parseFloat(elevation) : undefined,
       runType:       actType === "Running" ? runType : undefined,
       location:      actLocation.trim() || undefined,
-    });
-    const hits = habitsWithStats.filter((h) => EXERCISE_KEYWORDS.some((kw) => h.name.toLowerCase().includes(kw)));
-    let auto = 0;
-    hits.forEach((h) => { if (!isCheckedInToday(h.id)) { toggleCheckIn(h.id); auto++; } });
+    };
+    if (editingActivityId) {
+      updateActivityEntry(editingActivityId, updates);
+      setEditingActivityId(null);
+      toast({ title: "Activity updated", description: `${actType} saved.` });
+    } else {
+      addActivityEntry(updates);
+      const hits = habitsWithStats.filter((h) => EXERCISE_KEYWORDS.some((kw) => h.name.toLowerCase().includes(kw)));
+      let auto = 0;
+      hits.forEach((h) => { if (!isCheckedInToday(h.id)) { toggleCheckIn(h.id); auto++; } });
+      toast({ title: "Activity logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${actType} saved.` });
+    }
     setDuration(""); setDistance(""); setElevation(""); setActLocation("");
     setShowActivity(false);
-    toast({ title: "Activity logged!", description: auto > 0 ? `${auto} habit${auto > 1 ? "s" : ""} auto-checked ✓` : `${actType} saved.` });
   }
 
   function handleLogMeal() {
-    const cal  = parseFloat(mealCal);
-    const prot = parseFloat(mealProt);
+    const cal   = parseFloat(mealCal);
+    const prot  = parseFloat(mealProt);
     const carbs = parseFloat(mealCarbs);
     if (!mealName.trim()) { toast({ title: "Meal name required", variant: "destructive" }); return; }
     if (isNaN(cal) || cal < 0) { toast({ title: "Invalid calories", variant: "destructive" }); return; }
-    addMeal({ date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+    if (editingMealId) {
+      updateMeal(editingMealId, { date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+      setEditingMealId(null);
+      toast({ title: "Meal updated", description: `${mealName.trim()} — ${cal} kcal` });
+    } else {
+      addMeal({ date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+      toast({ title: "Meal logged!", description: `${mealName.trim()} — ${cal} kcal` });
+    }
     setMealName(""); setMealCal(""); setMealProt(""); setMealCarbs("");
     setMealDate(todayKey);
     setShowMeal(false);
-    toast({ title: "Meal logged!", description: `${mealName.trim()} — ${cal} kcal` });
   }
 
   function handleLogWeight() {
@@ -349,11 +412,17 @@ export default function HealthPage() {
     if (isNaN(val) || val <= 0 || val > 500) {
       toast({ title: "Invalid weight", variant: "destructive" }); return;
     }
-    addWeightEntry(val, undefined, weightDate);
+    if (editingWeightId) {
+      updateWeightEntry(editingWeightId, val, weightDate);
+      setEditingWeightId(null);
+      toast({ title: "Weight updated", description: `${val} kg saved.` });
+    } else {
+      addWeightEntry(val, undefined, weightDate);
+      const isToday = weightDate === localToday();
+      toast({ title: "Weight logged", description: `${val} kg recorded for ${isToday ? "today" : weightDate}.` });
+    }
     setWeightInput("");
     setShowWeight(false);
-    const isToday = weightDate === localToday();
-    toast({ title: "Weight logged", description: `${val} kg recorded for ${isToday ? "today" : weightDate}.` });
   }
 
   function openFabAction(action: "activity" | "meal" | "weight") {
@@ -810,8 +879,11 @@ export default function HealthPage() {
                           </div>
                           <p className="text-xs text-muted-foreground truncate mt-0.5">{entry.type}{metricSecondary ? ` · ${metricSecondary}` : ""}</p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          <button onClick={() => openEditActivity(entry)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-primary active:text-primary transition-colors">
+                            <Pencil className="w-3 h-3" />
+                          </button>
                           <button onClick={() => deleteActivityEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -980,8 +1052,11 @@ export default function HealthPage() {
                         {meal.carbs   > 0  && <span className="text-xs text-muted-foreground">{meal.carbs}g carbs</span>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
                       <span className="text-xs text-muted-foreground">{new Date(meal.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      <button onClick={() => openEditMeal(meal)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-primary active:text-primary transition-colors">
+                        <Pencil className="w-3 h-3" />
+                      </button>
                       <button onClick={() => deleteMeal(meal.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -1136,8 +1211,11 @@ export default function HealthPage() {
                       </div>
                       <span className="font-semibold text-sm text-foreground">{entry.weight} kg</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      <button onClick={() => openEditWeight(entry)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-primary active:text-primary transition-colors">
+                        <Pencil className="w-3 h-3" />
+                      </button>
                       <button onClick={() => deleteWeightEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -1160,7 +1238,13 @@ export default function HealthPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Moon className="w-4 h-4" style={{ color: "#5c7c6c" }} />
-                  <p className="text-sm font-bold text-foreground">Log Sleep</p>
+                  <p className="text-sm font-bold text-foreground">{editingSleepId ? "Edit Sleep" : "Log Sleep"}</p>
+                  {editingSleepId && (
+                    <button onClick={() => { setEditingSleepId(null); setSleepHoursInput(""); setSleepMinsInput(""); setSleepQuality(3); }}
+                      className="ml-1 text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded-md bg-accent transition-colors">
+                      × Cancel edit
+                    </button>
+                  )}
                 </div>
                 <button
                   onClick={() => { setSleepTargetInput(String(sleepTarget)); setShowSleepTarget(true); }}
@@ -1252,9 +1336,9 @@ export default function HealthPage() {
                 className="w-full gap-1.5"
                 style={{ background: "#5c7c6c" }}
               >
-                <Moon className="w-4 h-4" /> Log Sleep
+                <Moon className="w-4 h-4" /> {editingSleepId ? "Update Sleep" : "Log Sleep"}
               </Button>
-              {todaySleep && (
+              {!editingSleepId && todaySleep && (
                 <p className="text-[10px] text-muted-foreground text-center -mt-1">
                   Today already logged: <span className="font-semibold" style={{ color: "#5c7c6c" }}>{todaySleep.hours}h {todaySleep.minutes > 0 ? `${todaySleep.minutes}m` : ""}</span> — tap Log to overwrite
                 </p>
@@ -1463,8 +1547,11 @@ export default function HealthPage() {
                           <span className="text-[10px] text-muted-foreground ml-1">{["","Poor","Fair","OK","Good","Great"][entry.quality]}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1 shrink-0">
                         <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                        <button onClick={() => openEditSleep(entry)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-primary active:text-primary transition-colors">
+                          <Pencil className="w-3 h-3" />
+                        </button>
                         <button onClick={() => deleteSleep(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -1485,7 +1572,7 @@ export default function HealthPage() {
       {/* ══════════════ MODALS ══════════════ */}
 
       {/* Activity modal */}
-      <BottomModal open={showActivity} onClose={() => setShowActivity(false)} title="Log Activity" sub="Track your workout">
+      <BottomModal open={showActivity} onClose={() => { setShowActivity(false); setEditingActivityId(null); }} title={editingActivityId ? "Edit Activity" : "Log Activity"} sub={editingActivityId ? "Update this entry" : "Track your workout"}>
         <div className="space-y-3">
           <div className="flex gap-2">
             {PRIMARY_TYPES.map(({ id, label, icon: Icon, color }) => (
@@ -1537,13 +1624,15 @@ export default function HealthPage() {
           <p className="text-[10px] text-muted-foreground text-center">Logging auto-checks exercise habits for today</p>
         </div>
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" onClick={() => setShowActivity(false)} className="flex-1">Cancel</Button>
-          <Button onClick={handleLogActivity} className="flex-1 gap-1.5"><Plus className="w-4 h-4" />Log {actType}</Button>
+          <Button variant="outline" onClick={() => { setShowActivity(false); setEditingActivityId(null); }} className="flex-1">Cancel</Button>
+          <Button onClick={handleLogActivity} className="flex-1 gap-1.5">
+            {editingActivityId ? <><Check className="w-4 h-4" />Update</> : <><Plus className="w-4 h-4" />Log {actType}</>}
+          </Button>
         </div>
       </BottomModal>
 
       {/* Meal modal */}
-      <BottomModal open={showMeal} onClose={() => setShowMeal(false)} title="Log Meal" sub="Track calories & macros">
+      <BottomModal open={showMeal} onClose={() => { setShowMeal(false); setEditingMealId(null); }} title={editingMealId ? "Edit Meal" : "Log Meal"} sub={editingMealId ? "Update this entry" : "Track calories & macros"}>
         <div className="space-y-3">
           <div>
             <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Meal Name *</label>
@@ -1574,13 +1663,15 @@ export default function HealthPage() {
           </div>
         </div>
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" onClick={() => setShowMeal(false)} className="flex-1">Cancel</Button>
-          <Button onClick={handleLogMeal} className="flex-1 gap-1.5"><Plus className="w-4 h-4" />Add Meal</Button>
+          <Button variant="outline" onClick={() => { setShowMeal(false); setEditingMealId(null); }} className="flex-1">Cancel</Button>
+          <Button onClick={handleLogMeal} className="flex-1 gap-1.5">
+            {editingMealId ? <><Check className="w-4 h-4" />Update</> : <><Plus className="w-4 h-4" />Add Meal</>}
+          </Button>
         </div>
       </BottomModal>
 
       {/* Weight modal */}
-      <BottomModal open={showWeight} onClose={() => setShowWeight(false)} title="Log Weight" sub="Track your body weight">
+      <BottomModal open={showWeight} onClose={() => { setShowWeight(false); setEditingWeightId(null); }} title={editingWeightId ? "Edit Weight" : "Log Weight"} sub={editingWeightId ? "Update this entry" : "Track your body weight"}>
         <div className="space-y-3">
           <div>
             <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Weight (kg) *</label>
@@ -1596,8 +1687,10 @@ export default function HealthPage() {
           </div>
         </div>
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" onClick={() => setShowWeight(false)} className="flex-1">Cancel</Button>
-          <Button onClick={handleLogWeight} className="flex-1 gap-1.5"><Check className="w-4 h-4" />Log Weight</Button>
+          <Button variant="outline" onClick={() => { setShowWeight(false); setEditingWeightId(null); }} className="flex-1">Cancel</Button>
+          <Button onClick={handleLogWeight} className="flex-1 gap-1.5">
+            {editingWeightId ? <><Check className="w-4 h-4" />Update</> : <><Check className="w-4 h-4" />Log Weight</>}
+          </Button>
         </div>
       </BottomModal>
 

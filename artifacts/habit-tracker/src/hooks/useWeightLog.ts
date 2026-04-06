@@ -43,7 +43,17 @@ export function useWeightLog() {
     deleteWeight(id);
   }, []);
 
+  const updateWeightEntry = useCallback((id: string, weight: number, date?: string) => {
+    setWeightLog((prev) => {
+      const entry = prev.find((e) => e.id === id);
+      if (!entry) return prev;
+      const updated = { ...entry, weight, date: date ?? entry.date };
+      syncWeight(updated);
+      return prev.map((e) => e.id === id ? updated : e);
+    });
+  }, []);
+
   const latestWeight = weightLog.length > 0 ? weightLog[weightLog.length - 1].weight : null;
 
-  return { weightLog, addWeightEntry, deleteWeightEntry, latestWeight };
+  return { weightLog, addWeightEntry, deleteWeightEntry, updateWeightEntry, latestWeight };
 }

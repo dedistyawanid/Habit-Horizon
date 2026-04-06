@@ -48,9 +48,18 @@ export function useSleepLog() {
     deleteSleep(id);
   }
 
+  function updateEntry(id: string, updates: Partial<Omit<SleepEntry, "id" | "createdAt">>) {
+    setEntries((prev) => {
+      const updated = prev.map((e) => e.id === id ? { ...e, ...updates } : e);
+      const found = updated.find((e) => e.id === id);
+      if (found) syncSleep(found);
+      return updated;
+    });
+  }
+
   function setTargetHours(h: number) {
     setTargetHoursState(h);
   }
 
-  return { entries, targetHours, addEntry, deleteEntry, setTargetHours };
+  return { entries, targetHours, addEntry, deleteEntry, updateEntry, setTargetHours };
 }

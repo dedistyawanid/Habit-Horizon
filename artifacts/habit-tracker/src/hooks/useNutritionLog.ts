@@ -89,9 +89,19 @@ export function useNutritionLog() {
     deleteMeal(id);
   }
 
+  function updateEntry(id: string, updates: Partial<Omit<NutritionEntry, "id" | "createdAt">>) {
+    setEntries((prev) => {
+      const updated = prev.map((e) => e.id === id ? { ...e, ...updates } : e);
+      const found = updated.find((e) => e.id === id);
+      if (found) syncMeal(found);
+      return updated;
+    });
+    setLocalDirty(true);
+  }
+
   function updateTargets(t: NutritionTargets) {
     setTargetsState(t);
   }
 
-  return { entries, targets, addEntry, deleteEntry, updateTargets };
+  return { entries, targets, addEntry, deleteEntry, updateEntry, updateTargets };
 }

@@ -70,11 +70,13 @@ interface AppContextType {
   weightLog: WeightEntry[];
   addWeightEntry: (weight: number, notes?: string, date?: string) => void;
   deleteWeightEntry: (id: string) => void;
+  updateWeightEntry: (id: string, weight: number, date?: string) => void;
   latestWeight: number | null;
   // Activity log
   activityLog: ActivityEntry[];
   addActivityEntry: (entry: Omit<ActivityEntry, "id" | "createdAt">) => ActivityEntry;
   deleteActivityEntry: (id: string) => void;
+  updateActivityEntry: (id: string, updates: Partial<Omit<ActivityEntry, "id" | "createdAt">>) => void;
   // Import
   importData: (data: {
     habits?: Habit[];

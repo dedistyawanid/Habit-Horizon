@@ -46,5 +46,14 @@ export function useActivityLog() {
     deleteActivity(id);
   }, []);
 
-  return { activityLog, addActivityEntry, deleteActivityEntry };
+  const updateActivityEntry = useCallback((id: string, updates: Partial<Omit<ActivityEntry, "id" | "createdAt">>) => {
+    setActivityLog((prev) => {
+      const updated = prev.map((e) => e.id === id ? { ...e, ...updates } : e);
+      const found = updated.find((e) => e.id === id);
+      if (found) syncActivity(found);
+      return updated;
+    });
+  }, []);
+
+  return { activityLog, addActivityEntry, deleteActivityEntry, updateActivityEntry };
 }
