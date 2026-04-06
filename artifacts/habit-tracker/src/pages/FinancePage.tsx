@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, type CSSProperties } from "react";
+import { useSessionState } from "@/hooks/useSessionState";
 import { useApp } from "@/context/AppContext";
 import { getTodayKey } from "@/lib/dateUtils";
 import { Transaction } from "@/types/finance";
@@ -77,7 +78,7 @@ export default function FinancePage() {
   const [revenueRange, setRevenueRange] = useState<"week" | "month" | "annual">("month");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useSessionState("hh_draft_finance_form", EMPTY_FORM);
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "highest" | "lowest">("newest");
@@ -229,7 +230,7 @@ export default function FinancePage() {
               <Settings2 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => { setForm(EMPTY_FORM); setEditId(null); setShowForm(true); }}
+              onClick={() => { setEditId(null); setShowForm(true); }}
               className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-2 rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -786,7 +787,7 @@ export default function FinancePage() {
               <h3 className="font-semibold text-foreground">
                 {editId ? "Edit Transaction" : "New Transaction"}
               </h3>
-              <button onClick={() => { setShowForm(false); setEditId(null); }} className="p-1 rounded-lg text-muted-foreground hover:text-muted-foreground">
+              <button onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }} className="p-1 rounded-lg text-muted-foreground hover:text-muted-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>

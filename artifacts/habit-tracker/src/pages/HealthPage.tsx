@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, type CSSProperties } from "react";
+import { useSessionState } from "@/hooks/useSessionState";
 import {
   Scale, Dumbbell, Activity, Trash2, Check, Plus, MapPin, Timer,
   Wind, Heart, Zap, TrendingUp, Mountain, Navigation2, Utensils,
@@ -111,8 +112,8 @@ export default function HealthPage() {
   const { entries: sleepLog, targetHours: sleepTarget, addEntry: addSleep, deleteEntry: deleteSleep, setTargetHours: setSleepTarget } = useSleepLog();
   const { toast } = useToast();
 
-  /* UI state */
-  const [subTab, setSubTab]       = useState<SubTab>("activity");
+  /* UI state — subTab persisted across bottom-nav switches */
+  const [subTab, setSubTab]       = useSessionState<SubTab>("hh_health_subtab", "activity");
   const [period, setPeriod]       = useState<Period>("month");
   const [actRange, setActRange]   = useState<ActRange>("30d");
   const [customStart, setCustomStart] = useState("");
@@ -122,31 +123,31 @@ export default function HealthPage() {
   const [showMeal, setShowMeal]   = useState(false);
   const [showWeight, setShowWeight] = useState(false);
 
-  /* Activity form */
-  const [actType, setActType]     = useState("Running");
-  const [duration, setDuration]   = useState("");
-  const [distance, setDistance]   = useState("");
-  const [elevation, setElevation] = useState("");
-  const [runType, setRunType]     = useState<"Trail"|"Road">("Road");
-  const [actLocation, setActLocation] = useState("");
+  /* Activity form — drafts persist across tab switches */
+  const [actType, setActType]     = useSessionState("hh_draft_act_type", "Running");
+  const [duration, setDuration]   = useSessionState("hh_draft_act_duration", "");
+  const [distance, setDistance]   = useSessionState("hh_draft_act_distance", "");
+  const [elevation, setElevation] = useSessionState("hh_draft_act_elevation", "");
+  const [runType, setRunType]     = useSessionState<"Trail"|"Road">("hh_draft_act_runtype", "Road");
+  const [actLocation, setActLocation] = useSessionState("hh_draft_act_location", "");
   const [actDate,     setActDate]     = useState(() => localToday());
 
-  /* Meal form */
-  const [mealName,  setMealName]  = useState("");
-  const [mealCal,   setMealCal]   = useState("");
-  const [mealProt,  setMealProt]  = useState("");
-  const [mealCarbs, setMealCarbs] = useState("");
+  /* Meal form — drafts persist across tab switches */
+  const [mealName,  setMealName]  = useSessionState("hh_draft_meal_name", "");
+  const [mealCal,   setMealCal]   = useSessionState("hh_draft_meal_cal", "");
+  const [mealProt,  setMealProt]  = useSessionState("hh_draft_meal_prot", "");
+  const [mealCarbs, setMealCarbs] = useSessionState("hh_draft_meal_carbs", "");
   const [mealDate,  setMealDate]  = useState(() => localToday());
 
-  /* Weight form */
-  const [weightInput, setWeightInput] = useState("");
+  /* Weight form — draft persists */
+  const [weightInput, setWeightInput] = useSessionState("hh_draft_weight", "");
   const [weightDate,  setWeightDate]  = useState(() => localToday());
 
-  /* Sleep form */
-  const [sleepHoursInput, setSleepHoursInput]   = useState("");
+  /* Sleep form — drafts persist */
+  const [sleepHoursInput, setSleepHoursInput]   = useSessionState("hh_draft_sleep_h", "");
   const [sleepDate,       setSleepDate]         = useState(() => localToday());
-  const [sleepMinsInput,  setSleepMinsInput]    = useState("");
-  const [sleepQuality, setSleepQuality]         = useState<1|2|3|4|5>(3);
+  const [sleepMinsInput,  setSleepMinsInput]    = useSessionState("hh_draft_sleep_m", "");
+  const [sleepQuality, setSleepQuality]         = useSessionState<1|2|3|4|5>("hh_draft_sleep_q", 3);
   const [showSleepTarget, setShowSleepTarget]   = useState(false);
   const [sleepTargetInput, setSleepTargetInput] = useState("");
 
