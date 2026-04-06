@@ -135,7 +135,15 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     toast({ title: "Export complete", description: "Full backup downloaded." });
   }
   function handleExportCSV() {
-    exportAsCSV(habits, checkIns);
+    const nutritionLog = safeJson<NutritionEntry[]>("dedi_nutrition_log", []);
+    const sleepLog     = safeJson<SleepEntry[]>("dedi_sleep_log", []);
+    exportAsCSV(
+      habits, checkIns,
+      transactions, notes,
+      weightLog, activityLog,
+      nutritionLog, sleepLog,
+      wishlist,
+    );
     toast({ title: "Export complete", description: "CSV file downloaded." });
   }
   function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
