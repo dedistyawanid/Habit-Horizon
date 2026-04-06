@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type CSSProperties } from "react";
 import {
   Scale, Dumbbell, Activity, Trash2, Check, Plus, MapPin, Timer,
   Wind, Heart, Zap, TrendingUp, Mountain, Navigation2, Utensils,
@@ -102,6 +102,7 @@ function fmtDate(d: string) {
 /* ─── Main Component ─────────────────────────────────── */
 export default function HealthPage() {
   const {
+    settings,
     weightLog, addWeightEntry, deleteWeightEntry, latestWeight,
     activityLog, addActivityEntry, deleteActivityEntry,
     habitsWithStats, isCheckedInToday, toggleCheckIn,
@@ -365,7 +366,34 @@ export default function HealthPage() {
 
   /* ─── Shared chart axis style ─── */
   const axisTick = { fontSize: 9, fill: "#9C8B7A" };
-  const tooltipStyle = { fontSize: 11, borderRadius: 12, border: "1px solid #E5E0D8", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" };
+
+  const isDark = useMemo(() => {
+    if (settings.theme === "dark")  return true;
+    if (settings.theme === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }, [settings.theme]);
+
+  const tooltipStyle = useMemo<CSSProperties>(() => ({
+    fontSize: 11,
+    borderRadius: 16,
+    border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(229,224,216,0.9)",
+    boxShadow: isDark ? "0 6px 28px rgba(0,0,0,0.55)" : "0 4px 20px rgba(0,0,0,0.12)",
+    background: isDark ? "rgba(33,31,29,0.94)" : "rgba(255,255,255,0.94)",
+    backdropFilter: "blur(4px)",
+    WebkitBackdropFilter: "blur(4px)",
+    color: isDark ? "#e8dfd7" : "#161819",
+    padding: "8px 12px",
+  }), [isDark]);
+
+  const tooltipLabelStyle = useMemo<CSSProperties>(() => ({
+    color: isDark ? "#9C8B7A" : "#7A6B5A",
+    fontWeight: 600,
+    marginBottom: 4,
+  }), [isDark]);
+
+  const tooltipItemStyle = useMemo<CSSProperties>(() => ({
+    color: isDark ? "#5c7c6c" : "#2e4e3e",
+  }), [isDark]);
 
   return (
     <div className="min-h-screen">
@@ -520,6 +548,8 @@ export default function HealthPage() {
                       <YAxis tick={axisTick} tickLine={false} axisLine={false} />
                       <Tooltip
                         contentStyle={tooltipStyle}
+                        labelStyle={tooltipLabelStyle}
+                        itemStyle={tooltipItemStyle}
                         formatter={(v: number, name: string) =>
                           name === "km"
                             ? [`${v} km`, "Distance"]
@@ -545,7 +575,7 @@ export default function HealthPage() {
                     <BarChart data={sessionChartData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                       <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                       <YAxis allowDecimals={false} tick={axisTick} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [v, "Sessions"]} labelFormatter={fmtDate} />
+                      <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} formatter={(v: number) => [v, "Sessions"]} labelFormatter={fmtDate} />
                       <Bar dataKey="count" fill="#5c7c6c" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -901,6 +931,8 @@ export default function HealthPage() {
                     <YAxis tick={axisTick} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={tooltipStyle}
+                      labelStyle={tooltipLabelStyle}
+                      itemStyle={tooltipItemStyle}
                       formatter={(v: number, name: string) =>
                         name === "caloriesNorm" ? [`${Math.round(v * 100)} kcal`, "Calories"] : [`${v}g`, "Protein"]
                       }
@@ -1045,7 +1077,7 @@ export default function HealthPage() {
                     </defs>
                     <XAxis dataKey="date" tickFormatter={fmtDate} tick={axisTick} tickLine={false} axisLine={false} />
                     <YAxis domain={["auto", "auto"]} tick={axisTick} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={tooltipStyle} formatter={(v: number, name: string) => name === "weight" ? [`${v} kg`, "Weight"] : [`${v} kg`, "Goal"]} labelFormatter={fmtDate} />
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} formatter={(v: number, name: string) => name === "weight" ? [`${v} kg`, "Weight"] : [`${v} kg`, "Goal"]} labelFormatter={fmtDate} />
                     <ReferenceLine y={goalWeight} stroke="#E2725B" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: `${goalWeight}kg goal`, position: "insideTopRight", fontSize: 9, fill: "#E2725B" }} />
                     <Area type="monotone" dataKey="weight" stroke="#5c7c6c" strokeWidth={2} fill="url(#bodyGrad)" dot={false} activeDot={{ r: 4, fill: "#5c7c6c", strokeWidth: 0 }} />
                   </ComposedChart>
@@ -1343,6 +1375,8 @@ export default function HealthPage() {
                     />
                     <Tooltip
                       contentStyle={tooltipStyle}
+                      labelStyle={tooltipLabelStyle}
+                      itemStyle={tooltipItemStyle}
                       labelFormatter={fmtDate}
                       formatter={(value: number, name: string) => {
                         if (name === "hours")   return [`${value.toFixed(1)}h`, "Hours slept"];

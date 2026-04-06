@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 import { useApp } from "@/context/AppContext";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -50,7 +50,27 @@ const RANGE_OPTIONS: { value: ChartRange; label: string }[] = [
 ];
 
 export default function InsightsPage() {
-  const { habitsWithStats, checkIns, habits } = useApp();
+  const { settings, habitsWithStats, checkIns, habits } = useApp();
+
+  const isDark = useMemo(() => {
+    if (settings.theme === "dark")  return true;
+    if (settings.theme === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }, [settings.theme]);
+
+  const tooltipStyle = useMemo<CSSProperties>(() => ({
+    fontSize: 11,
+    borderRadius: 16,
+    border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(229,224,216,0.9)",
+    boxShadow: isDark ? "0 6px 28px rgba(0,0,0,0.55)" : "0 4px 20px rgba(0,0,0,0.12)",
+    background: isDark ? "rgba(33,31,29,0.94)" : "rgba(255,255,255,0.94)",
+    backdropFilter: "blur(4px)",
+    WebkitBackdropFilter: "blur(4px)",
+    color: isDark ? "#e8dfd7" : "#161819",
+    padding: "8px 12px",
+  }), [isDark]);
+  const tooltipLabelStyle = useMemo<CSSProperties>(() => ({ color: isDark ? "#9C8B7A" : "#7A6B5A", fontWeight: 600 }), [isDark]);
+  const tooltipItemStyle  = useMemo<CSSProperties>(() => ({ color: isDark ? "#5c7c6c" : "#2e4e3e" }), [isDark]);
   const [selectedHabit, setSelectedHabit] = useState<string | null>(null);
   const [chartRange, setChartRange] = useState<ChartRange>("30d");
 
@@ -182,7 +202,7 @@ export default function InsightsPage() {
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={chartRange === "30d" ? 4 : 0} />
               <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 9 }} />
-              <Tooltip formatter={(v) => [`${v}%`, "Completion"]} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+              <Tooltip formatter={(v) => [`${v}%`, "Completion"]} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
               <Line type="monotone" dataKey="completion" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -200,7 +220,7 @@ export default function InsightsPage() {
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} className="opacity-30" />
                   <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 9 }} />
                   <YAxis type="category" dataKey="category" tick={{ fontSize: 10 }} width={50} />
-                  <Tooltip formatter={(v) => [`${v}%`, "Avg"]} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+                  <Tooltip formatter={(v) => [`${v}%`, "Avg"]} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                   <Bar dataKey="avg" radius={[0, 4, 4, 0]}>
                     {categoryData.map((entry) => (
                       <Cell key={entry.category} fill={entry.color} />
@@ -223,7 +243,7 @@ export default function InsightsPage() {
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                   <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 10 }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -250,7 +270,7 @@ export default function InsightsPage() {
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={4} />
                 <YAxis domain={[0, 1]} ticks={[0, 1]} tickFormatter={(v) => (v === 1 ? "✓" : "")} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v) => [v === 1 ? "Completed" : "Missed", ""]} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+                <Tooltip formatter={(v) => [v === 1 ? "Completed" : "Missed", ""]} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                 <Bar dataKey="done" radius={[3, 3, 0, 0]} fill="hsl(var(--primary))" opacity={0.85} />
               </BarChart>
             </ResponsiveContainer>

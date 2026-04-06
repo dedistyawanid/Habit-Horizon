@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type CSSProperties } from "react";
 import { useApp } from "@/context/AppContext";
 import { getTodayKey } from "@/lib/dateUtils";
 import { Transaction } from "@/types/finance";
@@ -52,8 +52,28 @@ const EMPTY_FORM = {
 };
 
 export default function FinancePage() {
-  const { transactions, financeSettings, setFinanceSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome,
+  const { settings, transactions, financeSettings, setFinanceSettings, addTransaction, deleteTransaction, updateTransaction, totalIncome, totalExpenses, currentBalance, currentYearIncome,
           wishlist, addWishlistItem, updateWishlistItem, deleteWishlistItem, addWishlistSavings } = useApp();
+
+  const isDark = useMemo(() => {
+    if (settings.theme === "dark")  return true;
+    if (settings.theme === "light") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }, [settings.theme]);
+
+  const tooltipStyle = useMemo<CSSProperties>(() => ({
+    fontSize: 11,
+    borderRadius: 16,
+    border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(229,224,216,0.9)",
+    boxShadow: isDark ? "0 6px 28px rgba(0,0,0,0.55)" : "0 4px 20px rgba(0,0,0,0.12)",
+    background: isDark ? "rgba(33,31,29,0.94)" : "rgba(255,255,255,0.94)",
+    backdropFilter: "blur(4px)",
+    WebkitBackdropFilter: "blur(4px)",
+    color: isDark ? "#e8dfd7" : "#161819",
+    padding: "8px 12px",
+  }), [isDark]);
+  const tooltipLabelStyle = useMemo<CSSProperties>(() => ({ color: isDark ? "#9C8B7A" : "#7A6B5A", fontWeight: 600 }), [isDark]);
+  const tooltipItemStyle  = useMemo<CSSProperties>(() => ({ color: isDark ? "#5c7c6c" : "#2e4e3e" }), [isDark]);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -360,7 +380,7 @@ export default function FinancePage() {
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" tickFormatter={(d) => d.replace("-", "/")} />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 9 }} />
-                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative"]} labelFormatter={(d) => String(d).replace("-", "/")} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative"]} labelFormatter={(d) => String(d).replace("-", "/")} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                 <Line type="monotone" dataKey="cumulative" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
