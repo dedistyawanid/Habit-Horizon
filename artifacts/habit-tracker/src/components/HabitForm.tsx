@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { HabitFrequency, Habit } from "@/types/habit";
 import { HABIT_COLORS } from "@/lib/colors";
 import { useApp } from "@/context/AppContext";
@@ -29,12 +30,14 @@ interface HabitFormProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (values: Omit<Habit, "id" | "createdAt">) => void;
+  onDelete?: () => void;
   initialValues?: Partial<Habit>;
   mode?: "add" | "edit";
 }
 
-export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add" }: HabitFormProps) {
+export function HabitForm({ open, onClose, onSubmit, onDelete, initialValues, mode = "add" }: HabitFormProps) {
   const { settings } = useApp();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const form = useForm<HabitFormValues>({
     resolver: zodResolver(habitSchema),
@@ -51,6 +54,7 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
 
   useEffect(() => {
     if (open) {
+      setConfirmingDelete(false);
       form.reset({
         name: initialValues?.name || "",
         category: initialValues?.category || settings.habitCategories[0] || "Health",
@@ -223,6 +227,45 @@ export function HabitForm({ open, onClose, onSubmit, initialValues, mode = "add"
               </Button>
               <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
             </div>
+
+            {mode === "edit" && onDelete && (
+              <div className="pt-1">
+                {confirmingDelete ? (
+                  <div className="rounded-2xl border border-[#ac6e5c]/30 bg-[#ac6e5c]/8 dark:bg-[#ac6e5c]/10 p-3">
+                    <p className="text-sm text-center text-[#ac6e5c] font-medium mb-2.5">
+                      Delete this habit and all its history?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { onDelete(); onClose(); }}
+                        className="flex-1 rounded-xl py-2 text-sm font-semibold text-white bg-[#ac6e5c] hover:bg-[#9a5f4d] transition-colors active:scale-[0.97]"
+                        data-testid="btn-confirm-delete-habit"
+                      >
+                        Yes, Delete
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingDelete(false)}
+                        className="flex-1 rounded-xl py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 transition-colors"
+                      >
+                        Keep It
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(true)}
+                    className="w-full flex items-center justify-center gap-2 rounded-2xl py-2.5 text-sm font-medium text-[#ac6e5c] border border-[#ac6e5c]/30 hover:bg-[#ac6e5c]/8 dark:hover:bg-[#ac6e5c]/12 transition-colors"
+                    data-testid="btn-delete-habit"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Habit
+                  </button>
+                )}
+              </div>
+            )}
           </form>
         </Form>
       </DialogContent>

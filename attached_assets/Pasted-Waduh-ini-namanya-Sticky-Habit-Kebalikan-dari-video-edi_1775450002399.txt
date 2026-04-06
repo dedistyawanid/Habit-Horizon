@@ -1,0 +1,41 @@
+Waduh, ini namanya "Sticky Habit"! 😂 Kebalikan dari video editing yang butuh trimming cepat, di sini tombol "Delete"-nya malah sembunyi. Penyakit aplikasi kalau fiturnya sudah lengkap tapi pintu keluarnya lupa dipasang.
+
+Tenang, Dedi. Kita bakal pasang tombol "Trash Can" ini di tempat yang paling logis: di dalam Edit Modal dan lewat interaksi langsung di kartu habit.
+
+[V92] THE HABIT CLEAN-UP: Delete Actions & Edit Modal Integration
+1. Add Delete Option to Edit Modal:
+
+"Agent, di tab Habits, saat user membuka Edit Modal untuk salah satu habit, tambahkan tombol 'Delete Habit' di bagian bawah modal."
+
+"Berikan warna Merah/Terracotta (#ac6e5c) pada tombol tersebut agar terlihat sebagai aksi penghapusan."
+
+"Tambahkan Confirmation Dialog sebelum benar-benar menghapus: 'Are you sure you want to delete this habit?'."
+
+2. Fix Direct Delete Bug:
+
+"Perbaiki logika penghapusan habit. Pastikan saat user menghapus habit (baik dari list atau modal), data di database benar-benar terhapus dan UI langsung terupdate tanpa perlu refresh."
+
+3. Global Chart Tooltip Fix (Recall V91):
+
+"Pastikan teks di SEMUA TOOLTIP CHART (Nutrition, Finance, Habits, Running) berwarna Putih Terang (#FFFFFF) dan kontras tinggi di atas background gelap."
+
+"Gunakan gaya Glassmorphism (blur(6px)) untuk semua tooltip chart."
+
+4. Branding & Consistency (V85):
+
+"Confirm: Header, Sub-header, dan Nav Bar tetap memiliki efek Glassmorphism dengan Rounded Corners yang soft."
+
+English Prompt for Replit Agent (Paste Ini):
+[V92.1] Habit Management: Add Delete Option to Edit Modal & Fix Deletion Bug
+
+1. Edit Modal Update:
+
+In the Habits tab, when a user opens the Edit Habit Modal, add a prominent "Delete Habit" button at the bottom of the modal.
+
+Styling: Use a Terracotta/Red (#ac6e5c) color for the delete button to distinguish it as a destructive action.
+
+Confirmation: Implement a simple "Are you sure?" confirmation dialog before the habit is deleted from the database.
+
+2. Fix Deletion Logic:
+
+Resolve the bug where habits cannot be deleted. Ensure the deletion correctly removes the entry from the database and updates the UI immediately.

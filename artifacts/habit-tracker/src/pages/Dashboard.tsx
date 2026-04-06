@@ -356,6 +356,7 @@ export default function Dashboard({ onNewHabit }: DashboardProps) {
         open={!!editingHabit}
         onClose={() => setEditingHabit(null)}
         onSubmit={handleUpdate}
+        onDelete={editingHabit ? () => { deleteHabit(editingHabit.id); setEditingHabit(null); } : undefined}
         initialValues={editingHabit || undefined}
         mode="edit"
       />
