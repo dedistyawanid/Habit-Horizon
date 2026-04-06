@@ -74,6 +74,7 @@ export default function FinancePage() {
   }), [isDark]);
   const tooltipLabelStyle = useMemo<CSSProperties>(() => ({ color: isDark ? "#9C8B7A" : "#7A6B5A", fontWeight: 600 }), [isDark]);
   const tooltipItemStyle  = useMemo<CSSProperties>(() => ({ color: isDark ? "#5c7c6c" : "#2e4e3e" }), [isDark]);
+  const [revenueRange, setRevenueRange] = useState<"week" | "month" | "annual">("month");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -130,15 +131,46 @@ export default function FinancePage() {
   }, [transactions]);
 
   const cumulativeData = useMemo(() => {
-    const sorted = [...transactions]
+    const today = getTodayKey();
+    const income = [...transactions]
       .filter((t) => t.type === "income")
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .map((t) => ({ ...t, ymd: t.date.split("T")[0] }))
+      .sort((a, b) => a.ymd.localeCompare(b.ymd));
+
+    if (revenueRange === "annual") {
+      const yearStart = today.slice(0, 4) + "-01-01";
+      const monthly: Record<string, number> = {};
+      income.filter((t) => t.ymd >= yearStart).forEach((t) => {
+        const key = t.ymd.slice(0, 7);
+        monthly[key] = (monthly[key] ?? 0) + t.amount;
+      });
+      let running = 0;
+      return Object.keys(monthly).sort().map((mo) => {
+        running += monthly[mo];
+        const [, m] = mo.split("-");
+        const label = new Date(Number(mo.split("-")[0]), Number(m) - 1, 1)
+          .toLocaleString("en", { month: "short" });
+        return { date: label, cumulative: running };
+      });
+    }
+
+    const days = revenueRange === "week" ? 7 : 30;
+    const cutoff = (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - (days - 1));
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    })();
+
+    const filtered = income.filter((t) => t.ymd >= cutoff);
     let running = 0;
-    return sorted.slice(-30).map((t) => {
+    return filtered.map((t) => {
       running += t.amount;
-      return { date: t.date.split("T")[0].slice(5), cumulative: running };
+      return { date: t.ymd.slice(5).replace("-", "/"), cumulative: running };
     });
-  }, [transactions]);
+  }, [transactions, revenueRange]);
 
   function handleSubmit() {
     const amt = parseFloat(form.amount);
@@ -371,21 +403,51 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* Chart */}
-        {cumulativeData.length > 1 && (
-          <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
-            <h2 className="text-sm font-semibold text-foreground mb-4">Revenue Growth</h2>
+        {/* Revenue Growth Chart */}
+        <div className="bg-white dark:bg-card rounded-[28px] p-5 border border-[#E5E0D8] dark:border-[hsl(var(--border))]">
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <h2 className="text-sm font-semibold text-foreground">Revenue Growth</h2>
+            <div
+              className="period-toggle-wrap"
+              style={{ borderRadius: 28, padding: 3, height: 32, width: 210 }}
+            >
+              <div
+                className="period-toggle-thumb"
+                style={{
+                  top: 3, bottom: 3, left: 3,
+                  width: "calc(33.333% - 2px)",
+                  transform: `translateX(calc(${["week","month","annual"].indexOf(revenueRange)} * 100%))`,
+                  transition: "transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1)",
+                }}
+              />
+              {(["week", "month", "annual"] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRevenueRange(r)}
+                  className={`period-toggle-btn${revenueRange === r ? " is-active" : ""}`}
+                  style={{ fontSize: 11 }}
+                >
+                  {r === "week" ? "Week" : r === "month" ? "Month" : "Annual"}
+                </button>
+              ))}
+            </div>
+          </div>
+          {cumulativeData.length > 1 ? (
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={cumulativeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" tickFormatter={(d) => d.replace("-", "/")} />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 9 }} />
-                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative"]} labelFormatter={(d) => String(d).replace("-", "/")} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
-                <Line type="monotone" dataKey="cumulative" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} />
+                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative Income"]} contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+                <Line type="monotone" dataKey="cumulative" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={cumulativeData.length <= 12 ? { r: 3, fill: "hsl(var(--primary))", strokeWidth: 0 } : false} activeDot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        )}
+          ) : (
+            <div className="h-[160px] flex items-center justify-center text-sm text-muted-foreground">
+              No income data for this period
+            </div>
+          )}
+        </div>
 
         {/* Transaction list */}
         <div className="bg-white dark:bg-card rounded-[28px] border border-[#E5E0D8] dark:border-[hsl(var(--border))] overflow-hidden">
