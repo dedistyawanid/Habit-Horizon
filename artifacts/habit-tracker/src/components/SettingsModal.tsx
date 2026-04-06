@@ -14,6 +14,8 @@ import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { DateFormat, Theme, THEME_PRESETS, AccentTheme } from "@/types/settings";
 import { exportAsCSV, exportAsJSON, parseImportFile } from "@/lib/exportUtils";
+import { NutritionEntry } from "@/hooks/useNutritionLog";
+import { SleepEntry } from "@/hooks/useSleepLog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { upsertProfile } from "@/lib/fetchFromCloud";
@@ -45,6 +47,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     settings, updateSettings, updateProfile,
     habits, checkIns, notes, importData,
     transactions, financeSettings, weightLog, activityLog,
+    wishlist,
   } = useApp();
 
   const fileInputRef  = useRef<HTMLInputElement>(null);
@@ -121,7 +124,14 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   /* ── Export / Import ── */
   function handleExportJSON() {
-    exportAsJSON(habits, checkIns, notes, settings, transactions, financeSettings, weightLog, activityLog);
+    const nutritionLog = safeJson<NutritionEntry[]>("dedi_nutrition_log", []);
+    const sleepLog     = safeJson<SleepEntry[]>("dedi_sleep_log", []);
+    exportAsJSON(
+      habits, checkIns, notes, settings,
+      transactions, financeSettings,
+      weightLog, activityLog,
+      nutritionLog, sleepLog, wishlist,
+    );
     toast({ title: "Export complete", description: "Full backup downloaded." });
   }
   function handleExportCSV() {

@@ -13,6 +13,8 @@ import { Transaction, FinanceSettings } from "@/types/finance";
 import { WishlistItem } from "@/types/wishlist";
 import { WeightEntry } from "@/hooks/useWeightLog";
 import { ActivityEntry } from "@/hooks/useActivityLog";
+import { NutritionEntry } from "@/hooks/useNutritionLog";
+import { SleepEntry } from "@/hooks/useSleepLog";
 
 interface AppContextType {
   // Settings
@@ -83,6 +85,9 @@ interface AppContextType {
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
     activityLog?: ActivityEntry[];
+    nutritionLog?: NutritionEntry[];
+    sleepLog?: SleepEntry[];
+    wishlist?: WishlistItem[];
   }) => void;
 }
 
@@ -106,15 +111,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
     activityLog?: ActivityEntry[];
+    nutritionLog?: NutritionEntry[];
+    sleepLog?: SleepEntry[];
+    wishlist?: WishlistItem[];
   }) {
-    if (data.habits) localStorage.setItem("dedi_habits", JSON.stringify(data.habits));
-    if (data.checkIns) localStorage.setItem("dedi_checkins", JSON.stringify(data.checkIns));
-    if (data.notes) localStorage.setItem("dedi_quick_notes", JSON.stringify(data.notes));
-    if (data.settings) localStorage.setItem("dedi_app_settings", JSON.stringify(data.settings));
-    if (data.transactions) localStorage.setItem("dedi_transactions", JSON.stringify(data.transactions));
-    if (data.financeSettings) localStorage.setItem("dedi_finance_settings", JSON.stringify(data.financeSettings));
-    if (data.weightLog) localStorage.setItem("dedi_weight_log", JSON.stringify(data.weightLog));
-    if (data.activityLog) localStorage.setItem("dedi_activity_log", JSON.stringify(data.activityLog));
+    if (data.habits)          localStorage.setItem("dedi_habits",            JSON.stringify(data.habits));
+    if (data.checkIns)        localStorage.setItem("dedi_checkins",          JSON.stringify(data.checkIns));
+    if (data.notes)           localStorage.setItem("dedi_quick_notes",       JSON.stringify(data.notes));
+    if (data.settings)        localStorage.setItem("dedi_app_settings",      JSON.stringify(data.settings));
+    if (data.transactions)    localStorage.setItem("dedi_transactions",      JSON.stringify(data.transactions));
+    if (data.financeSettings) localStorage.setItem("dedi_finance_settings",  JSON.stringify(data.financeSettings));
+    if (data.weightLog)       localStorage.setItem("dedi_weight_log",        JSON.stringify(data.weightLog));
+    if (data.activityLog)     localStorage.setItem("dedi_activity_log",      JSON.stringify(data.activityLog));
+    if (data.nutritionLog)    localStorage.setItem("dedi_nutrition_log",     JSON.stringify(data.nutritionLog));
+    if (data.sleepLog)        localStorage.setItem("dedi_sleep_log",         JSON.stringify(data.sleepLog));
+    if (data.wishlist)        localStorage.setItem("dedi_wishlist",          JSON.stringify(data.wishlist));
     window.location.reload();
   }
 

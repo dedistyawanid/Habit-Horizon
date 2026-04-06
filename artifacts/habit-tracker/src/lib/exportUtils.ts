@@ -2,8 +2,11 @@ import { Habit, CheckIn } from "@/types/habit";
 import { QuickNote } from "@/types/notes";
 import { AppSettings } from "@/types/settings";
 import { Transaction, FinanceSettings } from "@/types/finance";
+import { WishlistItem } from "@/types/wishlist";
 import { WeightEntry } from "@/hooks/useWeightLog";
 import { ActivityEntry } from "@/hooks/useActivityLog";
+import { NutritionEntry } from "@/hooks/useNutritionLog";
+import { SleepEntry } from "@/hooks/useSleepLog";
 
 export function exportAsJSON(
   habits: Habit[],
@@ -13,11 +16,14 @@ export function exportAsJSON(
   transactions: Transaction[],
   financeSettings: FinanceSettings,
   weightLog: WeightEntry[],
-  activityLog: ActivityEntry[]
+  activityLog: ActivityEntry[],
+  nutritionLog: NutritionEntry[],
+  sleepLog: SleepEntry[],
+  wishlist: WishlistItem[],
 ) {
   const data = {
     exportedAt: new Date().toISOString(),
-    version: "3.1",
+    version: "4.0",
     habits,
     checkIns,
     notes,
@@ -26,9 +32,12 @@ export function exportAsJSON(
     financeSettings,
     weightLog,
     activityLog,
+    nutritionLog,
+    sleepLog,
+    wishlist,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `habit-tracker-backup-${getTodayKey()}.json`);
+  downloadBlob(blob, `horizon-hub-backup-${getTodayKey()}.json`);
 }
 
 export function exportAsCSV(habits: Habit[], checkIns: CheckIn[]) {
@@ -53,7 +62,7 @@ export function exportAsCSV(habits: Habit[], checkIns: CheckIn[]) {
 
   const csv = rows.join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
-  downloadBlob(blob, `habit-tracker-${getTodayKey()}.csv`);
+  downloadBlob(blob, `horizon-hub-habits-${getTodayKey()}.csv`);
 }
 
 export type ImportResult = {
@@ -68,6 +77,9 @@ export type ImportResult = {
     financeSettings?: FinanceSettings;
     weightLog?: WeightEntry[];
     activityLog?: ActivityEntry[];
+    nutritionLog?: NutritionEntry[];
+    sleepLog?: SleepEntry[];
+    wishlist?: WishlistItem[];
   };
 };
 
@@ -81,14 +93,17 @@ export function parseImportFile(json: string): ImportResult {
       success: true,
       message: "Import successful.",
       data: {
-        habits: Array.isArray(parsed.habits) ? parsed.habits : undefined,
-        checkIns: Array.isArray(parsed.checkIns) ? parsed.checkIns : undefined,
-        notes: Array.isArray(parsed.notes) ? parsed.notes : undefined,
-        settings: parsed.settings || undefined,
-        transactions: Array.isArray(parsed.transactions) ? parsed.transactions : undefined,
-        financeSettings: parsed.financeSettings || undefined,
-        weightLog: Array.isArray(parsed.weightLog) ? parsed.weightLog : undefined,
-        activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : undefined,
+        habits:          Array.isArray(parsed.habits)        ? parsed.habits        : undefined,
+        checkIns:        Array.isArray(parsed.checkIns)      ? parsed.checkIns      : undefined,
+        notes:           Array.isArray(parsed.notes)         ? parsed.notes         : undefined,
+        settings:        parsed.settings                                            || undefined,
+        transactions:    Array.isArray(parsed.transactions)  ? parsed.transactions  : undefined,
+        financeSettings: parsed.financeSettings                                     || undefined,
+        weightLog:       Array.isArray(parsed.weightLog)     ? parsed.weightLog     : undefined,
+        activityLog:     Array.isArray(parsed.activityLog)   ? parsed.activityLog   : undefined,
+        nutritionLog:    Array.isArray(parsed.nutritionLog)  ? parsed.nutritionLog  : undefined,
+        sleepLog:        Array.isArray(parsed.sleepLog)      ? parsed.sleepLog      : undefined,
+        wishlist:        Array.isArray(parsed.wishlist)      ? parsed.wishlist       : undefined,
       },
     };
   } catch {
