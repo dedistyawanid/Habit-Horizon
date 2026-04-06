@@ -109,6 +109,20 @@ export default function FinancePage() {
     }));
   }, [manageOpen]);
 
+  useEffect(() => {
+    if (!showForm) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); } };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [showForm]);
+
+  useEffect(() => {
+    if (!showWishForm) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { setShowWishForm(false); setEditWishId(null); setWishForm(EMPTY_WISH); } };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [showWishForm]);
+
   const annualTarget = financeSettings.annualTarget;
   const annualProgress = Math.min(100, (currentYearIncome / annualTarget) * 100);
 
@@ -193,6 +207,20 @@ export default function FinancePage() {
     }
     setForm(EMPTY_FORM);
     setShowForm(false);
+  }
+
+  function handleWishSubmit() {
+    const title = wishForm.title.trim();
+    const target = Number(wishForm.targetAmount);
+    if (!title || !target) return;
+    if (editWishId) {
+      updateWishlistItem(editWishId, { title, targetAmount: target, imageUrl: wishForm.imageUrl || undefined });
+    } else {
+      addWishlistItem({ title, targetAmount: target, currentAmount: 0, imageUrl: wishForm.imageUrl || undefined });
+    }
+    setShowWishForm(false);
+    setEditWishId(null);
+    setWishForm(EMPTY_WISH);
   }
 
   function startEdit(tx: Transaction) {
@@ -708,7 +736,9 @@ export default function FinancePage() {
                 placeholder="Title (e.g. New Car)"
                 value={wishForm.title}
                 onChange={(e) => setWishForm((f) => ({ ...f, title: e.target.value }))}
+                onKeyDown={(e) => { if (e.key === "Enter") handleWishSubmit(); }}
                 className="w-full px-3 py-2.5 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                autoFocus
               />
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">Rp</span>
@@ -737,19 +767,7 @@ export default function FinancePage() {
             <div className="flex gap-2">
               <button onClick={() => setShowWishForm(false)} className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm text-muted-foreground hover:bg-accent transition-colors">Cancel</button>
               <button
-                onClick={() => {
-                  const title = wishForm.title.trim();
-                  const target = Number(wishForm.targetAmount);
-                  if (!title || !target) return;
-                  if (editWishId) {
-                    updateWishlistItem(editWishId, { title, targetAmount: target, imageUrl: wishForm.imageUrl || undefined });
-                  } else {
-                    addWishlistItem({ title, targetAmount: target, currentAmount: 0, imageUrl: wishForm.imageUrl || undefined });
-                  }
-                  setShowWishForm(false);
-                  setEditWishId(null);
-                  setWishForm(EMPTY_WISH);
-                }}
+                onClick={handleWishSubmit}
                 className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
@@ -823,7 +841,9 @@ export default function FinancePage() {
                   placeholder="Title"
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
                   className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  autoFocus
                 />
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none select-none">
@@ -838,6 +858,7 @@ export default function FinancePage() {
                       const digits = e.target.value.replace(/\D/g, "");
                       setForm((f) => ({ ...f, amount: digits }));
                     }}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
                     className="field-dark w-full pl-8 pr-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>

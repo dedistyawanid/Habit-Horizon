@@ -102,7 +102,7 @@ export function HabitForm({ open, onClose, onSubmit, onDelete, initialValues, mo
                 <FormItem>
                   <FormLabel>Habit Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Morning workout" {...field} data-testid="input-habit-name" />
+                    <Input placeholder="e.g. Morning workout" {...field} data-testid="input-habit-name" autoFocus />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

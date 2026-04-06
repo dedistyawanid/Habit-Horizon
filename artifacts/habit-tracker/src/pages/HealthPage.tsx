@@ -173,6 +173,17 @@ export default function HealthPage() {
   const [nutrProtGoal, setNutrProtGoal]         = useState("");
   const [nutrCarbsGoal, setNutrCarbsGoal]       = useState("");
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (showSleepTarget) setShowSleepTarget(false);
+      else if (showGoalModal) setShowGoalModal(false);
+      else if (showNutrTargets) setShowNutrTargets(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [showSleepTarget, showGoalModal, showNutrTargets]);
+
   /* Edit state — id of entry being edited (null = add mode) */
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const [editingMealId,     setEditingMealId]     = useState<string | null>(null);
@@ -1283,6 +1294,7 @@ export default function HealthPage() {
                     <Input
                       type="number" placeholder="Hours" value={sleepHoursInput}
                       onChange={(e) => setSleepHoursInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleLogSleep(); }}
                       className="pl-9 text-sm" min="0" max="24"
                     />
                   </div>
@@ -1292,6 +1304,7 @@ export default function HealthPage() {
                     <Input
                       type="number" placeholder="Min" value={sleepMinsInput}
                       onChange={(e) => setSleepMinsInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleLogSleep(); }}
                       className="pl-9 text-sm" min="0" max="59"
                     />
                   </div>
@@ -1607,18 +1620,18 @@ export default function HealthPage() {
             {actType === "Running" && (
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input type="number" placeholder="Distance (km)" value={distance} onChange={(e) => setDistance(e.target.value)} className="pl-9 text-sm" step="0.1" min="0" />
+                <Input type="number" placeholder="Distance (km)" value={distance} onChange={(e) => setDistance(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogActivity(); }} className="pl-9 text-sm" step="0.1" min="0" autoFocus />
               </div>
             )}
             <div className="relative">
               <Timer className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input type="number" placeholder="Duration (min)" value={duration} onChange={(e) => setDuration(e.target.value)} className="pl-9 text-sm" min="1" />
+              <Input type="number" placeholder="Duration (min)" value={duration} onChange={(e) => setDuration(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogActivity(); }} className="pl-9 text-sm" min="1" autoFocus={actType !== "Running"} />
             </div>
           </div>
           {actType === "Running" && (
             <div className="relative">
               <Mountain className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input type="number" placeholder="Elevation gain (m) — optional" value={elevation} onChange={(e) => setElevation(e.target.value)} className="pl-9 text-sm" min="0" />
+              <Input type="number" placeholder="Elevation gain (m) — optional" value={elevation} onChange={(e) => setElevation(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogActivity(); }} className="pl-9 text-sm" min="0" />
             </div>
           )}
           <p className="text-[10px] text-muted-foreground text-center">Logging auto-checks exercise habits for today</p>
@@ -1636,28 +1649,28 @@ export default function HealthPage() {
         <div className="space-y-3">
           <div>
             <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Meal Name *</label>
-            <Input placeholder="e.g. Chicken rice, Oatmeal…" value={mealName} onChange={(e) => setMealName(e.target.value)} className="mt-1 text-sm" autoFocus />
+            <Input placeholder="e.g. Chicken rice, Oatmeal…" value={mealName} onChange={(e) => setMealName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogMeal(); }} className="mt-1 text-sm" autoFocus />
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Calories *</label>
               <div className="relative mt-1">
                 <Flame className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input type="number" placeholder="0" value={mealCal} onChange={(e) => setMealCal(e.target.value)} className="pl-8 text-sm" min="0" />
+                <Input type="number" placeholder="0" value={mealCal} onChange={(e) => setMealCal(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogMeal(); }} className="pl-8 text-sm" min="0" />
               </div>
             </div>
             <div>
               <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Protein (g)</label>
               <div className="relative mt-1">
                 <Beef className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input type="number" placeholder="0" value={mealProt} onChange={(e) => setMealProt(e.target.value)} className="pl-8 text-sm" min="0" />
+                <Input type="number" placeholder="0" value={mealProt} onChange={(e) => setMealProt(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogMeal(); }} className="pl-8 text-sm" min="0" />
               </div>
             </div>
             <div>
               <label className="text-[10px] text-muted-foreground uppercase tracking-wide">Carbs (g)</label>
               <div className="relative mt-1">
                 <Wheat className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input type="number" placeholder="0" value={mealCarbs} onChange={(e) => setMealCarbs(e.target.value)} className="pl-8 text-sm" min="0" />
+                <Input type="number" placeholder="0" value={mealCarbs} onChange={(e) => setMealCarbs(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleLogMeal(); }} className="pl-8 text-sm" min="0" />
               </div>
             </div>
           </div>
@@ -1875,6 +1888,12 @@ export default function HealthPage() {
 function BottomModal({ open, onClose, title, sub, children }: {
   open: boolean; onClose: () => void; title: string; sub: string; children: React.ReactNode;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
   if (!open) return null;
   return (
     <div
