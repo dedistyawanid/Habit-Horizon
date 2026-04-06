@@ -489,4 +489,70 @@
   /* Hide scrollbar (used for category tab row in Notes) */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Global Recharts tooltip: dark mode ─────────────────────────────
+     Applied to every chart across the app via class-based override.
+     Use !important to win over Recharts' inline contentStyle props.      */
+
+  /* Container */
+  .dark .recharts-default-tooltip {
+    background: rgba(33, 31, 29, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.60), 0 1px 0 rgba(255,255,255,0.04) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Label / Date row — Pure White */
+  .dark .recharts-tooltip-label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* Every value line — Bright Sage Green */
+  .dark .recharts-tooltip-item {
+    color: #A3C6A3 !important;
+    padding: 1px 0 !important;
+  }
+
+  /* Separator colon — keep it subtle */
+  .dark .recharts-tooltip-item-separator {
+    color: rgba(163, 198, 163, 0.5) !important;
+  }
+
+  /* ── Global Recharts axis labels: dark mode ──────────────────────── */
+
+  /* SVG text elements for X/Y axis ticks */
+  .dark .recharts-cartesian-axis-tick-value {
+    fill: rgba(232, 223, 215, 0.55) !important;
+  }
+
+  /* Radial / polar axis labels (InsightsPage radar) */
+  .dark .recharts-polar-angle-axis-tick-value {
+    fill: rgba(232, 223, 215, 0.55) !important;
+  }
+  .dark .recharts-polar-radius-axis-tick-value {
+    fill: rgba(232, 223, 215, 0.55) !important;
+  }
+
+  /* Legend text */
+  .dark .recharts-legend-item-text {
+    color: rgba(232, 223, 215, 0.70) !important;
+  }
+
+  /* ── Light mode tooltip polish ───────────────────────────────────── */
+
+  /* Container */
+  .recharts-default-tooltip {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14) !important;
+    padding: 8px 12px !important;
+  }
+
+  .recharts-tooltip-label {
+    font-weight: 600 !important;
+  }
 }
