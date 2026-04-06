@@ -23,7 +23,7 @@ function StatusIcon({ status }: { status: SyncStatus }) {
       <RefreshCw
         size={13}
         color={ACCENT}
-        style={{ animation: "spin 1s linear infinite" }}
+        className="animate-spin"
       />
     );
   if (status === "synced") return <CheckCircle2 size={13} color={ACCENT} />;
@@ -89,7 +89,6 @@ export function SyncIndicator() {
     >
       <StatusIcon status={status} />
       {label}
-      <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
     </span>
   );
 }

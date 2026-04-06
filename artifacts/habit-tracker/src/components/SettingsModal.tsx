@@ -484,10 +484,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 className="w-full gap-2"
                 data-testid="btn-force-push"
               >
-                <RefreshCw className="w-4 h-4" style={pushing ? { animation: "spin 1s linear infinite" } : undefined} />
+                <RefreshCw className={`w-4 h-4${pushing ? " animate-spin" : ""}`} />
                 {pushing ? "Uploading…" : "Push Now"}
               </Button>
-              <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
 
               {/* Results table */}
               {pushResults && (

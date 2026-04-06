@@ -556,3 +556,14 @@
     font-weight: 600 !important;
   }
 }
+
+/* ── App-level keyframe animations (moved here to eliminate inline <style> tags) ── */
+
+@keyframes syncSlide {
+  0%   { left: -50% }
+  100% { left: 150% }
+}
+
+.animate-sync-slide {
+  animation: syncSlide 1.2s ease-in-out infinite;
+}

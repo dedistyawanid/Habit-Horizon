@@ -77,16 +77,15 @@ function SyncProgressBar({ visible }: { visible: boolean }) {
       }}
     >
       <div
+        className={visible ? "animate-sync-slide" : ""}
         style={{
           position: "absolute",
           top: 0, left: "-50%",
           width: "50%",
           height: "100%",
           background: "linear-gradient(90deg, transparent, #556B2F, #6B8A3A, transparent)",
-          animation: visible ? "syncSlide 1.2s ease-in-out infinite" : "none",
         }}
       />
-      <style>{`@keyframes syncSlide { 0%{left:-50%} 100%{left:150%} }`}</style>
     </div>
   );
 }
