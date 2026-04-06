@@ -1696,10 +1696,10 @@ export default function HealthPage() {
 
       {/* Sleep Target Modal */}
       {showSleepTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
           onClick={() => setShowSleepTarget(false)}
         >
-          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm p-6 space-y-4 bg-white/[0.92] dark:bg-[#1c1a18]/[0.92]" style={{ borderRadius: 28, border: "1px solid rgba(229,224,216,0.4)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 32px 80px rgba(0,0,0,0.35)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1739,10 +1739,10 @@ export default function HealthPage() {
 
       {/* Goal Weight Modal */}
       {showGoalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
           onClick={() => setShowGoalModal(false)}
         >
-          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm p-6 space-y-4 bg-white/[0.92] dark:bg-[#1c1a18]/[0.92]" style={{ borderRadius: 28, border: "1px solid rgba(229,224,216,0.4)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 32px 80px rgba(0,0,0,0.35)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1778,10 +1778,10 @@ export default function HealthPage() {
 
       {/* Nutrition Targets Modal */}
       {showNutrTargets && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
           onClick={() => setShowNutrTargets(false)}
         >
-          <div className="w-full max-w-sm bg-white dark:bg-card p-6 space-y-4" style={{ borderRadius: 28, border: "1px solid #E5E0D8" }}
+          <div className="w-full max-w-sm p-6 space-y-4 bg-white/[0.92] dark:bg-[#1c1a18]/[0.92]" style={{ borderRadius: 28, border: "1px solid rgba(229,224,216,0.4)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 32px 80px rgba(0,0,0,0.35)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -1877,21 +1877,33 @@ function BottomModal({ open, onClose, title, sub, children }: {
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.28)", backdropFilter: "blur(4px)" }}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white dark:bg-card w-full max-w-md p-6 space-y-4" style={{ borderRadius: "28px 28px 0 0", border: "1px solid #E5E0D8" }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-base font-bold text-foreground">{title}</p>
-            <p className="text-xs text-muted-foreground">{sub}</p>
+      <div
+        className="w-full max-w-md max-h-[85vh] overflow-y-auto bg-white/[0.92] dark:bg-[#1c1a18]/[0.92]"
+        style={{
+          borderRadius: 28,
+          border: "1px solid rgba(229,224,216,0.4)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)",
+        }}
+      >
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-base font-bold text-foreground">{title}</p>
+              <p className="text-xs text-muted-foreground">{sub}</p>
+            </div>
+            <button onClick={onClose} className="w-8 h-8 rounded-xl bg-accent/70 flex items-center justify-center text-primary">
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-primary">
-            <X className="w-4 h-4" />
-          </button>
+          {children}
         </div>
-        {children}
-        <div style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
       </div>
     </div>
   );

@@ -781,105 +781,114 @@ export default function FinancePage() {
 
       {/* Add/Edit form modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white dark:bg-card rounded-[28px] w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-foreground">
-                {editId ? "Edit Transaction" : "New Transaction"}
-              </h3>
-              <button onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }} className="p-1 rounded-lg text-muted-foreground hover:text-muted-foreground">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Type toggle */}
-            <div className="flex rounded-xl overflow-hidden border border-[hsl(var(--border))] mb-4">
-              {(["income", "expense"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setForm((f) => ({ ...f, type: t, category: "" }))}
-                  className={cn(
-                    "flex-1 py-2 text-sm font-medium capitalize transition-all",
-                    form.type === t
-                      ? t === "income" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
-                      : "text-muted-foreground hover:bg-accent"
-                  )}
-                >
-                  {t}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); } }}
+        >
+          <div
+            className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white/[0.92] dark:bg-[#1c1a18]/[0.92]"
+            style={{ borderRadius: 28, border: "1px solid rgba(229,224,216,0.4)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)" }}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground">
+                  {editId ? "Edit Transaction" : "New Transaction"}
+                </h3>
+                <button onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }} className="w-8 h-8 rounded-xl bg-accent/70 flex items-center justify-center text-primary">
+                  <X className="w-4 h-4" />
                 </button>
-              ))}
-            </div>
-
-            <div className="space-y-3">
-              <input
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none select-none">
-                  Rp
-                </span>
-                <input
-                  placeholder="0"
-                  type="text"
-                  inputMode="numeric"
-                  value={fmtIDRInput(form.amount)}
-                  onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, "");
-                    setForm((f) => ({ ...f, amount: digits }));
-                  }}
-                  className="field-dark w-full pl-8 pr-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+
+              {/* Type toggle */}
+              <div className="flex rounded-xl overflow-hidden border border-[hsl(var(--border))] mb-4">
+                {(["income", "expense"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setForm((f) => ({ ...f, type: t, category: "" }))}
+                    className={cn(
+                      "flex-1 py-2 text-sm font-medium capitalize transition-all",
+                      form.type === t
+                        ? t === "income" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
+                        : "text-muted-foreground hover:bg-accent"
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-3">
                 <input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                  className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none select-none">
+                    Rp
+                  </span>
+                  <input
+                    placeholder="0"
+                    type="text"
+                    inputMode="numeric"
+                    value={fmtIDRInput(form.amount)}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, "");
+                      setForm((f) => ({ ...f, amount: digits }));
+                    }}
+                    className="field-dark w-full pl-8 pr-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                    className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                    className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    <option value="">Category</option>
+                    {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
                 <select
-                  value={form.category}
-                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="field-dark px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  value={form.accountSource}
+                  onChange={(e) => setForm((f) => ({ ...f, accountSource: e.target.value }))}
+                  className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
-                  <option value="">Category</option>
-                  {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <option value="">Account / Source (optional)</option>
+                  {accountSources.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
+                <textarea
+                  placeholder="Notes (optional)"
+                  value={form.notes}
+                  onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  rows={2}
+                  className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                />
               </div>
-              <select
-                value={form.accountSource}
-                onChange={(e) => setForm((f) => ({ ...f, accountSource: e.target.value }))}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">Account / Source (optional)</option>
-                {accountSources.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <textarea
-                placeholder="Notes (optional)"
-                value={form.notes}
-                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                rows={2}
-                className="field-dark w-full px-3 py-2 rounded-xl border border-[hsl(var(--border))] bg-accent text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-              />
-            </div>
 
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }}
-                className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-              >
-                <Check className="w-4 h-4" />
-                {editId ? "Update" : "Add"}
-              </button>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }}
+                  className="flex-1 py-2 rounded-xl border border-[hsl(var(--border))] text-sm font-medium text-muted-foreground hover:bg-accent transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  {editId ? "Update" : "Add"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -84,7 +84,10 @@ export function HabitForm({ open, onClose, onSubmit, onDelete, initialValues, mo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full">
+      <DialogContent
+        className="max-w-md w-full bg-white/[0.92] dark:bg-[#1c1a18]/[0.92] border border-white/30 dark:border-white/10"
+        style={{ borderRadius: 28, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 32px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06)" }}
+      >
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             {mode === "add" ? "Add New Habit" : "Edit Habit"}
