@@ -116,7 +116,7 @@ export default function FinancePage() {
     let running = 0;
     return sorted.slice(-30).map((t) => {
       running += t.amount;
-      return { date: t.date.slice(5), cumulative: running };
+      return { date: t.date.split("T")[0].slice(5), cumulative: running };
     });
   }, [transactions]);
 
@@ -358,9 +358,9 @@ export default function FinancePage() {
             <ResponsiveContainer width="100%" height={160}>
               <LineChart data={cumulativeData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
+                <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" tickFormatter={(d) => d.replace("-", "/")} />
                 <YAxis tickFormatter={(v) => formatShort(v)} tick={{ fontSize: 9 }} />
-                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative"]} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
+                <Tooltip formatter={(v: number) => [formatIDR(v), "Cumulative"]} labelFormatter={(d) => String(d).replace("-", "/")} contentStyle={{ borderRadius: 12, fontSize: 11 }} />
                 <Line type="monotone" dataKey="cumulative" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>

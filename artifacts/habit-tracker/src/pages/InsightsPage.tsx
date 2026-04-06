@@ -87,8 +87,8 @@ export default function InsightsPage() {
         const daysInMonth = new Date(yr, mo, 0).getDate();
         const totalExpected = habitsDue.length * daysInMonth;
         const totalDone = checkIns.filter((c) => {
-          const d = new Date(c.date);
-          return d.getFullYear() === yr && d.getMonth() + 1 === mo;
+          const [cYr, cMo] = c.date.split("T")[0].split("-").map(Number);
+          return cYr === yr && cMo === mo;
         }).length;
         return { label, completion: Math.min(100, Math.round((totalDone / totalExpected) * 100)) };
       });

@@ -95,8 +95,8 @@ function getActivityRange(range: ActRange, customStart: string, customEnd: strin
 }
 
 function fmtDate(d: string) {
-  const dt = new Date(d);
-  return `${dt.getMonth() + 1}/${dt.getDate()}`;
+  const parts = d.split("T")[0].split("-");
+  return `${Number(parts[1])}/${Number(parts[2])}`;
 }
 
 /* ─── Main Component ─────────────────────────────────── */
@@ -780,7 +780,7 @@ export default function HealthPage() {
                           <p className="text-xs text-muted-foreground truncate mt-0.5">{entry.type}{metricSecondary ? ` · ${metricSecondary}` : ""}</p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                           <button onClick={() => deleteActivityEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -1104,7 +1104,7 @@ export default function HealthPage() {
                       <span className="font-semibold text-sm text-foreground">{entry.weight} kg</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                       <button onClick={() => deleteWeightEntry(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -1429,7 +1429,7 @@ export default function HealthPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                        <span className="text-xs text-muted-foreground">{new Date(entry.date.split("T")[0] + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                         <button onClick={() => deleteSleep(entry.id)} className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-muted-foreground/40 hover:text-red-400 active:text-red-500 transition-colors">
                           <Trash2 className="w-3 h-3" />
                         </button>
