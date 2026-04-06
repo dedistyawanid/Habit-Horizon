@@ -26,6 +26,67 @@ if (!basePath) {
   );
 }
 
+const isDev = process.env.NODE_ENV !== "production";
+
+/*
+ * Content-Security-Policy is relaxed in dev to accommodate Vite's HMR
+ * (which needs `unsafe-eval` for source-map evaluation and `wss:` for the
+ * hot-reload WebSocket).  Production tightens both.
+ *
+ * External origins this app actually talks to:
+ *   - Supabase  (auth + DB)           https://*.supabase.co  wss://*.supabase.co
+ *   - Open-Meteo (weather)            https://api.open-meteo.com
+ *   - Nominatim (reverse-geocoding)   https://nominatim.openstreetmap.org
+ */
+const cspDirectives = [
+  "default-src 'self'",
+
+  isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'",
+
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+
+  "font-src 'self' https://fonts.gstatic.com data:",
+
+  isDev
+    ? "connect-src 'self' wss: https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://nominatim.openstreetmap.org"
+    : "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://nominatim.openstreetmap.org",
+
+  "img-src 'self' data: https: blob:",
+
+  "worker-src 'self' blob:",
+
+  "frame-src 'self'",
+
+  "frame-ancestors 'self'",
+
+  "base-uri 'self'",
+
+  "form-action 'self'",
+
+  "object-src 'none'",
+].join("; ");
+
+const securityHeaders: Record<string, string> = {
+  "Content-Security-Policy": cspDirectives,
+
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+
+  "X-Frame-Options": "SAMEORIGIN",
+
+  "X-Content-Type-Options": "nosniff",
+
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+
+  /*
+   * Permissions-Policy:
+   *   geolocation=(self)  — required for the weather card
+   *   camera / microphone — not used; explicitly denied
+   */
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(self)",
+};
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -62,6 +123,7 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    headers: securityHeaders,
     fs: {
       strict: true,
       deny: ["**/.*"],
@@ -71,5 +133,6 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    headers: securityHeaders,
   },
 });
