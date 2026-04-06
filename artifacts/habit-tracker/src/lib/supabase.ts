@@ -1,16 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const supabaseUrl     = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-const PLACEHOLDER_URL  = "https://dvhscmrnchajjxdjbfph.supabase.co";
-const PLACEHOLDER_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2aHNjbXJuY2hhamp4ZGpiZnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTY4OTcsImV4cCI6MjA5MDkzMjg5N30.4H1JFtR68Qsn7jmTjKTvCIns6chypLYp-bOlude9Fv8";
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error(
+    "[supabase] VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set as environment variables. " +
+    "Cloud sync will not work until these are configured."
+  );
+}
 
-export const supabase = createClient(
-  supabaseUrl     || PLACEHOLDER_URL,
-  supabaseAnonKey || PLACEHOLDER_KEY,
-);
+export const supabase = createClient(supabaseUrl ?? "", supabaseAnonKey ?? "");
 
-let _currentUserId = "dedi";
+let _currentUserId = "";
 export function setCurrentUserId(id: string) { _currentUserId = id; }
 export function getUserId(): string { return _currentUserId; }

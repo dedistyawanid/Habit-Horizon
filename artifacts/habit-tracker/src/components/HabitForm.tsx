@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { sanitizeInput } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { HabitFrequency, Habit } from "@/types/habit";
 import { HABIT_COLORS } from "@/lib/colors";
@@ -71,9 +72,9 @@ export function HabitForm({ open, onClose, onSubmit, onDelete, initialValues, mo
     const monthly = values.monthlyTarget ? parseInt(values.monthlyTarget) : undefined;
     const weekly = values.weeklyStreakTarget ? parseInt(values.weeklyStreakTarget) : 7;
     onSubmit({
-      name: values.name,
+      name: sanitizeInput(values.name, 100),
       category: values.category as Habit["category"],
-      description: values.description || "",
+      description: sanitizeInput(values.description || "", 500),
       frequency: values.frequency,
       color: values.color || "#879A77",
       monthlyTarget: monthly && !isNaN(monthly) && monthly > 0 ? monthly : undefined,

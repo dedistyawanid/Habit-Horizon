@@ -10,7 +10,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, Target, Plus, Trash2, Edit2, X, Check, Pencil, Settings2,
   Star, ImageOff, PiggyBank,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeInput } from "@/lib/utils";
 import { CategoryManager } from "@/components/CategoryManager";
 
 function formatIDR(amount: number) {
@@ -191,7 +191,7 @@ export default function FinancePage() {
     const amt = parseFloat(form.amount);
     if (!form.title || !form.amount || isNaN(amt) || amt <= 0) return;
     const data = {
-      title: form.title,
+      title: sanitizeInput(form.title, 200),
       amount: amt,
       date: form.date,
       category: form.category || "Other",
@@ -210,7 +210,7 @@ export default function FinancePage() {
   }
 
   function handleWishSubmit() {
-    const title = wishForm.title.trim();
+    const title = sanitizeInput(wishForm.title, 200);
     const target = Number(wishForm.targetAmount);
     if (!title || !target) return;
     if (editWishId) {

@@ -76,6 +76,15 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - `src/types/settings.ts` — `AccentTheme` type: `"sage"|"terracotta"|"forest"|"ochre"|"slate"`. 5 earth-tone presets. Migration logic in `useSettings.ts` auto-converts old names.
 - `src/types/finance.ts` — Finance types (Transaction, FinanceSettings)
 
+#### Security
+- **Credentials**: Supabase URL + anon key are read exclusively from `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` shared env vars (no hardcoded fallbacks)
+- **User ID scoping**: `getUserId()` returns `""` when signed out (previously `"dedi"`); all write ops are gated behind `AuthGate` in App.tsx
+- **Input sanitization**: `sanitizeInput(value, maxLength)` in `src/lib/utils.ts` strips HTML tags and limits length; applied to habit names, finance titles, meal names, activity locations
+- **Note preview XSS**: `escapeHtml()` runs before markdown rendering in `QuickNoteModal.tsx`'s `renderPreview` to prevent `<script>` injection
+- **Auth gate**: `if (!user) return <LoginPage />` in `AuthGate` (App.tsx) blocks all app content for unauthenticated sessions
+- **RLS**: Supabase anon key is designed to be public; RLS policies must be enabled on the Supabase dashboard to scope data per user
+- **Known warning**: `finance_settings` table not yet migrated in Supabase (console warning only, does not affect functionality)
+
 ### API Server (`artifacts/api-server`)
 - **Type**: Express API
 - **Preview path**: `/api`

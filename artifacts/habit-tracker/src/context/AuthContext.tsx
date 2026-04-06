@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* Hydrate in the background after sign-in */
         hydrate(u);
       } else {
-        setCurrentUserId("dedi");
+        setCurrentUserId("");
         setUser(null);
       }
     });
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "dedi_sync_queue", "dedi_supabase_migrated_v1",
     ];
     keysToRemove.forEach((k) => localStorage.removeItem(k));
-    setCurrentUserId("dedi");
+    setCurrentUserId("");
     await supabase.auth.signOut();
   };
 

@@ -14,7 +14,7 @@ import {
   PieChart, Pie, Cell, ComposedChart, Line, ReferenceLine,
   BarChart, Bar,
 } from "recharts";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeInput } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNutritionLog } from "@/hooks/useNutritionLog";
 import { useSleepLog } from "@/hooks/useSleepLog";
@@ -382,7 +382,7 @@ export default function HealthPage() {
       distanceKm:    actType === "Running" ? parseFloat(distance)  : undefined,
       elevationGain: actType === "Running" && elevation ? parseFloat(elevation) : undefined,
       runType:       actType === "Running" ? runType : undefined,
-      location:      actLocation.trim() || undefined,
+      location:      sanitizeInput(actLocation, 150) || undefined,
     };
     if (editingActivityId) {
       updateActivityEntry(editingActivityId, updates);
@@ -400,18 +400,19 @@ export default function HealthPage() {
   }
 
   function handleLogMeal() {
-    const cal   = parseFloat(mealCal);
-    const prot  = parseFloat(mealProt);
-    const carbs = parseFloat(mealCarbs);
-    if (!mealName.trim()) { toast({ title: "Meal name required", variant: "destructive" }); return; }
+    const cal      = parseFloat(mealCal);
+    const prot     = parseFloat(mealProt);
+    const carbs    = parseFloat(mealCarbs);
+    const cleanName = sanitizeInput(mealName, 200);
+    if (!cleanName) { toast({ title: "Meal name required", variant: "destructive" }); return; }
     if (isNaN(cal) || cal < 0) { toast({ title: "Invalid calories", variant: "destructive" }); return; }
     if (editingMealId) {
-      updateMeal(editingMealId, { date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+      updateMeal(editingMealId, { date: mealDate, name: cleanName, calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
       setEditingMealId(null);
-      toast({ title: "Meal updated", description: `${mealName.trim()} — ${cal} kcal` });
+      toast({ title: "Meal updated", description: `${cleanName} — ${cal} kcal` });
     } else {
-      addMeal({ date: mealDate, name: mealName.trim(), calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
-      toast({ title: "Meal logged!", description: `${mealName.trim()} — ${cal} kcal` });
+      addMeal({ date: mealDate, name: cleanName, calories: cal, protein: isNaN(prot) ? 0 : prot, carbs: isNaN(carbs) ? 0 : carbs });
+      toast({ title: "Meal logged!", description: `${cleanName} — ${cal} kcal` });
     }
     setMealName(""); setMealCal(""); setMealProt(""); setMealCarbs("");
     setMealDate(todayKey);
