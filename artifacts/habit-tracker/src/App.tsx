@@ -21,6 +21,8 @@ const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
 const FinancePage  = lazy(() => import("@/pages/FinancePage"));
 const HealthPage   = lazy(() => import("@/pages/HealthPage"));
 const LoginPage    = lazy(() => import("@/pages/LoginPage"));
+const LandingPage  = lazy(() => import("@/pages/LandingPage"));
+
 import { Settings, RefreshCw, Rocket } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { HabitCard } from "@/components/HabitCard";
@@ -244,8 +246,9 @@ function AppShell() {
 /* ── AuthGate: owns the appKey and refresh logic ── */
 function AuthGate() {
   const { user, loading, hydratedAt } = useAuth();
-  const [appKey,     setAppKey]     = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
+  const [appKey,      setAppKey]      = useState(0);
+  const [refreshing,  setRefreshing]  = useState(false);
+  const [showLogin,   setShowLogin]   = useState(false);
   const prevHydratedAt = useState(0);
 
   /* Bump appKey whenever a background hydration cycle completes */
@@ -274,16 +277,14 @@ function AuthGate() {
     }
   }, [user, refreshing]);
 
-  /* While Supabase auth check runs (fast, < 200ms) — show a minimal splash */
+  /* While Supabase auth check runs — show a minimal splash */
   if (loading) {
     return (
       <div
         className="min-h-screen flex items-end justify-center pb-12"
         style={{ background: "#F5F4F0" }}
       >
-        {/* Slim progress bar at the very top */}
         <SyncProgressBar visible />
-        {/* Minimal brand mark only — no blocking text */}
         <div className="flex flex-col items-center gap-2 opacity-60">
           <div
             className="w-10 h-10 rounded-[14px] flex items-center justify-center"
@@ -300,14 +301,34 @@ function AuthGate() {
     );
   }
 
-  if (!user) return <LoginPage />;
+  /* Jika user belum login: tampilkan LoginPage jika ditekan, atau LandingPage secara default */
+  if (!user) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-2 border-[#B86B52] border-t-transparent animate-spin" />
+          </div>
+        }
+      >
+        {showLogin ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowLogin(false)}
+              className="absolute top-6 left-6 z-50 text-xs px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-colors"
+            >
+              &larr; Back to Home
+            </button>
+            <LoginPage />
+          </div>
+        ) : (
+          <LandingPage onNavigateToLogin={() => setShowLogin(true)} />
+        )}
+      </Suspense>
+    );
+  }
 
   return (
-    /*
-     * WouterRouter is intentionally OUTSIDE AppProvider so that when appKey
-     * increments (sync remount), the Router's location state is preserved.
-     * Only the data/context layer remounts — navigation is untouched.
-     */
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <RefreshProvider value={{ refreshing, refreshFromCloud }}>
         <AppProvider key={appKey}>
